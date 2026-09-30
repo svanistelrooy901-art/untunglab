@@ -89,3 +89,33 @@ describe('scenario calculation (Doc 03 §12, Doc 06 §6)', () => {
     expect(() => scenarioIngredient(src, Number.NaN)).toThrow();
   });
 });
+
+describe('scenarioPrice and compareIngredientVersions (Phase 8)', () => {
+  it('scenario price is rounded to the sen, so Apply stores exactly what the preview showed', async () => {
+    const { scenarioPrice } = await import('../scenario');
+    expect(scenarioPrice(15, 20)).toBe(18);
+    expect(scenarioPrice(13.33, 10)).toBe(14.66); // 14.663
+    expect(scenarioPrice(13.33, 7)).toBe(14.26); // 14.2631
+    expect(scenarioPrice(40, -25)).toBe(30); // Doc 03 §11 decrease example
+    expect(() => scenarioPrice(15, -100)).toThrow(RangeError);
+  });
+
+  it('comparing two versions of an ingredient matches the percentage scenario and mutates nothing', async () => {
+    const { compareIngredientVersions } = await import('../scenario');
+    const menu = deepFreeze(chickenSandwich());
+    const biz = deepFreeze(business());
+    const src = menu.ingredients[0]!.ingredient!;
+    const viaVersions = compareIngredientVersions(menu, biz, src.id, src, { ...src, purchasePrice: src.purchasePrice * 1.1 });
+    const viaPct = compareScenario(menu, biz, src.id, 10);
+    expect(complete(viaVersions.after).profit).toBeCloseTo(complete(viaPct.scenario).profit, 10);
+    expect(complete(viaVersions.before).profit).toBeCloseTo(4.8, 10);
+  });
+
+  it('a package-size-only change moves the menu cost', async () => {
+    const { compareIngredientVersions } = await import('../scenario');
+    const menu = chickenSandwich();
+    const src = menu.ingredients[0]!.ingredient!;
+    const { before, after } = compareIngredientVersions(menu, business(), src.id, src, { ...src, packageQuantity: src.packageQuantity / 2 });
+    expect(complete(after).fullCost).toBeGreaterThan(complete(before).fullCost);
+  });
+});
