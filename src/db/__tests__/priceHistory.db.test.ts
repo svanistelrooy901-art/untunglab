@@ -219,7 +219,7 @@ describe('validation', () => {
     await expect(createIngredient(ctx, { ...chicken, packageQuantity: 0 })).rejects.toThrow();
     await expect(createIngredient(ctx, { ...chicken, purchasePrice: -1 })).rejects.toThrow();
     await expect(createIngredient(ctx, { ...chicken, name: '   ' })).rejects.toThrow();
-    await expect(createIngredient(ctx, { ...chicken, packageUnit: 'xyz' })).rejects.toThrow();
+    await expect(createIngredient(ctx, { ...chicken, packageUnit: '  ' })).rejects.toThrow();
     expect(await db.ingredients.count()).toBe(0);
     expect(await db.priceHistory.count()).toBe(0);
   });

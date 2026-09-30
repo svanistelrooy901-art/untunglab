@@ -1,4 +1,3 @@
-import 'fake-indexeddb/auto';
 import { UntungLabDB } from '../db';
 import { createContext, type Context } from '../repo';
 

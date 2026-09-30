@@ -9,7 +9,7 @@ the departure is recorded in [DECISIONS.md](./DECISIONS.md).
 ## Stack
 
 Vite, React, TypeScript, Tailwind CSS v4, Vitest, vite-plugin-pwa (Workbox).
-Later phases add Dexie (IndexedDB) for on-device storage.
+On-device storage: Dexie (IndexedDB).
 
 ## Scripts
 
@@ -27,6 +27,7 @@ Later phases add Dexie (IndexedDB) for on-device storage.
 
 ```
 src/domain/   Costing engine. Pure TypeScript, no React, no storage, no browser APIs.
+src/db/       On-device storage (Dexie schema, repositories). No React, no formulas.
 src/i18n/     Bahasa Melayu copy.
 src/app/      UI shell, routes, pages.
 ```
@@ -36,4 +37,4 @@ Every screen calls `src/domain`.
 
 ## Status
 
-Phases 1 and 2 are done (foundation and costing engine). QA evidence: `docs/qa/phase-2-evidence.md`. Decisions: `DECISIONS.md`.
+Phases 1 to 3 are done (foundation, costing engine, storage + Jejak Harga). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.

@@ -35,6 +35,13 @@ Authority order when documents conflict: 03, 02, 04, 05, 06, 01, 07 (Doc 00 §2)
 | D-13 | Pack-to-unit mappings (for example 1 pek = 12 biji) live on the ingredient and are optional. | Decision A-05. |
 | D-14 | A custom scenario may be any finite percentage above −100%. | Doc 02 §12 lists "Custom" without limits. |
 | D-15 | Reference fixtures split the Doc 03 §15 per-portion figures into real inputs (chicken RM15/kg at 120 g and 80 g). The sample chicken weights are invented for tests. | Needed to make M01/M02 and the chicken scenarios testable. |
+| D-16 | Operating-cost detail (workspace, water, electricity) is embedded on the `OperatingCostRow`, with a unique `[businessId+category]` index. | One row per category and no duplicate on mode switch (Doc 06 §5); avoids separate detail tables to keep in sync. |
+| D-17 | Derived values are never stored: ingredient/packaging unit cost, operating-cost rate, final monthly amount. `RecipeIngredient` has no cached cost. | Doc 05 §3 and §10: one authoritative source per value. |
+| D-18 | A history record is appended when price, package quantity or package unit changes (unit compared ignoring case/spaces). Name, active flag and pack mappings alone append nothing. Exactly one record per update, even if several fields changed. | Doc 05 §5. Pack-mapping edits are a judgement call; say if you want them tracked. |
+| D-19 | `purchaseDate` defaults to the device's local calendar date, and can be set by the user (back-dating allowed). History is ordered by date, then by `seq`. Backfill uses the ingredient's `createdAt` date. | Malaysian users' "today" is local, not UTC. `seq` breaks same-day ties. |
+| D-20 | Any non-blank unit is accepted as a package unit; unknown units are treated as counted units (for example `biji`, `kotak`). Blank units, non-positive quantities, negative prices and blank names are rejected before anything is written. | Custom counted units are normal in F&B. |
+| D-21 | The database blocks updates and deletes on `priceHistory` (Dexie hooks) and enforces unique `[ingredientId+seq]`. | Doc 05 §5 immutability. |
+| D-22 | Ingredient + history writes share one transaction; a failed history write rolls back the ingredient change. | No ingredient without history, no history without its ingredient. |
 
 ## Spec notes for your attention
 
