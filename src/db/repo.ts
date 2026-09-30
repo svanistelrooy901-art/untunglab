@@ -24,7 +24,7 @@ export function createContext(db: UntungLabDB, overrides: Partial<Omit<Context, 
   };
 }
 
-export type RepoErrorCode = 'invalid_ingredient' | 'not_found';
+export type RepoErrorCode = 'invalid_ingredient' | 'invalid_input' | 'not_found';
 
 export class RepoError extends Error {
   constructor(
