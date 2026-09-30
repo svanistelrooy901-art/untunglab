@@ -259,3 +259,19 @@ describe('validation', () => {
     expect(await listHistory(ctx, ing.id)).toHaveLength(1);
   });
 });
+
+describe('listAllHistory', () => {
+  it('returns every ingredient\'s records in one read, oldest first per ingredient, and never writes', async () => {
+    const { listAllHistory } = await import('../repo');
+    const { ctx, db } = freshContext();
+    const a = await createIngredient(ctx, { name: 'A', purchasePrice: 1, packageQuantity: 1, packageUnit: 'kg' });
+    const b = await createIngredient(ctx, { name: 'B', purchasePrice: 2, packageQuantity: 1, packageUnit: 'kg' });
+    await updateIngredient(ctx, a.id, { purchasePrice: 3 }, { purchaseDate: '2026-10-01' });
+    const before = await db.priceHistory.count();
+    const all = await listAllHistory(ctx);
+    expect(all).toHaveLength(3);
+    expect(all.filter((r) => r.ingredientId === a.id).map((r) => r.purchasePrice)).toEqual([1, 3]);
+    expect(all.some((r) => r.ingredientId === b.id)).toBe(true);
+    expect(await db.priceHistory.count()).toBe(before);
+  });
+});
