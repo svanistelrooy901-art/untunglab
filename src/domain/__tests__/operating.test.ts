@@ -158,3 +158,18 @@ describe('expected sales of zero or missing is incomplete, not zero overhead (Do
     expect(allocateOperating(0, 3000)).toEqual({ ok: true, rate: 0, ratePct: 0 });
   });
 });
+
+describe('workspace method switch keeps both inputs (Phase 5, D-30)', () => {
+  const base = { category: 'ruang_kerja' as const, mode: 'detailed' as const, simpleAmount: 0, active: true, classification: 'shared' as const };
+  const detail = { kind: 'workspace' as const, monthlyHomeCost: 2000, businessUsePct: 15, homeArea: 100, businessArea: 20 };
+
+  it('method "percent" uses the manual % even when areas are stored', () => {
+    expect(finalMonthlyAmount({ ...base, detail: { ...detail, method: 'percent' } })).toBe(300);
+  });
+  it('method "area" uses the areas even when a manual % is stored', () => {
+    expect(finalMonthlyAmount({ ...base, detail: { ...detail, method: 'area' } })).toBe(400);
+  });
+  it('without a method, both areas present still decide (D-10)', () => {
+    expect(finalMonthlyAmount({ ...base, detail })).toBe(400);
+  });
+});

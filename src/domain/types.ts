@@ -153,7 +153,12 @@ export type CostClassification = 'shared' | 'direct';
 export interface WorkspaceDetail {
   kind: 'workspace';
   monthlyHomeCost: number;
-  /** Manual business-use %. Ignored when both areas are given. */
+  /**
+   * Which input decides the business-use %. When absent, both areas present means areas decide (D-10).
+   * Stating it lets the user keep both sets of numbers and switch between them without losing either.
+   */
+  method?: 'percent' | 'area';
+  /** Manual business-use %. */
   businessUsePct?: number;
   homeArea?: number;
   businessArea?: number;

@@ -74,7 +74,8 @@ export function finalMonthlyAmount(entry: OperatingCostEntry): number {
   switch (detail.kind) {
     case 'workspace': {
       if (entry.category !== 'ruang_kerja') throw mismatch(entry, detail.kind);
-      const useAreas = detail.homeArea !== undefined && detail.businessArea !== undefined;
+      const hasAreas = detail.homeArea !== undefined && detail.businessArea !== undefined;
+      const useAreas = detail.method === 'area' || (detail.method === undefined && hasAreas);
       const pct = useAreas
         ? businessPctFromArea(detail.businessArea as number, detail.homeArea as number)
         : (detail.businessUsePct as number);

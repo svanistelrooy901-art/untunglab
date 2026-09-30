@@ -18,7 +18,7 @@ describe('validateWorkspace (Doc 02 §7)', () => {
     const r = validateWorkspace({ home: '2000', method: 'pct', pct: '15', homeArea: '', businessArea: '' });
     if (!r.ok) throw new Error('expected ok');
     expect(r.value.monthly).toBe(300);
-    expect(r.value.detail).toEqual({ kind: 'workspace', monthlyHomeCost: 2000, businessUsePct: 15 });
+    expect(r.value.detail).toEqual({ kind: 'workspace', monthlyHomeCost: 2000, method: 'percent', businessUsePct: 15 });
   });
 
   it('floor-area method derives the percentage and stores the areas', () => {
@@ -26,13 +26,13 @@ describe('validateWorkspace (Doc 02 §7)', () => {
     if (!r.ok) throw new Error('expected ok');
     expect(r.value.derivedPct).toBe(20);
     expect(r.value.monthly).toBe(400);
-    expect(r.value.detail).toMatchObject({ homeArea: 100, businessArea: 20 });
+    expect(r.value.detail).toMatchObject({ method: 'area', homeArea: 100, businessArea: 20 });
   });
 
   it('keeps the manual % when switching to areas and back (nothing is lost)', () => {
     const r = validateWorkspace({ home: '2000', method: 'pct', pct: '15', homeArea: '100', businessArea: '20' });
     if (!r.ok) throw new Error('expected ok');
-    expect(r.value.detail).toEqual({ kind: 'workspace', monthlyHomeCost: 2000, businessUsePct: 15, homeArea: 100, businessArea: 20 });
+    expect(r.value.detail).toEqual({ kind: 'workspace', monthlyHomeCost: 2000, method: 'percent', businessUsePct: 15, homeArea: 100, businessArea: 20 });
     expect(r.value.monthly).toBe(300);
   });
 

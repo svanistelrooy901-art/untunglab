@@ -130,6 +130,15 @@ export const ms = {
     kosSeunit: 'Harga beli dibahagi kuantiti dalam pek. Ini kos yang dipakai dalam resipi anda.',
     pemetaan: 'Hanya perlu kalau anda beli dalam satu unit (contoh pek) tetapi guna dalam unit lain (contoh biji).',
   },
+  ops: {
+    title: 'Kos Operasi',
+    errJumlah: 'Isi jumlah RM sebulan (RM0 atau lebih).',
+    errPeratus: 'Isi peratus antara 0 dan 100.',
+    errKeluasan: 'Isi keluasan rumah dan keluasan bisnes. Keluasan bisnes tak boleh lebih besar daripada rumah.',
+    errNilaiMasa: 'Isi Nilai Masa (RM sejam, RM0 atau lebih).',
+    errJualan: 'Isi Anggaran Jualan Bulanan lebih daripada RM0.',
+    errTarif: 'Isi kadar RM sekilowatt jam lebih daripada 0.',
+  },
   placeholder: {
     title: 'Sedang dibina',
     body: 'Bahagian ini akan siap dalam fasa pembangunan seterusnya.',
