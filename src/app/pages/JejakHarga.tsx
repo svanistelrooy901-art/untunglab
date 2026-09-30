@@ -3,6 +3,7 @@ import { normalisedUnitCost, perDisplayUnit } from '../../domain';
 import { listAllHistory, loadCostingData } from '../../db';
 import { t } from '../../i18n/ms';
 import { EmptyState, Loading, PageHeader, btnPrimary } from '../components/ui';
+import { PriceTrend } from '../components/PriceTrend';
 import { useLive } from '../data';
 import { buildTrails, type IngredientTrail } from '../insights';
 import { signedPct, signedRM, unitRM } from '../signed';
@@ -64,6 +65,14 @@ function Trail({ trail }: { trail: IngredientTrail }) {
           </Link>
         )}
       </p>
+      <PriceTrend
+        name={ing.name}
+        unit={latestUnit?.unit ?? ''}
+        points={trail.changes.map((c) => ({
+          date: c.entry.purchaseDate,
+          amount: perDisplayUnit(normalisedUnitCost(c.entry.purchasePrice, c.entry.packageQuantity, c.entry.packageUnit, c.entry.packMappings)).amount,
+        }))}
+      />
       <details className="mt-1 border-t border-border pt-2">
         <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">
           {t('jejak.sejarah').replace('{n}', String(trail.changes.length))}

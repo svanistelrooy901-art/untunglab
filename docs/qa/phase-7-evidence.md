@@ -2,9 +2,9 @@
 
 ## Result
 
-- 305 automated tests, 23 files, 0 failures. Typecheck clean. Production build with service worker succeeds.
+- 312 automated tests, 24 files, 0 failures. Typecheck clean. Production build with service worker succeeds.
 - Tests for the dashboard model, insights, Jejak Harga trails and the history reader were committed before their code (commit "Phase 7 tests first (red)").
-- Mutation check: **51 of 51 caught** (7 new: ranking order, drops never alerting, alert for unused ingredient, affected-menu count, Jejak Harga order, several loss menus linking to one menu, sign dropped from a movement).
+- Mutation check: **54 of 54 caught** (10 new: closed alert ignored, alert key not tied to the price event, trend upside down, plus ranking order, drops never alerting, alert for unused ingredient, affected-menu count, Jejak Harga order, several loss menus linking to one menu, sign dropped from a movement).
 - The Dashboard reads `computeAllMenus`, the same function as the Menu screens. It has no formula of its own.
 
 ## Doc 06 / Doc 02 traceability
@@ -24,3 +24,7 @@
 Browser checks ran with `scripts/e2e-phase7.mjs` at 390px then 1280px, including reload and offline. Screenshots are in `docs/qa/phase-7/`.
 
 Not covered: real iPhone Safari (Phase 11), screen-reader pass, many-menu performance.
+
+## Follow-up after review
+
+Alert threshold set to 10%, price alerts can be closed (and stay closed after reload; a new price change alerts again), and Jejak Harga cards have a trend graph (p7-04a-graf.png). Browser check now 18/18.

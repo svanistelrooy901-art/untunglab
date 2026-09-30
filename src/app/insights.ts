@@ -6,7 +6,7 @@ import { computeAllMenus } from './menuAssembly';
  * A latest movement of at least this many percent (either direction) becomes a Dashboard insight.
  * Every movement, whatever its size, is still shown on Jejak Harga. Product guidance, not a financial rule (D-43).
  */
-export const PRICE_ALERT_PCT = 5;
+export const PRICE_ALERT_PCT = 10;
 
 export interface MenuRef {
   id: string;
@@ -88,6 +88,8 @@ export type InsightItem =
   | { type: 'loss'; severity: 'critical'; menus: MenuRef[]; to: string }
   | {
       type: 'price_move';
+      /** Identifies this exact price event. Closing the alert stores it; the next price change has a new key. */
+      key: string;
       severity: 'warning' | 'info';
       direction: 'up' | 'down';
       ingredientId: string;
@@ -110,7 +112,7 @@ export interface DashboardModel {
   insights: InsightItem[];
 }
 
-export function buildDashboard(data: CostingData, history: readonly PriceHistoryRecord[]): DashboardModel {
+export function buildDashboard(data: CostingData, history: readonly PriceHistoryRecord[], dismissed: ReadonlySet<string> = new Set()): DashboardModel {
   const costed = computeAllMenus(data);
   const menus = [...costed.values()].filter((c) => c.menu.active);
 
@@ -148,8 +150,11 @@ export function buildDashboard(data: CostingData, history: readonly PriceHistory
     const pct = c?.comparison.percentChange;
     if (!c || pct === null || pct === undefined || Math.abs(pct) < PRICE_ALERT_PCT) continue;
     if (trail.affectedMenus.length === 0) continue;
+    const key = `price:${trail.ingredient.id}:${c.entry.id}`;
+    if (dismissed.has(key)) continue;
     moves.push({
       type: 'price_move',
+      key,
       severity: pct > 0 ? 'warning' : 'info',
       direction: pct > 0 ? 'up' : 'down',
       ingredientId: trail.ingredient.id,

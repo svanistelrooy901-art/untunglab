@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { formatPct, formatRM } from '../../domain';
-import { listAllHistory, loadCostingData } from '../../db';
+import { dismissInsight, listAllHistory, listDismissedInsightKeys, loadCostingData } from '../../db';
 import { t } from '../../i18n/ms';
 import { StatusBadge, issueText } from '../components/MenuResultView';
 import { EmptyState, Loading, PageHeader, btnPrimary } from '../components/ui';
-import { useLive } from '../data';
+import { useData, useLive } from '../data';
 import { buildDashboard, type InsightItem } from '../insights';
 import { signedPct, unitRM } from '../signed';
 import { SetupChecklist } from './Mula';
@@ -43,9 +43,10 @@ function insightCopy(i: InsightItem): { title: string; detail: string; cta: stri
 
 /** Leads with what needs action, then the margin ranking. Every number comes from the shared costing engine (M04). */
 export function DashboardPage() {
-  const data = useLive(async (c) => ({ costing: await loadCostingData(c), history: await listAllHistory(c) }));
+  const ctx = useData();
+  const data = useLive(async (c) => ({ costing: await loadCostingData(c), history: await listAllHistory(c), dismissed: await listDismissedInsightKeys(c) }));
   if (!data) return <Loading />;
-  const d = buildDashboard(data.costing, data.history);
+  const d = buildDashboard(data.costing, data.history, data.dismissed);
   const nameOf = (ref: string | undefined) => data.costing.ingredients.find((i) => i.id === ref)?.name ?? data.costing.packaging.find((p) => p.id === ref)?.name ?? data.costing.equipment.find((e) => e.id === ref)?.name ?? t('menu.hilang');
 
   if (d.menuCount === 0) {
@@ -83,8 +84,19 @@ export function DashboardPage() {
           {d.insights.map((i, n) => {
             const c = insightCopy(i);
             return (
-              <li key={`${i.type}-${n}`} className={`rounded-2xl border px-4 py-3 ${SEVERITY_STYLE[i.severity]}`}>
-                <p className="flex items-start gap-2 text-[15px] font-semibold">
+              <li key={`${i.type}-${n}`} className={`relative rounded-2xl border px-4 py-3 ${SEVERITY_STYLE[i.severity]}`}>
+                {i.type === 'price_move' && (
+                  <button
+                    type="button"
+                    aria-label={t('dash.tutupAmaran')}
+                    title={t('dash.tutupAmaran')}
+                    onClick={() => void dismissInsight(ctx, i.key)}
+                    className="absolute right-0 top-0 inline-flex size-11 items-center justify-center rounded-full text-lg text-muted hover:text-ink"
+                  >
+                    <span aria-hidden="true">×</span>
+                  </button>
+                )}
+                <p className={`flex items-start gap-2 text-[15px] font-semibold ${i.type === 'price_move' ? 'pr-8' : ''}`}>
                   <span aria-hidden="true" className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-current text-xs">
                     {SEVERITY_ICON[i.severity]}
                   </span>

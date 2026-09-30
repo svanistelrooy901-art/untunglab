@@ -95,12 +95,12 @@ describe('ingredient movement insights', () => {
   it('states item, normalised movement and affected menus, and links to Kesan Harga', async () => {
     const w = await world();
     w.setNow('2026-09-20T08:00:00');
-    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 16.065 }, { purchaseDate: '2026-09-20' }); // +7.1%
+    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 16.8 }, { purchaseDate: '2026-09-20' }); // +12%
     const { data, history } = await load(w);
     const move = buildDashboard(data, history).insights.find((i) => i.type === 'price_move');
     if (move?.type !== 'price_move') throw new Error('expected a price movement');
     expect(move).toMatchObject({ name: 'Ayam', direction: 'up', severity: 'warning', displayUnit: 'kg' });
-    expect(move.percent).toBeCloseTo(7.1, 6);
+    expect(move.percent).toBeCloseTo(12, 6);
     expect(move.affected.map((m) => m.name).sort()).toEqual(['Nasi Lemak', 'Sandwic Ayam']);
     expect(move.to).toBe(`/kesan-harga?bahan=${w.ayam.id}`);
   });

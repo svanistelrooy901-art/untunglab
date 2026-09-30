@@ -120,6 +120,12 @@ const muts = [
     'loss.length === 1 ? `/menu/${loss[0]!.id}` : \'/menu\'', '`/menu/${loss[0]!.id}`'],
   ['direction sign dropped from movement', 'src/app/signed.ts',
     'return value > 0 && !text.startsWith', 'return false && !text.startsWith'],
+  ['closed alert ignored', 'src/app/insights.ts',
+    'if (dismissed.has(key)) continue;', ''],
+  ['alert key not tied to the price event', 'src/app/insights.ts',
+    'const key = `price:${trail.ingredient.id}:${c.entry.id}`;', 'const key = `price:${trail.ingredient.id}`;'],
+  ['trend y not inverted', 'src/app/trend.ts',
+    '(1 - (p.amount - lo) / span) * h', '((p.amount - lo) / span) * h'],
 ];
 
 let survived = 0;

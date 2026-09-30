@@ -250,6 +250,19 @@ export async function listAllHistory(ctx: Context): Promise<PriceHistoryRecord[]
   return sortHistory(await ctx.db.priceHistory.toArray());
 }
 
+/** Dashboard price alerts the user has closed. Keyed by the specific price event, so a later change alerts again. */
+export async function dismissInsight(ctx: Context, key: string): Promise<void> {
+  const business = await ensureBusiness(ctx);
+  const at = ctx.now().toISOString();
+  await ctx.db.insights.put({ id: key, businessId: business.id, type: 'price_move', severity: 'info', triggerData: {}, text: '', createdAt: at, readAt: at });
+}
+
+/** Read-only, so it is safe inside a live query. */
+export async function listDismissedInsightKeys(ctx: Context): Promise<Set<string>> {
+  const rows = await ctx.db.insights.toArray();
+  return new Set(rows.filter((r) => r.readAt !== null).map((r) => r.id));
+}
+
 /**
  * Gives every ingredient that has no history one record from its current values. Idempotent: ingredients
  * that already have history are untouched, so running it twice adds nothing.
