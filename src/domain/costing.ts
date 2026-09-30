@@ -2,7 +2,6 @@ import { allocateOperating, allocatedOperatingCost } from './operating';
 import { DEFAULT_THRESHOLDS, classifyStatus } from './status';
 import type {
   CostBreakdown,
-  EquipmentLine,
   IngredientSource,
   Issue,
   IssueCode,
@@ -50,7 +49,7 @@ export function energyKwh(watts: number, durationMinutes: number): number {
 }
 
 /** Direct production electricity per batch = sum of equipment kWh x tariff (Doc 03 §7). */
-export function batchElectricityCost(lines: EquipmentLine[], tariffPerKwh: number): number {
+export function batchElectricityCost(lines: { watts: number; durationMinutes: number }[], tariffPerKwh: number): number {
   if (!isNonNegative(tariffPerKwh)) throw invalid('electricity tariff', tariffPerKwh);
   return lines.reduce((sum, l) => sum + energyKwh(l.watts, l.durationMinutes) * tariffPerKwh, 0);
 }
@@ -116,6 +115,11 @@ export function computeMenuCost(
   let packagingPerPortion = 0;
   let packagingOk = yieldOk;
   for (const line of menu.packaging) {
+    if (!line.packaging) {
+      issues.push(issue('packaging_missing', line.ref));
+      packagingOk = false;
+      continue;
+    }
     try {
       const unitCost = packagingUnitCost(line.packaging.purchasePrice, line.packaging.purchaseQuantity);
       if (!isNonNegative(line.quantityUsed)) throw invalid('packaging quantity used', line.quantityUsed);
@@ -132,7 +136,12 @@ export function computeMenuCost(
   let labourBatch = 0;
   let labourOk = true;
   try {
-    labourBatch = labourCostPerBatch(menu.productionMinutesPerBatch, business.valueOfTimePerHour);
+    if (business.valueOfTimePerHour === null && isPositive(menu.productionMinutesPerBatch)) {
+      issues.push(issue('nilai_masa_missing'));
+      labourOk = false;
+    } else {
+      labourBatch = labourCostPerBatch(menu.productionMinutesPerBatch, business.valueOfTimePerHour ?? 0);
+    }
   } catch (e) {
     record(e, 'labour');
     labourOk = false;
@@ -141,7 +150,18 @@ export function computeMenuCost(
   let utilitiesBatch = 0;
   let utilitiesOk = true;
   try {
-    utilitiesBatch = batchElectricityCost(menu.equipment, business.electricityTariffPerKwh);
+    const known: { watts: number; durationMinutes: number }[] = [];
+    for (const l of menu.equipment) {
+      if (l.watts === null) {
+        issues.push(issue('equipment_missing', l.ref));
+        utilitiesOk = false;
+      } else known.push({ watts: l.watts, durationMinutes: l.durationMinutes });
+    }
+    if (business.electricityTariffPerKwh === null && known.some((l) => l.watts * l.durationMinutes > 0)) {
+      issues.push(issue('electricity_tariff_missing'));
+      utilitiesOk = false;
+    }
+    if (utilitiesOk) utilitiesBatch = batchElectricityCost(known, business.electricityTariffPerKwh ?? 0);
   } catch (e) {
     record(e, 'equipment');
     utilitiesOk = false;
@@ -159,7 +179,9 @@ export function computeMenuCost(
 
   // Shared operating cost: sales of zero or missing is incomplete, not zero overhead.
   let rate: number | undefined;
-  if (!isNonNegative(business.sharedMonthlyOperatingCost)) {
+  if (business.sharedMonthlyOperatingCost === null) {
+    issues.push(issue('operating_costs_invalid'));
+  } else if (!isNonNegative(business.sharedMonthlyOperatingCost)) {
     issues.push(issue('invalid_quantity', 'sharedMonthlyOperatingCost'));
   } else {
     const allocation = allocateOperating(business.sharedMonthlyOperatingCost, business.expectedMonthlySales);

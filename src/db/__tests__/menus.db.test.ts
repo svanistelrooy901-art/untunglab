@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createIngredient } from '../repo';
+import { createIngredient, ensureBusiness, saveOperatingCost } from '../repo';
 import { addCustomEquipment, createPackaging } from '../masterData';
 import { deleteMenu, getMenu, listMenus, loadCostingData, saveMenu, type MenuDraft } from '../menus';
-import { saveCostProfile, saveOperatingCost, setTariff } from '../settings';
-import { ensureBusiness } from '../repo';
+import { saveCostProfile, setTariff } from '../settings';
 import { freshContext } from './helpers';
 
 async function seed(ctx: Parameters<typeof createIngredient>[0]) {

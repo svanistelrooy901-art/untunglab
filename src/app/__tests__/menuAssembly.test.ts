@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createIngredient, ensureBusiness } from '../../db/repo';
+import { createIngredient, ensureBusiness, saveOperatingCost } from '../../db/repo';
 import { addCustomEquipment, createPackaging, setIngredientActive } from '../../db/masterData';
 import { loadCostingData, saveMenu, type MenuDraft } from '../../db/menus';
-import { saveCostProfile, saveOperatingCost, setTariff } from '../../db/settings';
+import { saveCostProfile, setTariff } from '../../db/settings';
 import { freshContext } from '../../db/__tests__/helpers';
 import { computeAllMenus } from '../menuAssembly';
 

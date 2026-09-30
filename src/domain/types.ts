@@ -45,14 +45,18 @@ export interface PackagingSource {
 export type PackagingSemantics = 'per_portion' | 'per_batch';
 
 export interface PackagingLine {
-  packaging: PackagingSource;
+  ref?: string;
+  /** Null when the packaging item no longer exists: reported as `packaging_missing`, never skipped. */
+  packaging: PackagingSource | null;
   quantityUsed: number;
   semantics: PackagingSemantics;
 }
 
 /** RecipeEquipmentUsage resolved against the saved equipment: watts plus duration in minutes. */
 export interface EquipmentLine {
-  watts: number;
+  ref?: string;
+  /** Null when the appliance no longer exists: reported as `equipment_missing`, never skipped. */
+  watts: number | null;
   durationMinutes: number;
 }
 
@@ -70,12 +74,15 @@ export interface MenuInput {
 
 /** BusinessCostProfile plus the resolved shared operating total. */
 export interface BusinessInput {
-  /** Nilai Masa, RM per hour. */
-  valueOfTimePerHour: number;
-  /** Electricity tariff, RM per kWh. */
-  electricityTariffPerKwh: number;
-  /** Sum of eligible shared monthly operating costs (see `sharedOperatingTotal`). */
-  sharedMonthlyOperatingCost: number;
+  /** Nilai Masa, RM per hour. Null = not entered; only an issue when the menu has production time. */
+  valueOfTimePerHour: number | null;
+  /** Electricity tariff, RM per kWh. Null = not set; only an issue when the menu uses equipment. */
+  electricityTariffPerKwh: number | null;
+  /**
+   * Sum of eligible shared monthly operating costs (see `sharedOperatingTotal`).
+   * Null means at least one Kos Operasi row is unusable, so the total cannot be trusted.
+   */
+  sharedMonthlyOperatingCost: number | null;
   /** Anggaran Jualan Bulanan. Zero, missing or invalid makes allocation incomplete. */
   expectedMonthlySales?: number | null;
 }
@@ -86,7 +93,12 @@ export type IssueCode =
   | 'selling_price_invalid'
   | 'ingredient_missing'
   | 'incompatible_units'
-  | 'invalid_quantity';
+  | 'invalid_quantity'
+  | 'nilai_masa_missing'
+  | 'electricity_tariff_missing'
+  | 'packaging_missing'
+  | 'equipment_missing'
+  | 'operating_costs_invalid';
 
 export interface Issue {
   code: IssueCode;

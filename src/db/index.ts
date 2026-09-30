@@ -3,3 +3,4 @@ export * from './db';
 export * from './repo';
 export * from './masterData';
 export * from './settings';
+export * from './menus';
