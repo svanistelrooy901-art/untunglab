@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createIngredient, ensureBusiness, listAllHistory, saveOperatingCost, updateIngredient } from '../../db';
+import { createIngredient, dismissInsight, ensureBusiness, listAllHistory, listDismissedInsightKeys, saveOperatingCost, updateIngredient } from '../../db';
 import { loadCostingData, saveMenu, saveCostProfile, setTariff, createPackaging } from '../../db';
 import { freshContext } from '../../db/__tests__/helpers';
 import { computeAllMenus } from '../menuAssembly';
@@ -146,12 +146,47 @@ describe('ingredient movement insights', () => {
   it('only the latest movement of an ingredient is reported, and biggest movement first', async () => {
     const w = await world();
     await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 30 }, { purchaseDate: '2026-09-10' });
-    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 33 }, { purchaseDate: '2026-09-15' }); // +10% latest
-    await updateIngredient(w.ctx, w.lain.id, { purchasePrice: 60.48 }, { purchaseDate: '2026-09-16' }); // +20%
+    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 36 }, { purchaseDate: '2026-09-15' }); // +20% latest
+    await updateIngredient(w.ctx, w.lain.id, { purchasePrice: 65.52 }, { purchaseDate: '2026-09-16' }); // +30%
     const { data, history } = await load(w);
     const moves = buildDashboard(data, history).insights.filter((i) => i.type === 'price_move');
     expect(moves.map((m) => (m.type === 'price_move' ? m.name : ''))).toEqual(['Bahan lain', 'Ayam']);
-    expect((moves[1] as { percent: number }).percent).toBeCloseTo(10, 6);
+    expect((moves[1] as { percent: number }).percent).toBeCloseTo(20, 6);
+  });
+
+  it('the alert threshold is 10%', () => {
+    expect(PRICE_ALERT_PCT).toBe(10);
+  });
+});
+
+describe('dismissing a price alert', () => {
+  it('a dismissed alert is hidden, but a newer price change brings a new alert', async () => {
+    const w = await world();
+    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 18 }, { purchaseDate: '2026-09-20' });
+    let { data, history } = await load(w);
+    const move = buildDashboard(data, history).insights.find((i) => i.type === 'price_move');
+    if (move?.type !== 'price_move') throw new Error();
+    await dismissInsight(w.ctx, move.key);
+    const dismissed = await listDismissedInsightKeys(w.ctx);
+    expect(dismissed.has(move.key)).toBe(true);
+    expect(buildDashboard(data, history, dismissed).insights.some((i) => i.type === 'price_move')).toBe(false);
+    // Jejak Harga still shows the movement.
+    expect(buildTrails(data, history).find((x) => x.ingredient.id === w.ayam.id)?.lastChange).not.toBeNull();
+    // A new change is a new event.
+    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 21 }, { purchaseDate: '2026-09-25' });
+    ({ data, history } = await load(w));
+    const again = buildDashboard(data, history, dismissed).insights.find((i) => i.type === 'price_move');
+    expect(again?.type === 'price_move' && again.key).not.toBe(move.key);
+    expect(again).toBeDefined();
+  });
+
+  it('dismissing twice is harmless and loss alerts cannot be dismissed away', async () => {
+    const w = await world();
+    await dismissInsight(w.ctx, 'k1');
+    await dismissInsight(w.ctx, 'k1');
+    expect((await listDismissedInsightKeys(w.ctx)).size).toBe(1);
+    const { data, history } = await load(w);
+    expect(buildDashboard(data, history, new Set(['loss'])).insights[0]!.type).toBe('loss');
   });
 });
 
