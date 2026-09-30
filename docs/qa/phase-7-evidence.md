@@ -2,7 +2,7 @@
 
 ## Result
 
-- 306 automated tests, 23 files, 0 failures. Typecheck clean. Production build with service worker succeeds.
+- 305 automated tests, 23 files, 0 failures. Typecheck clean. Production build with service worker succeeds.
 - Tests for the dashboard model, insights, Jejak Harga trails and the history reader were committed before their code (commit "Phase 7 tests first (red)").
 - Mutation check: **51 of 51 caught** (7 new: ranking order, drops never alerting, alert for unused ingredient, affected-menu count, Jejak Harga order, several loss menus linking to one menu, sign dropped from a movement).
 - The Dashboard reads `computeAllMenus`, the same function as the Menu screens. It has no formula of its own.
