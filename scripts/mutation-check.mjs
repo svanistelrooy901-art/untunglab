@@ -126,6 +126,18 @@ const muts = [
     'const key = `price:${trail.ingredient.id}:${c.entry.id}`;', 'const key = `price:${trail.ingredient.id}`;'],
   ['trend y not inverted', 'src/app/trend.ts',
     '(1 - (p.amount - lo) / span) * h', '((p.amount - lo) / span) * h'],
+  ['preview price not rounded to the sen', 'src/domain/scenario.ts',
+    'return Math.round((raw + Number.EPSILON * Math.max(1, raw)) * 100) / 100;', 'return raw;'],
+  ['history review ignores the earlier version', 'src/domain/scenario.ts',
+    'before: computeMenuCost(withVersion(before), business, thresholds),', 'before: computeMenuCost(menu, business, thresholds),'],
+  ['history review uses typing order, not purchase date', 'src/app/scenarioView.ts',
+    'sortHistory(history.filter((r) => r.ingredientId === ingredientId))', 'history.filter((r) => r.ingredientId === ingredientId).sort((a, b) => a.seq - b.seq)'],
+  ['history review compares with the wrong record', 'src/app/scenarioView.ts',
+    'const previous = ordered[index - 1];', 'const previous = ordered[index + 1];'],
+  ['what-if lists menus that do not use the ingredient', 'src/app/scenarioView.ts',
+    '.filter((m) => m.active && m.ingredients.some((l) => l.ingredientId === ingredient.id))', '.filter((m) => m.active)'],
+  ['a percentage of −100 or below accepted', 'src/app/scenarioView.ts',
+    'return n > -100 ?', 'return n > -1000 ?'],
 ];
 
 let survived = 0;

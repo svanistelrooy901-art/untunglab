@@ -94,6 +94,11 @@ function Trail({ trail }: { trail: IngredientTrail }) {
                     {unitRM(unit.amount)} / {unit.unit}
                   </span>
                 </div>
+                {c.kind === 'change' && (
+                  <Link to={`/kesan-harga?bahan=${trail.ingredient.id}&rekod=${c.entry.id}`} className="inline-flex min-h-11 items-center text-xs font-semibold text-primary">
+                    {t('jejak.lihatKesanMenu')} →
+                  </Link>
+                )}
               </li>
             );
           })}

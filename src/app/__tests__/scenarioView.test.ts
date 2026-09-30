@@ -140,6 +140,15 @@ describe('History Review (read-only, exact transition)', () => {
     expect(cost(nasi.after).fullCost).toBeCloseTo(12.8, 9);
   });
 
+  it('"previous" follows purchase date, like Jejak Harga, not the order records were typed', async () => {
+    const w = await world();
+    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 30 }, { purchaseDate: '2026-09-20' });
+    await updateIngredient(w.ctx, w.ayam.id, { purchasePrice: 18 }, { purchaseDate: '2026-09-10' }); // typed later, dated earlier
+    const hist = await listHistory(w.ctx, w.ayam.id); // date order: 15, 18, 30
+    const v = historyReview(await load(w), hist, w.ayam.id, hist[2]!.id)!;
+    expect(v).toMatchObject({ beforePrice: 18, afterPrice: 30 });
+  });
+
   it('the baseline record has no earlier version to compare with', async () => {
     const w = await world();
     const hist = await listHistory(w.ctx, w.ayam.id);

@@ -37,3 +37,36 @@ export function compareScenario(
     scenario: computeMenuCost(scenarioMenu, business, thresholds),
   };
 }
+
+/**
+ * The price a percentage change would produce, rounded to the sen. Preview and Apply both use this value,
+ * so what the user sees is exactly what gets stored.
+ */
+export function scenarioPrice(currentPrice: number, pct: number): number {
+  if (!Number.isFinite(currentPrice) || currentPrice < 0) throw new RangeError('Current price must be zero or more');
+  if (!Number.isFinite(pct) || pct <= -100) throw new RangeError('Scenario change must be a finite percentage above −100%');
+  const raw = (currentPrice * (100 + pct)) / 100;
+  return Math.round((raw + Number.EPSILON * Math.max(1, raw)) * 100) / 100;
+}
+
+/**
+ * One menu costed with two versions of one ingredient, through the same `computeMenuCost` path.
+ * What-If passes live vs. changed; History Review passes the exact previous vs. current record.
+ */
+export function compareIngredientVersions(
+  menu: MenuInput,
+  business: BusinessInput,
+  ingredientId: string,
+  before: IngredientSource,
+  after: IngredientSource,
+  thresholds?: StatusThresholds,
+): { before: MenuCostResult; after: MenuCostResult } {
+  const withVersion = (version: IngredientSource): MenuInput => ({
+    ...menu,
+    ingredients: menu.ingredients.map((line) => (line.ingredient?.id === ingredientId ? { ...line, ingredient: { ...version, id: ingredientId } } : line)),
+  });
+  return {
+    before: computeMenuCost(withVersion(before), business, thresholds),
+    after: computeMenuCost(withVersion(after), business, thresholds),
+  };
+}
