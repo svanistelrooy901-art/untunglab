@@ -21,6 +21,7 @@ Later phases add Dexie (IndexedDB) for on-device storage.
 | `npm run build` | Typecheck, then production build with service worker |
 | `npm run preview` | Serve the production build locally |
 | `npm run icons` | Regenerate placeholder PWA icons |
+| `node scripts/mutation-check.mjs` | Break the engine on purpose and confirm the tests catch it |
 
 ## Layout
 
@@ -35,4 +36,4 @@ Every screen calls `src/domain`.
 
 ## Status
 
-Phase 1 (project foundation) and Phase 2 (costing engine) are in progress. See DECISIONS.md.
+Phases 1 and 2 are done (foundation and costing engine). QA evidence: `docs/qa/phase-2-evidence.md`. Decisions: `DECISIONS.md`.
