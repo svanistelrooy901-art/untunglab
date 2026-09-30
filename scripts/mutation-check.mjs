@@ -72,6 +72,22 @@ const muts = [
     'shown.amount > 0 && shown.amount < 0.01', 'shown.amount > 0 && shown.amount < 0.0000001'],
   ['pack-mapping change ignored by history', 'src/domain/priceHistory.ts',
     ' ||\n    mappingsKey(previous.packMappings) !== mappingsKey(next.packMappings)', ''],
+  ['zero expected sales accepted by storage', 'src/db/settings.ts',
+    '!Number.isFinite(sales) || sales <= 0', '!Number.isFinite(sales) || sales < 0'],
+  ['zero expected sales accepted by the form', 'src/app/operatingForms.ts',
+    'if (n === null || n <= 0) errors.sales', 'if (n === null || n < 0) errors.sales'],
+  ['same-date tariff piles up rows', 'src/db/settings.ts',
+    'id: sameDay?.id ?? ctx.newId()', 'id: ctx.newId()'],
+  ['future tariff treated as current', 'src/db/settings.ts',
+    'r.effectiveDate <= today', 'true'],
+  ['reset wipes the simple amount', 'src/db/settings.ts',
+    "mode: 'simple', updatedAt", "mode: 'simple', simpleAmount: 0, updatedAt"],
+  ['overview hides broken rows from allocation', 'src/app/operatingView.ts',
+    "hasErrors ? { ok: false, reason: 'incomplete_costs' } : a", 'a'],
+  ['workspace method flag ignored by engine', 'src/domain/operating.ts',
+    "detail.method === 'area' || (detail.method === undefined && hasAreas)", 'hasAreas'],
+  ['getter writes inside live query', 'src/db/settings.ts',
+    'const business = await getBusiness(ctx);\n  const profile', 'const business = await ensureBusiness(ctx);\n  const profile'],
 ];
 
 let survived = 0;

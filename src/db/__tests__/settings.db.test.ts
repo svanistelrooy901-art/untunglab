@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   currentTariff,
+  getBusiness,
   ensureBusiness,
   getCostProfile,
   listOperatingCosts,
@@ -159,5 +160,36 @@ describe('operating cost list and reset', () => {
     await saveOperatingCost(ctx, { ...common, mode: 'simple', simpleAmount: 40 });
     const [row] = await db.operatingCosts.toArray();
     expect(row).toMatchObject({ mode: 'simple', simpleAmount: 40, detail });
+  });
+});
+
+describe('read-only getters never write (they run inside live queries, which are read-only)', () => {
+  it('work in a read transaction on an empty database', async () => {
+    const { ctx, db } = freshContext();
+    const out = await db.transaction('r', [db.businesses, db.costProfiles, db.tariffs, db.operatingCosts], async () => ({
+      profile: await getCostProfile(ctx),
+      business: await getBusiness(ctx),
+      tariff: await currentTariff(ctx),
+      rows: await listOperatingCosts(ctx),
+    }));
+    expect(out.profile).toMatchObject({ valueOfTimePerHour: null, expectedMonthlySales: null });
+    expect(out.business).toBeNull();
+    expect(out.tariff).toBeNull();
+    expect(out.rows).toEqual([]);
+    expect(await db.businesses.count()).toBe(0);
+  });
+
+  it('work in a read transaction once the business exists', async () => {
+    const { ctx, db } = freshContext();
+    await saveCostProfile(ctx, { valueOfTimePerHour: 20 });
+    await setTariff(ctx, 0.5, '2026-01-01');
+    const out = await db.transaction('r', [db.businesses, db.costProfiles, db.tariffs], async () => ({
+      profile: await getCostProfile(ctx),
+      business: await getBusiness(ctx),
+      tariff: await currentTariff(ctx),
+    }));
+    expect(out.profile.valueOfTimePerHour).toBe(20);
+    expect(out.business).not.toBeNull();
+    expect(out.tariff?.ratePerKwh).toBe(0.5);
   });
 });

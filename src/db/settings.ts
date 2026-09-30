@@ -7,11 +7,24 @@ export const OPERATING_CATEGORIES: readonly OperatingCategory[] = ['ruang_kerja'
 
 const invalid = (msg: string) => new RepoError('invalid_input', msg);
 
+/** Read-only: safe inside live queries. The business is created at startup, never by a getter. */
+export async function getBusiness(ctx: Context): Promise<Business | null> {
+  return (await ctx.db.businesses.toCollection().first()) ?? null;
+}
+
+/** Read-only. Before the business exists this is an empty profile ("not entered"), never zero. */
 export async function getCostProfile(ctx: Context): Promise<BusinessCostProfile> {
-  const business = await ensureBusiness(ctx);
-  const profile = await ctx.db.costProfiles.get(business.id);
-  if (!profile) throw new RepoError('not_found', 'Cost profile missing');
-  return profile;
+  const business = await getBusiness(ctx);
+  const profile = business ? await ctx.db.costProfiles.get(business.id) : undefined;
+  return (
+    profile ?? {
+      businessId: business?.id ?? '',
+      valueOfTimePerHour: null,
+      expectedMonthlySales: null,
+      allocationMethod: 'revenue_percentage',
+      updatedAt: '',
+    }
+  );
 }
 
 export interface CostProfilePatch {
@@ -62,7 +75,8 @@ export async function updateBusinessProfile(ctx: Context, patch: { name?: string
 
 /** The rate in force today: the latest effective date that is not in the future. Null until the user sets one. */
 export async function currentTariff(ctx: Context): Promise<UtilityTariff | null> {
-  const business = await ensureBusiness(ctx);
+  const business = await getBusiness(ctx);
+  if (!business) return null;
   const today = localDate(ctx.now());
   const rows = await ctx.db.tariffs.where('businessId').equals(business.id).toArray();
   const inForce = rows.filter((r) => r.effectiveDate <= today).sort((a, b) => (a.effectiveDate < b.effectiveDate ? 1 : -1));

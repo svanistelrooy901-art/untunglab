@@ -49,6 +49,12 @@ Authority order when documents conflict: 03, 02, 04, 05, 06, 01, 07 (Doc 00 §2)
 | D-27 | Packaging has no price history in V1. | Doc 02 §4 and Doc 05 only require history for Bahan. |
 | D-28 | Duplicate names are allowed (two ovens, two "Gula" brands). | A hard rule would block real cases; the user can tell them apart by size or archive one. |
 | D-29 | Unit dropdown suggestions (kg, g, l, ml, biji, pek, kotak, botol, tin, ikat, keping) are hints only. The user can type any unit. | Matches D-20. |
+| D-30 | Electricity tariff has **no built-in default**. The field shows "Contoh dalam spesifikasi UntungLab: RM0.50" as a hint only, and the user must save their own rate. Tariffs are effective-dated; the latest one not in the future applies. | The spec gives RM0.50 only as an illustration (Doc 03 §7). A silent default would put a made-up number into every user's cost. Until a rate is set, equipment electricity in a menu will be reported as incomplete (Phase 6). |
+| D-31 | `WorkspaceDetail` gets an optional `method` ('percent' or 'area'). It says which input decides the business-use %; both the manual % and the areas are kept. Without it, the old rule (both areas present means areas decide, D-10) still applies. | Doc 04 §4 requires that switching back and forth never deletes advanced data. |
+| D-32 | Nilai Masa may be RM0 (no labour costed); it can be left blank (not entered). Expected monthly sales must be more than RM0 or blank. Blank is stored as null and never read as zero. | Doc 03 §8. |
+| D-33 | Onboarding is a "Mula di sini" checklist on the Dashboard route, with progress derived from saved data (Nilai Masa, Kos Operasi, Anggaran Jualan, first Bahan; Pembungkusan and Peralatan optional; first Menu shown as "tersedia tak lama lagi"). Business name and type are optional fields on the Kos Operasi page. There is no forced wizard. | Doc 02 §2 lists the steps; a checklist that reads real data cannot drift from what is saved. The real Dashboard arrives in Phase 7. |
+| D-34 | In Lebih Tepat, Elektrik holds only the general shared amount (lighting, fridge, aircond). A visible warning tells the user not to include production appliances. Rows stay `shared` in the UI; the `direct` classification exists in the engine but is not offered in V1. | Doc 02 §9, D-11. |
+| D-35 | Percentage chips are 10, 15, 20, 25 and "Lain-lain" for Ruang Kerja and Air alike. | Doc 02 §7 lists these for Ruang Kerja; §8 says "percentage chips plus custom input" for Air. |
 
 ## Spec notes for your attention
 

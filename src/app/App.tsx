@@ -4,6 +4,8 @@ import { t } from '../i18n/ms';
 import { Layout } from './components/Layout';
 import { DataProvider } from './data';
 import { BahanPage } from './pages/Bahan';
+import { KosOperasiPage } from './pages/KosOperasi';
+import { MulaPage } from './pages/Mula';
 import { Lagi, Placeholder } from './pages/Pages';
 import { PembungkusanPage } from './pages/Pembungkusan';
 import { PeralatanPage } from './pages/Peralatan';
@@ -11,6 +13,8 @@ import { ROUTES } from './routes';
 
 /** Screens built so far. Everything else shows the placeholder until its phase. */
 const PAGES: Record<string, ComponentType> = {
+  '/': MulaPage,
+  '/kos-operasi': KosOperasiPage,
   '/bahan': BahanPage,
   '/pembungkusan': PembungkusanPage,
   '/peralatan': PeralatanPage,
