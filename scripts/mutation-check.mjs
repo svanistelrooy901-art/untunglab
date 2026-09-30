@@ -106,6 +106,20 @@ const muts = [
     '(menu.productionMinutesPerBatch / 60) * rate', '(menu.productionMinutesPerBatch / 100) * rate'],
   ['zero yield accepted by the menu form', 'src/app/menuForm.ts',
     'yieldN === null || yieldN <= 0', 'yieldN === null || yieldN < 0'],
+  ['ranking worst margin first', 'src/app/insights.ts',
+    'b.marginPct - a.marginPct ||', 'a.marginPct - b.marginPct ||'],
+  ['drops below the threshold never alert', 'src/app/insights.ts',
+    'Math.abs(pct) < PRICE_ALERT_PCT', 'pct < PRICE_ALERT_PCT'],
+  ['alert for an ingredient no menu uses', 'src/app/insights.ts',
+    'if (trail.affectedMenus.length === 0) continue;', ''],
+  ['affected menus miscounted', 'src/app/insights.ts',
+    'm.ingredients.some((l) => l.ingredientId === ingredientId)', 'm.ingredients.every((l) => l.ingredientId === ingredientId)'],
+  ['Jejak Harga oldest change first', 'src/app/insights.ts',
+    'da < db ? 1 : -1', 'da < db ? -1 : 1'],
+  ['several loss menus link to one arbitrary menu', 'src/app/insights.ts',
+    'loss.length === 1 ? `/menu/${loss[0]!.id}` : \'/menu\'', '`/menu/${loss[0]!.id}`'],
+  ['direction sign dropped from movement', 'src/app/signed.ts',
+    'return value > 0 && !text.startsWith', 'return false && !text.startsWith'],
 ];
 
 let survived = 0;

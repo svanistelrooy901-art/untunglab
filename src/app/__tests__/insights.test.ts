@@ -151,7 +151,7 @@ describe('ingredient movement insights', () => {
     const { data, history } = await load(w);
     const moves = buildDashboard(data, history).insights.filter((i) => i.type === 'price_move');
     expect(moves.map((m) => (m.type === 'price_move' ? m.name : ''))).toEqual(['Bahan lain', 'Ayam']);
-    expect(moves[1]!.type === 'price_move' && moves[1].percent).toBeCloseTo(10, 6);
+    expect((moves[1] as { percent: number }).percent).toBeCloseTo(10, 6);
   });
 });
 

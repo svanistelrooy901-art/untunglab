@@ -6,7 +6,8 @@ import { DataProvider } from './data';
 import { BahanPage } from './pages/Bahan';
 import { KosOperasiPage } from './pages/KosOperasi';
 import { MenuEditorPage, MenuListPage } from './pages/Menu';
-import { MulaPage } from './pages/Mula';
+import { DashboardPage } from './pages/Dashboard';
+import { JejakHargaPage } from './pages/JejakHarga';
 import { Lagi, Placeholder } from './pages/Pages';
 import { PembungkusanPage } from './pages/Pembungkusan';
 import { PeralatanPage } from './pages/Peralatan';
@@ -14,7 +15,8 @@ import { ROUTES } from './routes';
 
 /** Screens built so far. Everything else shows the placeholder until its phase. */
 const PAGES: Record<string, ComponentType> = {
-  '/': MulaPage,
+  '/': DashboardPage,
+  '/jejak-harga': JejakHargaPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,
   '/bahan': BahanPage,

@@ -13,7 +13,7 @@ interface Step {
 }
 
 /** Guided setup (Doc 02 §2). Progress is derived from real data, so it can never drift from what is saved. */
-export function MulaPage() {
+export function SetupChecklist() {
   const data = useLive(async (c) => {
     const [profile, ops, ingredients, packaging, equipment, menus] = await Promise.all([
       getCostProfile(c),

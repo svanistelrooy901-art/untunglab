@@ -21,6 +21,7 @@ On-device storage: Dexie (IndexedDB).
 | `npm run build` | Typecheck, then production build with service worker |
 | `npm run preview` | Serve the production build locally |
 | `npm run icons` | Regenerate placeholder PWA icons |
+| `node scripts/e2e-phase7.mjs` | Browser check for Dashboard, Jejak Harga and price insights |
 | `node scripts/e2e-phase6.mjs` | Browser check for Menu / Resipi (Doc 06 M01 through the real screens) |
 | `node scripts/e2e-phase5.mjs` | Browser check for Kos Operasi and the setup checklist (same requirements) |
 | `node scripts/e2e-smoke.mjs` | Browser smoke test (needs Playwright, a running `npm run preview`, `PW_ROOT` and `APP_URL`) |
@@ -40,4 +41,4 @@ Every screen calls `src/domain`.
 
 ## Status
 
-Phases 1 to 6 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.
+Phases 1 to 7 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi, Dashboard + Jejak Harga + Insights). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.

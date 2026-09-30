@@ -245,6 +245,11 @@ export async function listHistory(ctx: Context, ingredientId: string): Promise<P
   return sortHistory(await ctx.db.priceHistory.where('ingredientId').equals(ingredientId).toArray());
 }
 
+/** Every price-history record, oldest first per ingredient. One read for Jejak Harga and the Dashboard. Never writes. */
+export async function listAllHistory(ctx: Context): Promise<PriceHistoryRecord[]> {
+  return sortHistory(await ctx.db.priceHistory.toArray());
+}
+
 /**
  * Gives every ingredient that has no history one record from its current values. Idempotent: ingredients
  * that already have history are untouched, so running it twice adds nothing.
