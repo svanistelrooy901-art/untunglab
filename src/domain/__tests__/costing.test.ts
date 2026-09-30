@@ -301,4 +301,8 @@ describe('mandatory Kos Operasi categories (D-70)', () => {
   it('an empty list changes nothing', () => {
     expect(computeMenuCost(bareMenu(), business({ missingOperatingCategories: [] })).complete).toBe(true);
   });
+  it('missing categories and missing sales are both named, each once', () => {
+    const r = computeMenuCost(bareMenu(), business({ missingOperatingCategories: ['air'], expectedMonthlySales: null }));
+    expect(r.issues.map((i) => i.code).sort()).toEqual(['expected_sales_missing', 'operating_costs_missing']);
+  });
 });

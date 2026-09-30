@@ -8,7 +8,7 @@ import { EmptyState, Field, InfoTip, Loading, PageHeader, btnPrimary, btnQuiet, 
 import { LimitNote } from '../components/LimitNote';
 import { useData, useLive } from '../data';
 import { useLicense, useLimit } from '../license';
-import { businessInputFrom, computeAllMenus, menuInputFrom } from '../menuAssembly';
+import { businessInputFrom, computeAllMenus, equipmentSectionState, menuInputFrom } from '../menuAssembly';
 import { parseNumber } from '../forms';
 import { emptyForm, parseMenuForm, type MenuForm } from '../menuForm';
 import { computeMenuCost } from '../../domain';
@@ -180,6 +180,7 @@ function MenuEditor({ data, existing }: { data: CostingData; existing: StoredMen
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  const equipState = equipmentSectionState(data);
   const parsed = parseMenuForm(form, existing?.id);
   const errors = submitted && !parsed.ok ? parsed.errors : {};
   const name = useMemo(() => namer(data), [data]);
@@ -327,31 +328,40 @@ function MenuEditor({ data, existing }: { data: CostingData; existing: StoredMen
         + {t('menu.packTambah')}
       </button>
 
-      {/* Peralatan */}
-      <h2 className="mt-6 flex items-center text-base font-bold">{t('menu.alatTajuk')}<InfoTip text={t('tip.watt')} label={t('menu.alatTajuk')} /></h2>
-      {data.equipment.filter((e) => e.active).length === 0 && form.equipment.length === 0 && (
-        <p className="mt-1 text-sm text-muted">{t('menu.tiadaAlat')} <Link to="/peralatan" className="font-semibold text-primary underline">{t('nav.peralatan')}</Link></p>
-      )}
-      {form.equipment.map((l, i) => {
-        const patch = (p: Partial<typeof l>) => set('equipment', form.equipment.map((x, j) => (j === i ? { ...x, ...p } : x)));
-        return (
-          <div key={i} className={lineBox}>
-            <label className="text-sm font-medium" htmlFor={`eq-${i}`}>{t('menu.alatPilih')}</label>
-            <select id={`eq-${i}`} className={selectClass} value={l.equipmentId} onChange={(e) => patch({ equipmentId: e.target.value })}>
-              <option value="">{t('menu.pilihSatu')}</option>
-              {data.equipment.filter((x) => x.active || x.id === l.equipmentId).map((x) => (
-                <option key={x.id} value={x.id}>{x.name} ({x.powerWatts} W){x.active ? '' : ` ${t('menu.diarkib')}`}</option>
-              ))}
-              {l.equipmentId && !data.equipment.some((x) => x.id === l.equipmentId) && <option value={l.equipmentId}>{t('menu.hilang')}</option>}
-            </select>
-            <Field label={t('menu.alatMinit')} inputMode="decimal" value={l.minutes} onChange={(e) => patch({ minutes: e.target.value })} />
-            <button type="button" className={btnQuiet} onClick={() => set('equipment', form.equipment.filter((_, j) => j !== i))}>{t('menu.buangBaris')}</button>
-          </div>
-        );
-      })}
-      <button type="button" className={`${btnSecondary} mt-3`} onClick={() => set('equipment', [...form.equipment, { equipmentId: '', minutes: '' }])}>
-        + {t('menu.alatTambah')}
-      </button>
+      {/* Peralatan: only when Elektrik is in Kira Lebih Tepat (D-71). Hidden lines stay stored and simply stop counting. */}
+      {equipState === 'show' ? (
+        <>
+        <h2 className="mt-6 flex items-center text-base font-bold">{t('menu.alatTajuk')}<InfoTip text={t('tip.watt')} label={t('menu.alatTajuk')} /></h2>
+        {data.equipment.filter((e) => e.active).length === 0 && form.equipment.length === 0 && (
+          <p className="mt-1 text-sm text-muted">{t('menu.tiadaAlat')} <Link to="/peralatan" className="font-semibold text-primary underline">{t('nav.peralatan')}</Link></p>
+        )}
+        {form.equipment.map((l, i) => {
+          const patch = (p: Partial<typeof l>) => set('equipment', form.equipment.map((x, j) => (j === i ? { ...x, ...p } : x)));
+          return (
+            <div key={i} className={lineBox}>
+              <label className="text-sm font-medium" htmlFor={`eq-${i}`}>{t('menu.alatPilih')}</label>
+              <select id={`eq-${i}`} className={selectClass} value={l.equipmentId} onChange={(e) => patch({ equipmentId: e.target.value })}>
+                <option value="">{t('menu.pilihSatu')}</option>
+                {data.equipment.filter((x) => x.active || x.id === l.equipmentId).map((x) => (
+                  <option key={x.id} value={x.id}>{x.name} ({x.powerWatts} W){x.active ? '' : ` ${t('menu.diarkib')}`}</option>
+                ))}
+                {l.equipmentId && !data.equipment.some((x) => x.id === l.equipmentId) && <option value={l.equipmentId}>{t('menu.hilang')}</option>}
+              </select>
+              <Field label={t('menu.alatMinit')} inputMode="decimal" value={l.minutes} onChange={(e) => patch({ minutes: e.target.value })} />
+              <button type="button" className={btnQuiet} onClick={() => set('equipment', form.equipment.filter((_, j) => j !== i))}>{t('menu.buangBaris')}</button>
+            </div>
+          );
+        })}
+        <button type="button" className={`${btnSecondary} mt-3`} onClick={() => set('equipment', [...form.equipment, { equipmentId: '', minutes: '' }])}>
+          + {t('menu.alatTambah')}
+        </button>
+        </>
+      ) : form.equipment.length > 0 || equipState === 'hidden_missing' ? (
+        <p className="mt-6 text-sm text-muted" data-testid="peralatan-tersembunyi">
+          {equipState === 'hidden_simple' ? t('menu.isu.peralatanMudah') : t('menu.isu.peralatanBelum')}{' '}
+          <Link to="/kos-operasi" className="inline-flex min-h-11 items-center font-semibold text-primary underline">{t('ops.title')}</Link>
+        </p>
+      ) : null}
 
       {errors.lines && <p role="alert" className="mt-4 text-sm font-medium text-loss">{errors.lines}</p>}
 

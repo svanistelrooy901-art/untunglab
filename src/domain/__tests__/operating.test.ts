@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import type { OperatingCostEntry } from '../types';
 import {
   OperatingCostError,
   appliancesCounted,

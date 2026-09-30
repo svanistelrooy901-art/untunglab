@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CODE_ALPHABET, generateCode, normaliseCode } from '../code';
-import { FREE_LIMITS, canAdd, canUseDetailedOperating, detailedOperatingAccess, limitState } from '../entitlement';
+import { FREE_LIMITS, canAdd, detailedOperatingAccess, limitState } from '../entitlement';
 import { generateKeyPair, signLicense, verifyLicense, type LicensePayload } from '../token';
 
 const payload = (over: Partial<LicensePayload> = {}): LicensePayload => ({ v: 1, plan: 'lifetime', deviceId: 'dev-1', codeHint: 'K3M7', issuedAt: '2026-09-30T00:00:00.000Z', ...over });
@@ -87,10 +87,6 @@ describe('free plan limits (D-58)', () => {
     expect(canAdd('free', 'packaging', 1)).toBe(true);
     expect(canAdd('free', 'packaging', 2)).toBe(false);
     expect(canAdd('pro', 'menus', 500)).toBe(true);
-  });
-  it('Kira Lebih Tepat is a paid feature', () => {
-    expect(canUseDetailedOperating('free')).toBe(false);
-    expect(canUseDetailedOperating('pro')).toBe(true);
   });
   it('limitState reports used, limit and whether more can be added', () => {
     expect(limitState('free', 'menus', 2)).toEqual({ used: 2, limit: 2, canAdd: false });

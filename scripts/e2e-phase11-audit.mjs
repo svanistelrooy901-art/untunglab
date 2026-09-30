@@ -2,6 +2,7 @@
 // leftover English UI words, placeholder screens, and that loss is conveyed by text. Needs the e2e build (Pro, no limits).
 // E2E_KEYS=/tmp/e2e-keys.json PW_ROOT=$(npm root -g) APP_URL=http://localhost:4181/ node scripts/e2e-phase11-audit.mjs <dir>
 import { createRequire } from 'node:module';
+import { fillRemainingOperating } from './e2e-ops.mjs';
 import { activatePro } from './e2e-license.mjs';
 const require = createRequire(process.env.PW_ROOT + '/');
 const { chromium } = require('playwright');
@@ -46,6 +47,7 @@ await page.getByText('✓ Disimpan').waitFor();
 await page.getByRole('button', { name: /^Gas/ }).click();
 await box('Jumlah sebulan (RM)').fill('600');
 await saveSheet();
+await fillRemainingOperating(page, url);
 await page.getByText('RM600.00').first().waitFor();
 async function menu(name, price, a, b) {
   await page.goto(url + '#/menu/baru');

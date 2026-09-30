@@ -95,9 +95,12 @@ await page.screenshot({ path: `${S}/p10-04-menu-penuh.png` });
 
 await page.goto(url + '#/kos-operasi');
 await page.getByRole('button', { name: /Ruang Kerja/ }).click();
-ok('detailed tab locked on free', await page.getByRole('tab', { name: /Kira Lebih Tepat/ }).isDisabled());
-ok('lock explanation shown', await page.getByTestId('tab-locked').isVisible());
-await page.screenshot({ path: `${S}/p10-05-tab-kunci.png` });
+ok('detailed tab is NOT locked on free (marketing preview, D-72)', await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).isEnabled());
+await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
+ok('preview explanation shown', await page.getByTestId('tab-pratonton').isVisible());
+ok('detailed fields are disabled on free', await page.getByRole('textbox', { name: 'Kos rumah atau sewa sebulan (RM)', exact: true }).isDisabled());
+ok('detailed Simpan is disabled on free', await page.getByRole('button', { name: 'Simpan' }).last().isDisabled());
+await page.screenshot({ path: `${S}/p10-05-tab-pratonton.png` });
 await page.keyboard.press('Escape');
 
 // --- activation errors ---
@@ -138,7 +141,8 @@ await addBahan('Bahan 11');
 ok('11th ingredient accepted on full version', true);
 await page.goto(url + '#/kos-operasi');
 await page.getByRole('button', { name: /Ruang Kerja/ }).click();
-ok('detailed tab open on full version', await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).isEnabled());
+await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
+ok('detailed fields editable on full version', await page.getByRole('textbox', { name: 'Kos rumah atau sewa sebulan (RM)', exact: true }).isEnabled());
 await page.keyboard.press('Escape');
 
 // --- offline after activation ---

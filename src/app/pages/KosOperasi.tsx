@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { canUseDetailedOperating } from '../../license/entitlement';
+import { detailedOperatingAccess } from '../../license/entitlement';
 import { useLicense } from '../license';
 import { energyKwh, formatPct, formatRM, type OperatingCategory } from '../../domain';
 import {
@@ -38,6 +38,15 @@ export function KosOperasiPage() {
     <section>
       <PageHeader title={t('ops.title')} />
       <p className="mt-1 text-sm text-muted">{t('ops.intro')}</p>
+      {(() => {
+        const done = overview.lines.filter((l) => l.entered).length;
+        const all = done === overview.lines.length;
+        return (
+          <p role="status" className={`mt-2 text-sm font-semibold ${all ? 'text-healthy' : 'text-watch'}`} data-testid="ops-kemajuan">
+            {all ? `✓ ${t('ops.semuaDiisi')}` : t('ops.kemajuan').replace('{n}', String(done)).replace('{total}', String(overview.lines.length))}
+          </p>
+        );
+      })()}
 
       <SettingsCard />
 
@@ -107,9 +116,17 @@ function CategoryRow({ line, row, onOpen }: { line: OverviewLine; row: Operating
           <span className="block text-xs text-muted">{t('ops.belumIsi')}</span>
         ) : null}
       </span>
-      <span className="shrink-0 text-right">
-        <span className="block text-sm font-semibold">{line.entered && !line.error ? formatRM(line.amount) : '—'}</span>
-        <span className="block text-xs text-muted">{t('ops.rmSebulan')}</span>
+      <span className="flex shrink-0 items-center gap-2 text-right">
+        {line.entered ? (
+          <span>
+            <span className="block text-sm font-semibold">{line.error ? '—' : formatRM(line.amount)}</span>
+            <span className="block text-xs text-muted">{t('ops.rmSebulan')}</span>
+          </span>
+        ) : null}
+        <span className={`inline-flex min-h-9 items-center rounded-full px-3 text-sm font-semibold ${line.entered ? 'text-primary' : 'bg-primary text-white'}`}>
+          {line.entered ? t('ops.sunting') : `+ ${t('ops.isi')}`}
+        </span>
+        <span aria-hidden="true" className="text-lg text-muted">›</span>
       </span>
     </button>
   );
@@ -173,8 +190,9 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
   const ctx = useData();
   const canAdvance = ADVANCED.includes(category);
   const { plan, ready } = useLicense();
-  // Free plan: the detailed tab is locked unless this row is already detailed (existing numbers must keep working, D-59).
-  const detailedLocked = ready && !canUseDetailedOperating(plan) && row?.mode !== 'detailed';
+  // Free plan (D-72): Kira Lebih Tepat can be opened and looked at, but its fields are disabled. A row that is already
+  // detailed stays editable so existing numbers are never stuck behind the paywall.
+  const preview = ready && detailedOperatingAccess(plan, row?.mode ?? null) === 'preview';
   const [tab, setTab] = useState<'simple' | 'detailed'>(row?.mode === 'detailed' && canAdvance ? 'detailed' : 'simple');
   const [simple, setSimple] = useState(row ? String(row.simpleAmount) : '');
   const [submitted, setSubmitted] = useState(false);
@@ -203,10 +221,23 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
 
   const detailedCheck = category === 'ruang_kerja' ? wsCheck : category === 'air' ? waterCheck : category === 'elektrik' ? elCheck : null;
 
+  /** "Tiada kos ini": an explicit RM0, so a category is never left blank by accident (D-70). */
+  async function saveSimple(amount: number) {
+    setFailed(false);
+    try {
+      const business = await ensureBusiness(ctx);
+      await saveOperatingCost(ctx, { businessId: business.id, category, active: true, classification: 'shared', mode: 'simple', simpleAmount: amount });
+      onDone();
+    } catch {
+      setFailed(true);
+    }
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
     setFailed(false);
+    if (tab === 'detailed' && preview) return;
     const business = await ensureBusiness(ctx);
     const common = { businessId: business.id, category, active: true, classification: 'shared' as const };
     try {
@@ -240,19 +271,22 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
               role="tab"
               aria-selected={tab === m}
               onClick={() => setTab(m)}
-              disabled={m === 'detailed' && detailedLocked}
-              className={`min-h-11 rounded-lg text-sm font-semibold disabled:opacity-60 ${tab === m ? 'bg-surface text-primary shadow-sm' : 'text-muted'}`}
+              className={`min-h-11 rounded-lg text-sm font-semibold ${tab === m ? 'bg-surface text-primary shadow-sm' : 'text-muted'}`}
             >
-              {m === 'simple' ? t('ops.modMudah') : detailedLocked ? `🔒 ${t('ops.kiraTepat')}` : t('ops.kiraTepat')}
+              {m === 'simple' ? t('ops.modMudah') : t('ops.kiraTepat')}
             </button>
           ))}
         </div>
       )}
 
-      {canAdvance && detailedLocked && (
-        <p className="mt-2 text-xs text-muted" data-testid="tab-locked">
-          {t('lesen.tabKunciIsi')} <Link to="/lesen" className="font-semibold text-primary underline">{t('lesen.naiktaraf')}</Link>
-        </p>
+      {canAdvance && tab === 'detailed' && preview && (
+        <div className="mt-3 rounded-xl border border-primary-line bg-primary-soft p-3 text-sm" data-testid="tab-pratonton">
+          <p className="font-medium">{t('lesen.pratonton')}</p>
+          <p className="mt-1 text-xs text-muted">{t('lesen.pratontonNota')}</p>
+          <Link to="/lesen" className="mt-1 inline-flex min-h-11 items-center font-semibold text-primary underline">
+            {t('lesen.naiktaraf')}
+          </Link>
+        </div>
       )}
 
       {tab === 'simple' && (
@@ -265,7 +299,16 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
           hint={canAdvance && row?.detail ? t('ops.kekalNota') : undefined}
         />
       )}
+      {tab === 'simple' && (
+        <div className="mt-2">
+          <button type="button" className={btnQuiet} onClick={() => void saveSimple(0)}>
+            {t('ops.tiadaKos')}
+          </button>
+          <p className="text-xs text-muted">{t('ops.tiadaKosNota')}</p>
+        </div>
+      )}
 
+      <fieldset disabled={tab === 'detailed' && preview} className={tab === 'detailed' && preview ? 'opacity-60' : ''} data-testid="medan-tepat">
       {tab === 'detailed' && category === 'ruang_kerja' && (
         <WorkspaceFields
           {...{ home, setHome, wsMethod, setWsMethod, wsPct, setWsPct, homeArea, setHomeArea, bizArea, setBizArea }}
@@ -281,11 +324,12 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
         </div>
       )}
       {tab === 'detailed' && category === 'elektrik' && <ElectricityFields shared={shared} setShared={setShared} error={submitted && !elCheck.ok ? elCheck.errors.shared : undefined} monthly={elCheck.ok ? elCheck.value.monthly : null} />}
+      </fieldset>
 
       {(category === 'ruang_kerja' || tab === 'detailed') && <p className="mt-3 text-xs text-muted">{category === 'ruang_kerja' ? t('ops.anggaranNota') : ''}</p>}
       {failed && <p role="alert" className="mt-3 text-sm font-medium text-loss">{t('common.gagalSimpan')}</p>}
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="submit" className={btnPrimary}>{t('common.simpan')}</button>
+        <button type="submit" className={btnPrimary} disabled={tab === 'detailed' && preview}>{t('common.simpan')}</button>
         <button type="button" className={btnSecondary} onClick={onDone}>{t('common.batal')}</button>
         {row?.detail && (
           <button

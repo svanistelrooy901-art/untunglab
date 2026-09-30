@@ -85,6 +85,11 @@ export interface BusinessInput {
   sharedMonthlyOperatingCost: number | null;
   /** Anggaran Jualan Bulanan. Zero, missing or invalid makes allocation incomplete. */
   expectedMonthlySales?: number | null;
+  /**
+   * Kos Operasi categories with no row at all. Every category must be filled, with an explicit RM0 when there is no
+   * such cost, so a forgotten category is never read as zero overhead (D-70).
+   */
+  missingOperatingCategories?: OperatingCategory[];
 }
 
 export type IssueCode =
@@ -98,7 +103,8 @@ export type IssueCode =
   | 'electricity_tariff_missing'
   | 'packaging_missing'
   | 'equipment_missing'
-  | 'operating_costs_invalid';
+  | 'operating_costs_invalid'
+  | 'operating_costs_missing';
 
 export interface Issue {
   code: IssueCode;

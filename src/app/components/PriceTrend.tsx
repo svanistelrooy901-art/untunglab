@@ -3,7 +3,7 @@ import { t } from '../../i18n/ms';
 import { signedPct, signedRM, unitRM } from '../signed';
 import { trendPoints, type TrendInput } from '../trend';
 
-const BOX = { width: 320, height: 170, padX: 22, padY: 36 };
+const BOX = { width: 320, height: 136, padX: 22, padY: 32 };
 
 /**
  * Normalised unit cost over time for one ingredient. One series, so no legend; the title names it.
@@ -48,7 +48,7 @@ export function PriceTrend({ name, points, unit }: { name: string; points: Trend
       </p>
       <svg
         viewBox={`0 0 ${BOX.width} ${BOX.height}`}
-        className="w-full touch-pan-y select-none text-primary"
+        className="w-full max-w-[320px] touch-pan-y select-none text-primary"
         role="img"
         aria-label={t('jejak.trendLabel').replace('{nama}', name).replace('{a}', first).replace('{b}', last).replace('{n}', String(points.length))}
         data-testid="trend"

@@ -144,7 +144,10 @@ describe('menus costed from stored rows', () => {
 
   it('no Nilai Masa, no tariff, no sales: every gap is named', async () => {
     const t = freshContext();
-    await ensureBusiness(t.ctx);
+    const biz = await ensureBusiness(t.ctx);
+    // Kos Operasi filled (D-70) with Elektrik in Kira Lebih Tepat (D-71), but no Nilai Masa, tariff or sales.
+    await saveOperatingCost(t.ctx, { businessId: biz.id, category: 'elektrik', mode: 'detailed', simpleAmount: 0, detail: { kind: 'electricity', sharedMonthlyAmount: 0 }, active: true, classification: 'shared' });
+    await fillOperatingZeros(t.ctx, biz.id);
     const oven = await addCustomEquipment(t.ctx, { name: 'Oven', powerWatts: 2000 });
     const saved = await saveMenu(t.ctx, { name: 'A', yield: 1, productionMinutesPerBatch: 30, sellingPrice: 10, ingredients: [], packaging: [], equipment: [{ equipmentId: oven.id, durationMinutes: 45 }] });
     const r = (await run(t as never)).results.get(saved.menuId)?.result;

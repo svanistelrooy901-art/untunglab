@@ -179,7 +179,11 @@ export function computeMenuCost(
 
   // Shared operating cost: sales of zero or missing is incomplete, not zero overhead.
   let rate: number | undefined;
-  if (business.sharedMonthlyOperatingCost === null) {
+  if (business.missingOperatingCategories && business.missingOperatingCategories.length > 0) {
+    issues.push(issue('operating_costs_missing', business.missingOperatingCategories.join(',')));
+    // Sales is an independent gap: name it too, so the user sees everything to fix in one go.
+    if (!allocateOperating(0, business.expectedMonthlySales).ok) issues.push(issue('expected_sales_missing'));
+  } else if (business.sharedMonthlyOperatingCost === null) {
     issues.push(issue('operating_costs_invalid'));
   } else if (!isNonNegative(business.sharedMonthlyOperatingCost)) {
     issues.push(issue('invalid_quantity', 'sharedMonthlyOperatingCost'));

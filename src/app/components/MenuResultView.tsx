@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatPct, formatRM, type BusinessInput, type Issue, type MenuCostResult, type MenuInput, type StatusCode } from '../../domain';
+import { formatPct, formatRM, type BusinessInput, type Issue, type MenuCostResult, type MenuInput, type OperatingCategory, type StatusCode } from '../../domain';
 import { t } from '../../i18n/ms';
 import { explainMenu } from '../menuExplain';
 
@@ -27,11 +27,16 @@ const ISSUE_LINK: Partial<Record<Issue['code'], string>> = {
   nilai_masa_missing: '/kos-operasi',
   electricity_tariff_missing: '/kos-operasi',
   operating_costs_invalid: '/kos-operasi',
+  operating_costs_missing: '/kos-operasi',
   ingredient_missing: '/bahan',
   incompatible_units: '/bahan',
 };
 
 export function issueText(issue: Issue, nameOf: (ref: string | undefined) => string): string {
+  if (issue.code === 'operating_costs_missing') {
+    const names = (issue.ref ?? '').split(',').filter(Boolean).map((c) => t(`ops.cat.${c as OperatingCategory}`)).join(', ');
+    return t('menu.isu.operating_costs_missing').replace('{name}', names);
+  }
   return t(`menu.isu.${issue.code}`).replace('{name}', nameOf(issue.ref));
 }
 

@@ -1,13 +1,15 @@
 import {
+  appliancesCounted,
   computeMenuCost,
   finalMonthlyAmount,
+  missingCategories,
   sharedOperatingTotal,
   type BusinessInput,
   type MenuCostResult,
   type MenuInput,
   type OperatingCostEntry,
 } from '../domain';
-import type { CostingData, StoredMenu } from '../db';
+import { OPERATING_CATEGORIES, type CostingData, type StoredMenu } from '../db';
 import { toEntry } from './operatingView';
 
 export interface CostedMenu {
@@ -34,7 +36,20 @@ export function businessInputFrom(data: CostingData): BusinessInput {
     electricityTariffPerKwh: data.tariff?.ratePerKwh ?? null,
     sharedMonthlyOperatingCost: shared,
     expectedMonthlySales: data.profile.expectedMonthlySales,
+    missingOperatingCategories: missingCategories(entries, OPERATING_CATEGORIES),
   };
+}
+
+export type EquipmentSectionState = 'show' | 'hidden_simple' | 'hidden_missing';
+
+/**
+ * Whether the menu builder offers production appliances (D-71). Stored appliance lines are never deleted by hiding the
+ * section; they simply stop counting while Elektrik is in Mudah.
+ */
+export function equipmentSectionState(data: CostingData): EquipmentSectionState {
+  const entries = data.operatingRows.map(toEntry);
+  if (appliancesCounted(entries)) return 'show';
+  return entries.some((e) => e.category === 'elektrik') ? 'hidden_simple' : 'hidden_missing';
 }
 
 /** Turns stored quantities into engine input using live master data. No cost is read from any stored row. */
@@ -66,11 +81,14 @@ export function menuInputFrom(menu: StoredMenu, data: CostingData): MenuInput {
         semantics: l.usageSemantics,
       };
     }),
-    equipment: menu.equipment.map((l) => ({
-      ref: l.equipmentId,
-      watts: equipment.get(l.equipmentId)?.powerWatts ?? null,
-      durationMinutes: l.durationMinutes,
-    })),
+    // Appliance electricity is costed per recipe only when Elektrik is in Kira Lebih Tepat (D-71).
+    equipment: appliancesCounted(data.operatingRows.map(toEntry))
+      ? menu.equipment.map((l) => ({
+          ref: l.equipmentId,
+          watts: equipment.get(l.equipmentId)?.powerWatts ?? null,
+          durationMinutes: l.durationMinutes,
+        }))
+      : [],
   };
 }
 

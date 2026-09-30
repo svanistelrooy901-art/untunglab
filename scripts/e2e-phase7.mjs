@@ -1,6 +1,7 @@
 // Browser check for Phase 7 (Dashboard, Jejak Harga, Insights). Same M01 menu, then a price move.
 // Usage: PW_ROOT=$(npm root -g) APP_URL=http://localhost:4173/ node scripts/e2e-phase7.mjs <screenshot-dir>
 import { createRequire } from 'node:module';
+import { fillRemainingOperating } from './e2e-ops.mjs';
 const require = createRequire(process.env.PW_ROOT + '/');
 const { chromium } = require('playwright');
 const S = process.argv[2] ?? '.';
@@ -45,6 +46,7 @@ await page.getByText('✓ Disimpan').waitFor();
 await page.getByRole('button', { name: /^Gas/ }).click();
 await box('Jumlah sebulan (RM)').fill('600');
 await saveSheet();
+await fillRemainingOperating(page, url);
 
 await page.goto(url + '#/menu/baru');
 await box('Nama menu').fill('Nasi Lemak');

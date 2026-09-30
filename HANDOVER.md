@@ -12,7 +12,7 @@ PWA pengiraan kos dan untung untuk perniagaan makanan rumah. Bahasa Melayu dahul
 | `src/license` | Kod lesen, token luar talian, had percuma. |
 | `server` | Pelayan lesen (Cloudflare Worker + D1). |
 | `docs/qa` | Bukti QA setiap fasa, jejak ujian, senarai semak telefon. |
-| `DECISIONS.md` | Semua keputusan (D-01 hingga D-69) dan sebabnya. |
+| `DECISIONS.md` | Semua keputusan (D-01 hingga D-73) dan sebabnya. |
 
 ## Peraturan yang tidak boleh dilanggar
 1. Satu enjin kos. Skrin tidak mengira formula sendiri.
@@ -21,6 +21,7 @@ PWA pengiraan kos dan untung untuk perniagaan makanan rumah. Bahasa Melayu dahul
 4. Jejak Harga tidak boleh diubah atau dipadam (kecuali semasa pulihkan penuh).
 5. Nombor negatif dipaparkan dengan tanda −, ikon dan label, bukan warna sahaja.
 6. Had percuma hanya menyekat penambahan; data sedia ada tidak dipadam dan nombor tidak berubah mengikut pelan.
+7. Keenam-enam kategori Kos Operasi wajib diisi (RM0 dikira sebagai diisi). Elektrik peralatan hanya dikira bila Elektrik ialah Kira Lebih Tepat (D-70, D-71). Pengguna percuma boleh melihat Kira Lebih Tepat tetapi medannya dilumpuhkan (D-72).
 
 ## Perintah
 `npm run dev` · `npm test` · `npm run typecheck` · `npm run typecheck:server` · `npm run build`

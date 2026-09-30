@@ -87,12 +87,15 @@ await save();
 ok('invalid amount message', await page.getByText('Isi jumlah RM sebulan').isVisible());
 await page.keyboard.press('Escape');
 
+// D-70: the Kos Operasi step needs all six categories, so it is not done yet with only some filled.
+await page.goto(url + '#/kos-operasi');
+ok('progress names how many of 6 are filled', await page.getByTestId('ops-kemajuan').getByText(/\d \/ 6 kategori diisi/).isVisible());
 await page.goto(url);
-await page.getByText(/[3-9] \/ 7 siap/).waitFor();
+await page.getByText(/[2-9] \/ 7 siap/).waitFor();
 await page.screenshot({ path: `${S}/p5-06-mula-progress.png` });
 
 await page.reload();
-await page.getByText(/[3-9] \/ 7 siap/).waitFor();
+await page.getByText(/[2-9] \/ 7 siap/).waitFor();
 await page.waitForTimeout(1500);
 await ctx.setOffline(true);
 await page.goto(url + '#/kos-operasi');

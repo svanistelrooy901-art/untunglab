@@ -8,7 +8,12 @@ export function canAdd(plan: Plan, kind: LimitedKind, currentCount: number): boo
   return plan === 'pro' || currentCount < FREE_LIMITS[kind];
 }
 
-export const canUseDetailedOperating = (plan: Plan): boolean => plan === 'pro';
+/**
+ * Kira Lebih Tepat is visible to everyone so free users can see what they would get (D-72). Its fields are editable for
+ * pro, and for a row that is already detailed (e.g. restored from a backup) so existing numbers never get stuck.
+ */
+export const detailedOperatingAccess = (plan: Plan, currentMode: 'simple' | 'detailed' | null): 'edit' | 'preview' =>
+  plan === 'pro' || currentMode === 'detailed' ? 'edit' : 'preview';
 
 export interface LimitState {
   used: number;

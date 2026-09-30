@@ -21,8 +21,13 @@ Guna alamat sebenar selepas deploy (lihat `DEPLOY.md`). Tandakan setiap baris. J
 - [ ] Laporan → Eksport CSV berjaya.
 - [ ] Butang belakang telefon tidak menutup app secara mengejut pada skrin utama.
 
+## Kos Operasi (semua telefon)
+- [ ] Enam baris semuanya ada butang "+ Isi"; selepas diisi bertukar "Sunting".
+- [ ] "Tiada kos ini (RM0)" menyimpan RM0 dan menambah kemajuan n / 6.
+- [ ] Elektrik Mudah: bahagian Peralatan dalam menu hilang. Kira Lebih Tepat: muncul semula.
+
 ## Lesen (selepas pelayan siap, sandbox)
-- [ ] Versi percuma: tambah bahan ke-11 disekat dengan mesej BM jelas; tab "Kira Lebih Tepat" terkunci.
+- [ ] Versi percuma: tambah bahan ke-11 disekat dengan mesej BM jelas; tab "Kira Lebih Tepat" boleh dibuka tetapi medan tidak boleh diisi (pratonton) dan ada pautan "Buka versi penuh".
 - [ ] Beli (sandbox): kod tiba di emel dalam 1 minit (semak spam juga).
 - [ ] Masukkan kod: berjaya. Kapal terbang: masih versi penuh.
 - [ ] Aktifkan kod yang sama pada telefon kedua: berjaya. Telefon ketiga: mesej had 2 peranti.

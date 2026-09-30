@@ -1,4 +1,4 @@
-import type { OperatingCostEntry, OperatingMode } from './types';
+import type { OperatingCategory, OperatingCostEntry, OperatingMode } from './types';
 
 export type OperatingErrorCode =
   | 'invalid_amount'
@@ -147,4 +147,18 @@ export function allocateOperating(sharedMonthlyCost: number, expectedMonthlySale
 /** Allocated shared operating cost for a menu = selling price x rate (revenue-percentage method). */
 export function allocatedOperatingCost(sellingPrice: number, rate: number): number {
   return sellingPrice * rate;
+}
+
+/** Required categories that have no row at all. A row of any kind (even archived, even RM0) counts as filled. */
+export function missingCategories(entries: readonly OperatingCostEntry[], required: readonly OperatingCategory[]): OperatingCategory[] {
+  const have = new Set(entries.map((e) => e.category));
+  return required.filter((c) => !have.has(c));
+}
+
+/**
+ * Production appliances add their own electricity to a recipe only when Elektrik is in Kira Lebih Tepat. In Mudah the
+ * whole electricity bill is already a shared monthly cost, so charging appliances as well would count it twice (D-71, Doc 03 §9).
+ */
+export function appliancesCounted(entries: readonly OperatingCostEntry[]): boolean {
+  return entries.some((e) => e.category === 'elektrik' && e.active && e.mode === 'detailed');
 }

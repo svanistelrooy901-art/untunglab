@@ -1,6 +1,7 @@
 // Browser check for Phase 6 (Menu / Resipi). Runs the Doc 06 M01 case through the real screens.
 // Usage: PW_ROOT=$(npm root -g) APP_URL=http://localhost:4173/ node scripts/e2e-phase6.mjs <screenshot-dir>
 import { createRequire } from 'node:module';
+import { fillRemainingOperating } from './e2e-ops.mjs';
 import { activatePro } from './e2e-license.mjs';
 const require = createRequire(process.env.PW_ROOT + '/');
 const { chromium } = require('playwright');
@@ -69,6 +70,7 @@ await page.getByText('✓ Disimpan').waitFor();
 await page.getByRole('button', { name: /^Gas/ }).click();
 await box('Jumlah sebulan (RM)').fill('600');
 await saveSheet();
+await fillRemainingOperating(page, url);
 
 // --- M01 ---
 await page.goto(url + '#/menu');
@@ -109,7 +111,10 @@ await page.getByRole('button', { name: 'Simpan kadar' }).click();
 await page.getByText('RM1.00 / sejam').waitFor();
 ok('oven RM1.00 an hour at RM0.50', true);
 await page.screenshot({ path: `${S}/p6-05-elektrik-alat.png` });
-await page.keyboard.press('Escape');
+// Appliances are costed per recipe only when Elektrik is saved in Kira Lebih Tepat (D-71).
+await box('Elektrik am sebulan (RM)').fill('0');
+await saveSheet();
+await page.getByText('Lebih Tepat').first().waitFor();
 
 // --- equipment in a menu: C05 RM0.75 per batch ---
 await page.goto(url + '#/menu');
