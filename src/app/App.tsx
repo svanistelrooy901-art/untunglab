@@ -7,6 +7,7 @@ import { BahanPage } from './pages/Bahan';
 import { KosOperasiPage } from './pages/KosOperasi';
 import { MenuEditorPage, MenuListPage } from './pages/Menu';
 import { DashboardPage } from './pages/Dashboard';
+import { SandaranPage } from './pages/Sandaran';
 import { KesanHargaPage } from './pages/KesanHarga';
 import { JejakHargaPage } from './pages/JejakHarga';
 import { Lagi, Placeholder } from './pages/Pages';
@@ -19,6 +20,7 @@ const PAGES: Record<string, ComponentType> = {
   '/': DashboardPage,
   '/jejak-harga': JejakHargaPage,
   '/kesan-harga': KesanHargaPage,
+  '/sandaran': SandaranPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,
   '/bahan': BahanPage,

@@ -46,6 +46,12 @@ const PATHS = {
       <path d="M14 3v5h5M9 13h6M9 17h6" />
     </>
   ),
+  sandaran: (
+    <>
+      <path d="M12 3v12M7 10l5 5 5-5" />
+      <path d="M4 17v3h16v-3" />
+    </>
+  ),
   lagi: (
     <>
       <circle cx="5" cy="12" r="1.5" fill="currentColor" />

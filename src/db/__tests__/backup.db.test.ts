@@ -29,7 +29,7 @@ async function world() {
 }
 
 /** Rebuild a valid checksum after a test edits the data, so only the intended defect is present. */
-async function rechecksum(text: string, edit: (data: Record<string, any[]>) => void): Promise<string> {
+async function rechecksum(text: string, edit: (data: any) => void): Promise<string> {
   const file = JSON.parse(text);
   edit(file.data);
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(file.data)));
@@ -43,7 +43,7 @@ describe('export', () => {
   it('wraps every table in a versioned envelope with a checksum', async () => {
     const w = await world();
     const b = await createBackup(w.ctx);
-    expect(b).toMatchObject({ app: 'untunglab', format: BACKUP_FORMAT, exportedAt: '2026-09-01T08:00:00.000Z'.length ? expect.any(String) : '' });
+    expect(b).toMatchObject({ app: 'untunglab', format: BACKUP_FORMAT, exportedAt: expect.any(String) });
     expect(b.checksum).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(b.data.ingredients).toHaveLength(1);
     expect(b.data.priceHistory).toHaveLength(2);
@@ -156,7 +156,7 @@ describe('atomic restore', () => {
     const beforeIng = await target.db.ingredients.toArray();
     const beforeHist = await target.db.priceHistory.toArray();
     const original = target.db.menus.bulkAdd.bind(target.db.menus);
-    target.db.menus.bulkAdd = (() => Promise.reject(new Error('disk full'))) as typeof target.db.menus.bulkAdd;
+    target.db.menus.bulkAdd = (() => Promise.reject(new Error('disk full'))) as unknown as typeof target.db.menus.bulkAdd;
     await expect(restoreBackup(target.ctx, text)).rejects.toThrow();
     target.db.menus.bulkAdd = original;
     expect(await target.db.ingredients.toArray()).toEqual(beforeIng);

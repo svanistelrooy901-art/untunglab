@@ -43,6 +43,9 @@ export class UntungLabDB extends Dexie {
   scenarios!: EntityTable<Scenario, 'id'>;
   insights!: EntityTable<Insight, 'id'>;
 
+  /** True only while a full backup restore replaces every table. Price history is immutable otherwise. */
+  restoring = false;
+
   constructor(name = 'untunglab') {
     super(name);
 
@@ -72,6 +75,7 @@ export class UntungLabDB extends Dexie {
       throw new ImmutableRecordError('priceHistory');
     });
     this.priceHistory.hook('deleting', () => {
+      if (this.restoring) return;
       throw new ImmutableRecordError('priceHistory');
     });
   }

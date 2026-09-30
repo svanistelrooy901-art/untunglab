@@ -21,6 +21,7 @@ On-device storage: Dexie (IndexedDB).
 | `npm run build` | Typecheck, then production build with service worker |
 | `npm run preview` | Serve the production build locally |
 | `npm run icons` | Regenerate placeholder PWA icons |
+| `node scripts/e2e-phase9.mjs` | Browser check for Sandaran (export, refuse bad files, restore on a new device offline) |
 | `node scripts/e2e-phase8.mjs` | Browser check for Kesan Harga (what-if, reset, apply, history review) |
 | `node scripts/e2e-phase7.mjs` | Browser check for Dashboard, Jejak Harga and price insights |
 | `node scripts/e2e-phase6.mjs` | Browser check for Menu / Resipi (Doc 06 M01 through the real screens) |
@@ -42,4 +43,4 @@ Every screen calls `src/domain`.
 
 ## Status
 
-Phases 1 to 8 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi, Dashboard + Jejak Harga + Insights, Kesan Harga). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.
+Phases 1 to 9 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi, Dashboard + Jejak Harga + Insights, Kesan Harga, Sandaran). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.

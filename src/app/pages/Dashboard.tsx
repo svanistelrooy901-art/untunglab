@@ -5,6 +5,8 @@ import { t } from '../../i18n/ms';
 import { StatusBadge, issueText } from '../components/MenuResultView';
 import { EmptyState, Loading, PageHeader, btnPrimary } from '../components/ui';
 import { useData, useLive } from '../data';
+import { backupReminder } from '../backupReminder';
+import { lastBackupAt } from '../backupFile';
 import { buildDashboard, type InsightItem } from '../insights';
 import { signedPct, unitRM } from '../signed';
 import { SetupChecklist } from './Mula';
@@ -49,9 +51,21 @@ export function DashboardPage() {
   const d = buildDashboard(data.costing, data.history, data.dismissed);
   const nameOf = (ref: string | undefined) => data.costing.ingredients.find((i) => i.id === ref)?.name ?? data.costing.packaging.find((p) => p.id === ref)?.name ?? data.costing.equipment.find((e) => e.id === ref)?.name ?? t('menu.hilang');
 
+  const reminder = backupReminder({ hasData: data.costing.ingredients.length > 0 || d.menuCount > 0, lastBackupAt: lastBackupAt(), now: ctx.now() });
+  const reminderCard = reminder.kind !== 'none' && (
+    <p className="mt-3 rounded-2xl border border-watch-line bg-watch-soft px-4 py-3 text-sm" data-testid="peringatan-sandaran">
+      <span aria-hidden="true">! </span>
+      {reminder.kind === 'never' ? t('sandaran.peringatanNever') : t('sandaran.peringatanStale').replace('{n}', String(reminder.days))}{' '}
+      <Link to="/sandaran" className="font-semibold text-primary underline">
+        {t('sandaran.peringatanCta')}
+      </Link>
+    </p>
+  );
+
   if (d.menuCount === 0) {
     return (
       <section>
+        {reminderCard}
         <SetupChecklist />
         <div className="mt-6">
           <EmptyState
@@ -72,6 +86,7 @@ export function DashboardPage() {
     <section>
       <PageHeader title={t('dash.title')} />
       <p className="mt-1 text-sm text-muted">{t('dash.intro')}</p>
+      {reminderCard}
 
       <h2 className="mt-5 text-sm font-bold">{t('dash.perhatianTajuk')}</h2>
       {d.insights.length === 0 ? (

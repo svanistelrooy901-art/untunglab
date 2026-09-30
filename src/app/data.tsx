@@ -11,6 +11,8 @@ function start(): Promise<Context> {
     await ensureBusiness(ctx);
     await seedEquipmentPresets(ctx);
     await backfillPriceHistory(ctx);
+    // Ask the browser not to evict our data. A no is fine; the Sandaran page explains what it means.
+    void navigator.storage?.persist?.().catch(() => undefined);
     return ctx;
   })();
   return started;
