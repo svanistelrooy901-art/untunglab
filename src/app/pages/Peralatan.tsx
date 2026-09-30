@@ -116,14 +116,17 @@ function DetailForm({ preset, onDone, onBack }: { preset: EquipmentPreset | null
   const ctx = useData();
   const [name, setName] = useState(preset?.canonicalName ?? '');
   const [watts, setWatts] = useState(preset ? String(preset.defaultWatts) : '');
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const [submitted, setSubmitted] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  const check = validateEquipmentForm({ name, watts });
+  const errors: Record<string, string | undefined> = submitted && !check.ok ? check.errors : {};
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const r = validateEquipmentForm({ name, watts });
-    setErrors(r.ok ? {} : r.errors);
+    setSubmitted(true);
+    const r = check;
     if (!r.ok) return;
     setBusy(true);
     setSaveError(false);
@@ -165,14 +168,17 @@ function EditForm({ item, onDone }: { item: Equipment; onDone: () => void }) {
   const ctx = useData();
   const [name, setName] = useState(item.name);
   const [watts, setWatts] = useState(String(item.powerWatts));
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const [submitted, setSubmitted] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  const check = validateEquipmentForm({ name, watts });
+  const errors: Record<string, string | undefined> = submitted && !check.ok ? check.errors : {};
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const r = validateEquipmentForm({ name, watts });
-    setErrors(r.ok ? {} : r.errors);
+    setSubmitted(true);
+    const r = check;
     if (!r.ok) return;
     setBusy(true);
     setSaveError(false);

@@ -67,17 +67,19 @@ function PackagingForm({ item, onDone }: { item: Packaging | null; onDone: () =>
   const [price, setPrice] = useState(item ? String(item.purchasePrice) : '');
   const [quantity, setQuantity] = useState(item ? String(item.purchaseQuantity) : '');
   const [unit, setUnit] = useState(item?.purchaseUnit ?? 'pcs');
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const [submitted, setSubmitted] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const v = validatePackagingForm({ name: name || 'x', price, quantity, unit });
-  const preview = v.ok ? unitCostLabel(v.value.purchasePrice, v.value.purchaseQuantity, v.value.purchaseUnit) : null;
+  const check = validatePackagingForm({ name, price, quantity, unit });
+  const errors: Record<string, string | undefined> = submitted && !check.ok ? check.errors : {};
+  const previewCheck = validatePackagingForm({ name: 'x', price, quantity, unit });
+  const preview = previewCheck.ok ? unitCostLabel(previewCheck.value.purchasePrice, previewCheck.value.purchaseQuantity, previewCheck.value.purchaseUnit) : null;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const r = validatePackagingForm({ name, price, quantity, unit });
-    setErrors(r.ok ? {} : r.errors);
+    setSubmitted(true);
+    const r = check;
     if (!r.ok) return;
     setBusy(true);
     setSaveError(false);

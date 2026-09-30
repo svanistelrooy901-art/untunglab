@@ -82,24 +82,27 @@ function IngredientForm({ ingredient, onDone }: { ingredient: Ingredient | null;
   const [date, setDate] = useState(localDate(new Date()));
   const [supplier, setSupplier] = useState('');
   const [notes, setNotes] = useState('');
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const [submitted, setSubmitted] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const history = useLive((c) => (ingredient ? listHistory(c, ingredient.id) : Promise.resolve([])), [ingredient?.id]);
 
   const mappings = parseMappings(rows);
-  const preview = (() => {
-    const v = validateIngredientForm({ name: name || 'x', price, quantity, unit });
-    return v.ok ? unitCostLabel(v.value.purchasePrice, v.value.packageQuantity, v.value.packageUnit, mappings.ok ? mappings.value : []) : null;
-  })();
+  const check = validateIngredientForm({ name, price, quantity, unit });
+  // Errors appear after the first save attempt, then follow the fields live so they clear as soon as they are fixed.
+  const errors: Record<string, string | undefined> = submitted
+    ? { ...(check.ok ? {} : check.errors), ...(mappings.ok ? {} : { mapping: mappings.errors.mapping }) }
+    : {};
+  const preview = validateIngredientForm({ name: 'x', price, quantity, unit });
+  const previewText = preview.ok
+    ? unitCostLabel(preview.value.purchasePrice, preview.value.packageQuantity, preview.value.packageUnit, mappings.ok ? mappings.value : [])
+    : null;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const v = validateIngredientForm({ name, price, quantity, unit });
-    const errs: Record<string, string | undefined> = v.ok ? {} : { ...v.errors };
-    if (!mappings.ok) errs.mapping = mappings.errors.mapping;
-    setErrors(errs);
+    setSubmitted(true);
+    const v = check;
     if (!v.ok || !mappings.ok) return;
     setBusy(true);
     setSaveError(false);
@@ -142,7 +145,7 @@ function IngredientForm({ ingredient, onDone }: { ingredient: Ingredient | null;
           {t('bahan.kosSeunit')}
           <InfoTip text={t('tip.kosSeunit')} label={t('bahan.kosSeunit')} />
         </span>
-        <span className="font-semibold text-primary">{preview ?? '—'}</span>
+        <span className="font-semibold text-primary">{previewText ?? '—'}</span>
       </div>
 
       <details className="mt-3 rounded-xl border border-border px-3" open={rows.length > 0}>

@@ -21,6 +21,7 @@ On-device storage: Dexie (IndexedDB).
 | `npm run build` | Typecheck, then production build with service worker |
 | `npm run preview` | Serve the production build locally |
 | `npm run icons` | Regenerate placeholder PWA icons |
+| `node scripts/e2e-smoke.mjs` | Browser smoke test (needs Playwright, a running `npm run preview`, `PW_ROOT` and `APP_URL`) |
 | `node scripts/mutation-check.mjs` | Break the engine on purpose and confirm the tests catch it |
 
 ## Layout
@@ -37,4 +38,4 @@ Every screen calls `src/domain`.
 
 ## Status
 
-Phases 1 to 3 are done (foundation, costing engine, storage + Jejak Harga). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.
+Phases 1 to 4 are done (foundation, costing engine, storage + Jejak Harga, master data screens). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.

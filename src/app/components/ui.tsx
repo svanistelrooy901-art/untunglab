@@ -130,5 +130,5 @@ export function Badge({ children, tone = 'neutral' }: { children: ReactNode; ton
     watch: 'border-watch-line bg-watch-soft text-watch',
     healthy: 'border-healthy-line bg-healthy-soft text-healthy',
   } as const;
-  return <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${tones[tone]}`}>{children}</span>;
+  return <span className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-semibold ${tones[tone]}`}>{children}</span>;
 }

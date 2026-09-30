@@ -42,6 +42,13 @@ Authority order when documents conflict: 03, 02, 04, 05, 06, 01, 07 (Doc 00 §2)
 | D-20 | Any non-blank unit is accepted as a package unit; unknown units are treated as counted units (for example `biji`, `kotak`). Blank units, non-positive quantities, negative prices and blank names are rejected before anything is written. | Custom counted units are normal in F&B. |
 | D-21 | The database blocks updates and deletes on `priceHistory` (Dexie hooks) and enforces unique `[ingredientId+seq]`. | Doc 05 §5 immutability. |
 | D-22 | Ingredient + history writes share one transaction; a failed history write rolls back the ingredient change. | No ingredient without history, no history without its ingredient. |
+| D-23 | Numbers typed in forms accept a decimal point or comma ("15,5"), and a lone comma followed by exactly three digits is a thousands separator ("1,000"). Anything else is rejected with a message naming the field. | Malaysian users type both. |
+| D-24 | Validation messages show after the first Simpan tap, then update live and clear as soon as the field is fixed. | Avoids nagging on an empty form while still guiding. |
+| D-25 | Archive instead of delete for Bahan, Pembungkusan and Peralatan (with a "Tunjuk yang diarkib" toggle). No hard delete in V1. | Recipes (Phase 6) will reference these; deleting would orphan them. Archive never touches Jejak Harga. |
+| D-26 | Equipment presets are seeded on first open and never overwritten. Choosing a preset copies its wattage as an estimate ("Anggaran UntungLab"). Changing the wattage, or tapping "Guna nilai ini", confirms it. Renaming alone does not. Custom equipment counts as confirmed. | Doc 02 §5, Doc 04 §5. |
+| D-27 | Packaging has no price history in V1. | Doc 02 §4 and Doc 05 only require history for Bahan. |
+| D-28 | Duplicate names are allowed (two ovens, two "Gula" brands). | A hard rule would block real cases; the user can tell them apart by size or archive one. |
+| D-29 | Unit dropdown suggestions (kg, g, l, ml, biji, pek, kotak, botol, tin, ikat, keping) are hints only. The user can type any unit. | Matches D-20. |
 
 ## Spec notes for your attention
 
