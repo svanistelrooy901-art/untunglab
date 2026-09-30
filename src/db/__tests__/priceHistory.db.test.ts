@@ -63,6 +63,33 @@ describe('Jejak Harga records (Doc 06 §4)', () => {
     expect(h[1]).toMatchObject({ purchasePrice: 70, packageQuantity: 3 });
   });
 
+  it('a pack-mapping-only change appends one record that keeps the mapping snapshot (D-18)', async () => {
+    const { ctx } = freshContext();
+    const ing = await createIngredient(ctx, {
+      name: 'Telur',
+      purchasePrice: 6,
+      packageQuantity: 1,
+      packageUnit: 'pek',
+      packMappings: [{ pack: 'pek', unit: 'biji', unitsPerPack: 12 }],
+    });
+    await updateIngredient(ctx, ing.id, { packMappings: [{ pack: 'pek', unit: 'biji', unitsPerPack: 10 }] });
+    const h = await listHistory(ctx, ing.id);
+    expect(h).toHaveLength(2);
+    expect(h[0]?.packMappings).toEqual([{ pack: 'pek', unit: 'biji', unitsPerPack: 12 }]);
+    expect(h[1]?.packMappings).toEqual([{ pack: 'pek', unit: 'biji', unitsPerPack: 10 }]);
+    // Base unit is the pek, so cost per pek does not move; the mapping change is still on record.
+    expect(h[0]?.normalizedUnitCost).toBeCloseTo(6, 12);
+    expect(h[1]?.normalizedUnitCost).toBeCloseTo(6, 12);
+  });
+
+  it('re-saving the same mappings appends nothing', async () => {
+    const { ctx } = freshContext();
+    const m = [{ pack: 'pek', unit: 'biji', unitsPerPack: 12 }];
+    const ing = await createIngredient(ctx, { name: 'Telur', purchasePrice: 6, packageQuantity: 1, packageUnit: 'pek', packMappings: m });
+    await updateIngredient(ctx, ing.id, { packMappings: [...m] });
+    expect(await listHistory(ctx, ing.id)).toHaveLength(1);
+  });
+
   it('a name-only change appends nothing', async () => {
     const { ctx, db } = freshContext();
     const ing = await createIngredient(ctx, chicken);

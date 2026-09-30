@@ -153,6 +153,7 @@ function historyRecord(
     purchasePrice: p.purchasePrice,
     packageQuantity: p.packageQuantity,
     packageUnit: p.packageUnit,
+    packMappings: mappings,
     normalizedUnitCost: n.perBaseUnit,
     baseUnit: n.baseUnit,
     supplier: extra.supplier ?? null,

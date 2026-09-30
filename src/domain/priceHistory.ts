@@ -4,15 +4,24 @@ import type { PackMapping } from './types';
 
 /**
  * Doc 03 §11 / Doc 05 §5: a price-history record is written only when purchase data changes:
- * price, package quantity, or package unit (compared as the normalised base unit's package definition).
+ * price, package quantity, package unit, or the pack mappings (decision D-18, confirmed by the product owner).
  * A name-only edit or a re-save with the same values writes nothing.
  */
 export function purchaseDataChanged(previous: PurchaseSnapshot, next: PurchaseSnapshot): boolean {
   return (
     previous.purchasePrice !== next.purchasePrice ||
     previous.packageQuantity !== next.packageQuantity ||
-    previous.packageUnit.trim().toLowerCase() !== next.packageUnit.trim().toLowerCase()
+    previous.packageUnit.trim().toLowerCase() !== next.packageUnit.trim().toLowerCase() ||
+    mappingsKey(previous.packMappings) !== mappingsKey(next.packMappings)
   );
+}
+
+/** Order-, case- and whitespace-insensitive identity of a mapping list. */
+function mappingsKey(mappings: PackMapping[] = []): string {
+  return mappings
+    .map((m) => `${m.pack.trim().toLowerCase()}|${m.unit.trim().toLowerCase()}|${m.unitsPerPack}`)
+    .sort()
+    .join(';');
 }
 
 export interface HistoryEntry extends PurchaseSnapshot {
@@ -30,7 +39,7 @@ export function sortHistory<T extends { purchaseDate: string; seq: number }>(rec
 
 export type HistoryChange<T> =
   | { kind: 'baseline'; entry: T }
-  | { kind: 'change'; entry: T; previous: T; comparison: PurchaseComparison }
+  | { kind: 'change'; entry: T; previous: T; comparison: PurchaseComparison; mappingsChanged: boolean }
   | { kind: 'incompatible_units'; entry: T; previous: T };
 
 /**
@@ -43,7 +52,13 @@ export function historyChanges<T extends HistoryEntry>(records: readonly T[], ma
     const previous = ordered[i - 1];
     if (!previous) return { kind: 'baseline', entry };
     try {
-      return { kind: 'change', entry, previous, comparison: comparePurchases(previous, entry, mappings) };
+      return {
+        kind: 'change',
+        entry,
+        previous,
+        comparison: comparePurchases(previous, entry, mappings),
+        mappingsChanged: mappingsKey(previous.packMappings) !== mappingsKey(entry.packMappings),
+      };
     } catch (e) {
       if (e instanceof UnitError) return { kind: 'incompatible_units', entry, previous };
       throw e;

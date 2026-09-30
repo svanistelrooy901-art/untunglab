@@ -104,6 +104,8 @@ export interface PriceHistoryRecord {
   purchasePrice: number;
   packageQuantity: number;
   packageUnit: string;
+  /** Pack mappings in force at the time, so the normalised cost can always be re-derived. */
+  packMappings: PackMapping[];
   /** Snapshot of the normalised cost at the time, per base unit. */
   normalizedUnitCost: number;
   baseUnit: string;

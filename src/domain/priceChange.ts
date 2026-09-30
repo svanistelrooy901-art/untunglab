@@ -5,6 +5,8 @@ export interface PurchaseSnapshot {
   purchasePrice: number;
   packageQuantity: number;
   packageUnit: string;
+  /** Pack mappings in force when this purchase was recorded. Falls back to the mappings passed in. */
+  packMappings?: PackMapping[];
 }
 
 export interface PurchaseComparison {
@@ -28,8 +30,8 @@ export function comparePurchases(
   current: PurchaseSnapshot,
   mappings: PackMapping[] = [],
 ): PurchaseComparison {
-  const p = normalisedUnitCost(previous.purchasePrice, previous.packageQuantity, previous.packageUnit, mappings);
-  const c = normalisedUnitCost(current.purchasePrice, current.packageQuantity, current.packageUnit, mappings);
+  const p = normalisedUnitCost(previous.purchasePrice, previous.packageQuantity, previous.packageUnit, previous.packMappings ?? mappings);
+  const c = normalisedUnitCost(current.purchasePrice, current.packageQuantity, current.packageUnit, current.packMappings ?? mappings);
   if (p.baseUnit !== c.baseUnit) {
     throw new UnitError('incompatible', `Cannot compare ${previous.packageUnit} with ${current.packageUnit}`);
   }
