@@ -1,6 +1,7 @@
 // Browser check for Phase 6 (Menu / Resipi). Runs the Doc 06 M01 case through the real screens.
 // Usage: PW_ROOT=$(npm root -g) APP_URL=http://localhost:4173/ node scripts/e2e-phase6.mjs <screenshot-dir>
 import { createRequire } from 'node:module';
+import { activatePro } from './e2e-license.mjs';
 const require = createRequire(process.env.PW_ROOT + '/');
 const { chromium } = require('playwright');
 const S = process.argv[2] ?? '.';
@@ -16,6 +17,7 @@ const box = (name) => page.getByRole('textbox', { name, exact: true });
 const saveSheet = () => page.getByRole('button', { name: 'Simpan' }).last().click();
 
 // --- master data ---
+await activatePro(page, url);
 await page.goto(url + '#/bahan');
 for (const [n, price, qty] of [['Ayam', '15', '1'], ['Bahan lain', '50.4', '1']]) {
   await page.getByRole('button', { name: 'Tambah bahan' }).first().click();

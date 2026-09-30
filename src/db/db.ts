@@ -1,4 +1,4 @@
-import Dexie, { type EntityTable } from 'dexie';
+import Dexie, { type EntityTable, type Table } from 'dexie';
 import type {
   Business,
   BusinessCostProfile,
@@ -6,6 +6,7 @@ import type {
   EquipmentPreset,
   Ingredient,
   Insight,
+  LicenseRow,
   Menu,
   OperatingCostRow,
   Packaging,
@@ -42,6 +43,7 @@ export class UntungLabDB extends Dexie {
   menus!: EntityTable<Menu, 'id'>;
   scenarios!: EntityTable<Scenario, 'id'>;
   insights!: EntityTable<Insight, 'id'>;
+  license!: Table<LicenseRow, string>;
 
   /** True only while a full backup restore replaces every table. Price history is immutable otherwise. */
   restoring = false;
@@ -69,6 +71,9 @@ export class UntungLabDB extends Dexie {
       scenarios: 'id, businessId',
       insights: 'id, businessId, type, createdAt, readAt',
     });
+
+    // Schema v2: device identity and licence activation (Phase 10). Existing data is untouched.
+    this.version(2).stores({ license: 'id' });
 
     // Price history is immutable event data (Doc 05 §5): no edits, no deletes.
     this.priceHistory.hook('updating', () => {

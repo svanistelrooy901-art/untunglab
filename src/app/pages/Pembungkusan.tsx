@@ -2,23 +2,28 @@ import { useState } from 'react';
 import { createPackaging, listPackaging, setPackagingActive, updatePackaging, type Packaging } from '../../db';
 import { t } from '../../i18n/ms';
 import { Badge, EmptyState, Field, InfoTip, Loading, PageHeader, Sheet, btnPrimary, btnQuiet, btnSecondary } from '../components/ui';
+import { LimitNote } from '../components/LimitNote';
 import { useData, useLive } from '../data';
+import { useLimit } from '../license';
 import { unitCostLabel, validatePackagingForm } from '../forms';
 
 export function PembungkusanPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<Packaging | 'new' | null>(null);
   const items = useLive((ctx) => listPackaging(ctx, { includeInactive: showArchived }), [showArchived]);
+  const activeCount = useLive((ctx) => listPackaging(ctx).then((l) => l.length));
+  const limit = useLimit('packaging', activeCount ?? 0);
   return (
     <section>
       <PageHeader
         title={t('pack.title')}
         action={
-          <button type="button" className={btnPrimary} onClick={() => setEditing('new')}>
+          <button type="button" className={btnPrimary} disabled={!limit.canAdd} onClick={() => setEditing('new')}>
             {t('pack.tambah')}
           </button>
         }
       />
+      <LimitNote state={limit} />
       {!items ? (
         <Loading />
       ) : items.length === 0 && !showArchived ? (
@@ -26,7 +31,7 @@ export function PembungkusanPage() {
           title={t('pack.kosongTajuk')}
           body={t('pack.kosongIsi')}
           action={
-            <button type="button" className={btnPrimary} onClick={() => setEditing('new')}>
+            <button type="button" className={btnPrimary} disabled={!limit.canAdd} onClick={() => setEditing('new')}>
               {t('pack.tambah')}
             </button>
           }
@@ -63,6 +68,8 @@ export function PembungkusanPage() {
 
 function PackagingForm({ item, onDone }: { item: Packaging | null; onDone: () => void }) {
   const ctx = useData();
+  const activeCount = useLive((c) => listPackaging(c).then((l) => l.length));
+  const limit = useLimit('packaging', activeCount ?? 0);
   const [name, setName] = useState(item?.name ?? '');
   const [price, setPrice] = useState(item ? String(item.purchasePrice) : '');
   const [quantity, setQuantity] = useState(item ? String(item.purchaseQuantity) : '');
@@ -120,6 +127,7 @@ function PackagingForm({ item, onDone }: { item: Packaging | null; onDone: () =>
           <button
             type="button"
             className={btnQuiet}
+            disabled={!item.active && (activeCount === undefined || !limit.canAdd)}
             onClick={async () => {
               await setPackagingActive(ctx, item.id, !item.active);
               onDone();

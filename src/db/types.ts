@@ -197,3 +197,8 @@ export interface Insight {
   createdAt: string;
   readAt: string | null;
 }
+
+/** Device identity and licence activation. Kept out of backups on purpose. */
+export type LicenseRow =
+  | { id: 'device'; deviceId: string; createdAt: string }
+  | { id: 'activation'; token: string; codeHint: string; activatedAt: string };

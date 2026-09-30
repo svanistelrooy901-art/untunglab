@@ -1,0 +1,25 @@
+# Cloudflare Worker for the UntungLab licence server. See ../README.md for the steps.
+name = "untunglab-license"
+main = "index.ts"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "untunglab-license"
+database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
+
+[vars]
+PRICE_SEN = "5900"                          # RM59.00 in sen. Change here to change the price; no app update needed.
+TOYYIB_BASE_URL = "https://dev.toyyibpay.com"   # sandbox first; production is https://toyyibpay.com
+TOYYIB_CATEGORY = "REPLACE_WITH_CATEGORY_CODE"
+PUBLIC_BASE_URL = "https://REPLACE.workers.dev" # this Worker's public address (or your own domain)
+APP_ORIGIN = "https://REPLACE-app-origin"       # where the UntungLab app is hosted
+APP_URL = "https://REPLACE-app-origin"
+BREVO_SENDER_EMAIL = "REPLACE@your-domain.com"  # must be a sender verified in Brevo
+BREVO_SENDER_NAME = "UntungLab"
+
+# Secrets (never in this file):
+#   wrangler secret put TOYYIB_SECRET
+#   wrangler secret put LICENSE_PRIVATE_KEY     (from scripts/gen-keys.mjs)
+#   wrangler secret put ADMIN_TOKEN
+#   wrangler secret put BREVO_API_KEY

@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "types": ["node"], "noEmit": true },
+  "include": [".", "../core", "../../src/license/code.ts", "../../src/license/token.ts"]
+}

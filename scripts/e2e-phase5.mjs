@@ -1,6 +1,7 @@
 // Browser check for Phase 5 (Kos Operasi, onboarding checklist, tooltips).
 // Usage: PW_ROOT=$(npm root -g) APP_URL=http://localhost:4173/ node scripts/e2e-phase5.mjs <screenshot-dir>
 import { createRequire } from 'node:module';
+import { activatePro } from './e2e-license.mjs';
 const require = createRequire(process.env.PW_ROOT + '/');
 const { chromium } = require('playwright');
 const S = process.argv[2] ?? '.';
@@ -14,6 +15,7 @@ page.on('pageerror', (e) => errors.push(String(e)));
 const ok = (name, cond) => { console.log(`${cond ? 'PASS' : 'FAIL'}  ${name}`); if (!cond) process.exitCode = 1; };
 const save = () => page.getByRole('button', { name: 'Simpan' }).last().click();
 
+await activatePro(page, url);
 await page.goto(url);
 await page.getByText('0 / 7 siap').waitFor();
 await page.screenshot({ path: `${S}/p5-01-mula.png` });

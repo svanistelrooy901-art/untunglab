@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { canUseDetailedOperating } from '../../license/entitlement';
+import { useLicense } from '../license';
 import { energyKwh, formatPct, formatRM, type OperatingCategory } from '../../domain';
 import {
   currentTariff,
@@ -169,6 +172,9 @@ function SettingsForm({ ctx, initial }: { ctx: ReturnType<typeof useData>; initi
 function CategoryForm({ category, row, onDone }: { category: OperatingCategory; row: OperatingCostRow | null; onDone: () => void }) {
   const ctx = useData();
   const canAdvance = ADVANCED.includes(category);
+  const { plan, ready } = useLicense();
+  // Free plan: the detailed tab is locked unless this row is already detailed (existing numbers must keep working, D-59).
+  const detailedLocked = ready && !canUseDetailedOperating(plan) && row?.mode !== 'detailed';
   const [tab, setTab] = useState<'simple' | 'detailed'>(row?.mode === 'detailed' && canAdvance ? 'detailed' : 'simple');
   const [simple, setSimple] = useState(row ? String(row.simpleAmount) : '');
   const [submitted, setSubmitted] = useState(false);
@@ -234,12 +240,19 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
               role="tab"
               aria-selected={tab === m}
               onClick={() => setTab(m)}
-              className={`min-h-11 rounded-lg text-sm font-semibold ${tab === m ? 'bg-surface text-primary shadow-sm' : 'text-muted'}`}
+              disabled={m === 'detailed' && detailedLocked}
+              className={`min-h-11 rounded-lg text-sm font-semibold disabled:opacity-60 ${tab === m ? 'bg-surface text-primary shadow-sm' : 'text-muted'}`}
             >
-              {m === 'simple' ? t('ops.modMudah') : t('ops.kiraTepat')}
+              {m === 'simple' ? t('ops.modMudah') : detailedLocked ? `🔒 ${t('ops.kiraTepat')}` : t('ops.kiraTepat')}
             </button>
           ))}
         </div>
+      )}
+
+      {canAdvance && detailedLocked && (
+        <p className="mt-2 text-xs text-muted" data-testid="tab-locked">
+          {t('lesen.tabKunciIsi')} <Link to="/lesen" className="font-semibold text-primary underline">{t('lesen.naiktaraf')}</Link>
+        </p>
       )}
 
       {tab === 'simple' && (

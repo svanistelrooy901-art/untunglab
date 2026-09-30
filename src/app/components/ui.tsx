@@ -5,7 +5,7 @@ export const btnPrimary =
   'inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50';
 export const btnSecondary =
   'inline-flex min-h-11 items-center justify-center rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-ink hover:bg-canvas disabled:opacity-50';
-export const btnQuiet = 'inline-flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-medium text-primary hover:bg-primary-soft';
+export const btnQuiet = 'inline-flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-medium text-primary hover:bg-primary-soft disabled:opacity-50';
 
 export function PageHeader({ title, action }: { title: string; action?: ReactNode }) {
   return (

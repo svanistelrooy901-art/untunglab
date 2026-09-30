@@ -3,24 +3,29 @@ import { formatPct, historyChanges } from '../../domain';
 import { createIngredient, listHistory, listIngredients, localDate, setIngredientActive, updateIngredient, type Ingredient } from '../../db';
 import { t } from '../../i18n/ms';
 import { Badge, EmptyState, Field, InfoTip, Loading, PageHeader, Sheet, btnPrimary, btnQuiet, btnSecondary } from '../components/ui';
+import { LimitNote } from '../components/LimitNote';
 import { useData, useLive } from '../data';
+import { useLimit } from '../license';
 import { parseMappings, unitCostLabel, validateIngredientForm, type MappingRow } from '../forms';
 
 export function BahanPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<Ingredient | 'new' | null>(null);
   const items = useLive((ctx) => listIngredients(ctx, { includeInactive: showArchived }), [showArchived]);
+  const activeCount = useLive((ctx) => listIngredients(ctx).then((l) => l.length));
+  const limit = useLimit('ingredients', activeCount ?? 0);
 
   return (
     <section>
       <PageHeader
         title={t('bahan.title')}
         action={
-          <button type="button" className={btnPrimary} onClick={() => setEditing('new')}>
+          <button type="button" className={btnPrimary} disabled={!limit.canAdd} onClick={() => setEditing('new')}>
             {t('bahan.tambah')}
           </button>
         }
       />
+      <LimitNote state={limit} />
       {!items ? (
         <Loading />
       ) : items.length === 0 && !showArchived ? (
@@ -28,7 +33,7 @@ export function BahanPage() {
           title={t('bahan.kosongTajuk')}
           body={t('bahan.kosongIsi')}
           action={
-            <button type="button" className={btnPrimary} onClick={() => setEditing('new')}>
+            <button type="button" className={btnPrimary} disabled={!limit.canAdd} onClick={() => setEditing('new')}>
               {t('bahan.tambah')}
             </button>
           }
@@ -72,6 +77,8 @@ function IngredientSheet({ target, onClose }: { target: Ingredient | 'new' | nul
 
 function IngredientForm({ ingredient, onDone }: { ingredient: Ingredient | null; onDone: () => void }) {
   const ctx = useData();
+  const activeCount = useLive((c) => listIngredients(c).then((l) => l.length));
+  const limit = useLimit('ingredients', activeCount ?? 0);
   const [name, setName] = useState(ingredient?.name ?? '');
   const [price, setPrice] = useState(ingredient ? String(ingredient.purchasePrice) : '');
   const [quantity, setQuantity] = useState(ingredient ? String(ingredient.packageQuantity) : '');
@@ -192,6 +199,7 @@ function IngredientForm({ ingredient, onDone }: { ingredient: Ingredient | null;
           <button
             type="button"
             className={btnQuiet}
+            disabled={!ingredient.active && (activeCount === undefined || !limit.canAdd)}
             onClick={async () => {
               await setIngredientActive(ctx, ingredient.id, !ingredient.active);
               onDone();

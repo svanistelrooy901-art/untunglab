@@ -3,6 +3,8 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { t } from '../i18n/ms';
 import { Layout } from './components/Layout';
 import { DataProvider } from './data';
+import { LicenseProvider } from './license';
+import { LesenPage } from './pages/Lesen';
 import { BahanPage } from './pages/Bahan';
 import { KosOperasiPage } from './pages/KosOperasi';
 import { MenuEditorPage, MenuListPage } from './pages/Menu';
@@ -21,6 +23,7 @@ const PAGES: Record<string, ComponentType> = {
   '/jejak-harga': JejakHargaPage,
   '/kesan-harga': KesanHargaPage,
   '/sandaran': SandaranPage,
+  '/lesen': LesenPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,
   '/bahan': BahanPage,
@@ -38,6 +41,7 @@ export function App() {
         </p>
       }
     >
+      <LicenseProvider>
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>
@@ -57,6 +61,7 @@ export function App() {
           </Route>
         </Routes>
       </HashRouter>
+      </LicenseProvider>
     </DataProvider>
   );
 }

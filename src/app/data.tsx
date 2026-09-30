@@ -1,6 +1,6 @@
 import { liveQuery } from 'dexie';
 import { createContext as createReactContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { UntungLabDB, backfillPriceHistory, createContext, ensureBusiness, seedEquipmentPresets, type Context } from '../db';
+import { UntungLabDB, backfillPriceHistory, createContext, ensureBusiness, ensureDeviceId, seedEquipmentPresets, type Context } from '../db';
 
 /** One database per app session. Opened lazily; startup work is idempotent, so a reload is always safe. */
 let started: Promise<Context> | null = null;
@@ -11,6 +11,7 @@ function start(): Promise<Context> {
     await ensureBusiness(ctx);
     await seedEquipmentPresets(ctx);
     await backfillPriceHistory(ctx);
+    await ensureDeviceId(ctx);
     // Ask the browser not to evict our data. A no is fine; the Sandaran page explains what it means.
     void navigator.storage?.persist?.().catch(() => undefined);
     return ctx;

@@ -36,6 +36,8 @@ src/domain/   Costing engine. Pure TypeScript, no React, no storage, no browser 
 src/db/       On-device storage (Dexie schema, repositories). No React, no formulas.
 src/i18n/     Bahasa Melayu copy.
 src/app/      UI shell, routes, pages.
+src/license/  Licence code, offline token check, free-plan limits.
+server/       Licence server (Cloudflare Worker + D1): payment, codes, devices.
 ```
 
 The rule from Doc 03 applies everywhere: no screen implements its own profitability formula.
@@ -43,4 +45,4 @@ Every screen calls `src/domain`.
 
 ## Status
 
-Phases 1 to 9 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi, Dashboard + Jejak Harga + Insights, Kesan Harga, Sandaran). QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.
+Phases 1 to 10 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi, Dashboard + Jejak Harga + Insights, Kesan Harga, Sandaran, Lesen). The licence server is in `server/` (see `server/README.md`); it needs your Cloudflare, ToyyibPay and Brevo setup before it can sell. QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.

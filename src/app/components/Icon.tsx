@@ -52,6 +52,12 @@ const PATHS = {
       <path d="M4 17v3h16v-3" />
     </>
   ),
+  lesen: (
+    <>
+      <circle cx="8" cy="12" r="4" />
+      <path d="M12 12h9M18 12v3M15 12v2" />
+    </>
+  ),
   lagi: (
     <>
       <circle cx="5" cy="12" r="1.5" fill="currentColor" />

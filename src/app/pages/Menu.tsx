@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { dimensionOf, formatPct, formatRM, type PackagingSemantics } from '../../domain';
 import { deleteMenu, loadCostingData, saveMenu, type CostingData, type Ingredient, type StoredMenu } from '../../db';
 import { t } from '../../i18n/ms';
 import { MenuResultView, StatusBadge, issueText } from '../components/MenuResultView';
 import { EmptyState, Field, InfoTip, Loading, PageHeader, btnPrimary, btnQuiet, btnSecondary } from '../components/ui';
+import { LimitNote } from '../components/LimitNote';
 import { useData, useLive } from '../data';
+import { useLicense, useLimit } from '../license';
 import { businessInputFrom, computeAllMenus, menuInputFrom } from '../menuAssembly';
 import { parseNumber } from '../forms';
 import { emptyForm, parseMenuForm, type MenuForm } from '../menuForm';
@@ -31,17 +33,25 @@ export function MenuListPage() {
   const name = namer(data);
   const menus = [...costed.values()];
   const hasIngredients = data.ingredients.some((i) => i.active);
+  const limit = useLimit('menus', data.menus.length);
 
   return (
     <section>
       <PageHeader
         title={t('menu.title')}
         action={
-          <Link to="/menu/baru" className={btnPrimary}>
-            {t('menu.tambah')}
-          </Link>
+          limit.canAdd ? (
+            <Link to="/menu/baru" className={btnPrimary}>
+              {t('menu.tambah')}
+            </Link>
+          ) : (
+            <button type="button" disabled className={btnPrimary}>
+              {t('menu.tambah')}
+            </button>
+          )
         }
       />
+      <LimitNote state={limit} />
       {menus.length === 0 ? (
         <EmptyState
           title={t('menu.kosongTajuk')}
@@ -112,7 +122,40 @@ export function MenuEditorPage() {
       </section>
     );
   }
-  return <MenuEditor key={existing?.id ?? 'baru'} data={data} existing={existing ?? null} />;
+  if (!existing) return <NewMenuGate data={data} />;
+  return <MenuEditor key={existing.id} data={data} existing={existing} />;
+}
+
+/**
+ * Decides once, when the screen opens, whether a new menu may be created. Saving the last allowed menu changes the
+ * count while the editor is still on screen, and that must not flip it to the "limit reached" view mid-save.
+ */
+function NewMenuGate({ data }: { data: CostingData }) {
+  const { ready } = useLicense();
+  const limit = useLimit('menus', data.menus.length);
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (ready && allowed === null) setAllowed(limit.canAdd);
+  }, [ready, allowed, limit.canAdd]);
+  if (allowed === null) return <Loading />;
+  if (!allowed) {
+    return (
+      <section>
+        <PageHeader title={t('menu.title')} />
+        <EmptyState
+          title={t('lesen.penuhTajuk')}
+          body={t('lesen.penuhIsi')}
+          action={
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link to="/lesen" className={btnPrimary}>{t('lesen.naiktaraf')}</Link>
+              <Link to="/menu" className={btnSecondary}>{t('menu.title')}</Link>
+            </div>
+          }
+        />
+      </section>
+    );
+  }
+  return <MenuEditor key="baru" data={data} existing={null} />;
 }
 
 function unitOptions(i: Ingredient | undefined): string[] {

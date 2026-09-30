@@ -152,10 +152,42 @@ const muts = [
     "(row[field] as number) < 0) issues.push({ code: 'bad_row', detail: `${name}[${i}].${field}` });\n      for (const field of POSITIVE)", "(row[field] as number) < -1e9) issues.push({ code: 'bad_row', detail: `${name}[${i}].${field}` });\n      for (const field of POSITIVE)"],
   ['reminder waits one day too long', 'src/app/backupReminder.ts',
     'days >= BACKUP_REMINDER_DAYS', 'days > BACKUP_REMINDER_DAYS'],
+  ['free limit off by one', 'src/license/entitlement.ts',
+    "currentCount < FREE_LIMITS[kind]", "currentCount <= FREE_LIMITS[kind]"],
+  ['free plan gets detailed operating costs', 'src/license/entitlement.ts',
+    "canUseDetailedOperating = (plan: Plan): boolean => plan === 'pro'", "canUseDetailedOperating = (plan: Plan): boolean => true"],
+  ['token for another device accepted', 'src/license/token.ts',
+    "if (p.deviceId !== deviceId)", "if (false)"],
+  ['token signature not checked', 'src/license/token.ts',
+    "if (!valid) return { ok: false, reason: 'bad_signature' };", ""],
+  ['ambiguous characters allowed in codes', 'src/license/code.ts',
+    "'ABCDEFGHJKMNPQRSTVWXYZ23456789'", "'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'"],
+  ['callback hash not checked', 'server/core/api.ts',
+    "if (!safeEqual(hash.toLowerCase(), md5(config.toyyibSecret + status + orderId + refno + 'ok')))", "if (false)"],
+  ['payment not confirmed with ToyyibPay', 'server/core/api.ts',
+    "if (!confirmed) return new Response('OK');", ""],
+  ['paid amount not compared', 'server/core/api.ts',
+    " && t.amountSen === order.amountSen", ""],
+  ['third device allowed', 'server/core/api.ts',
+    "devices.length >= config.maxDevices", "devices.length > config.maxDevices"],
+  ['revoked code still activates', 'server/core/api.ts',
+    "if (license.status === 'revoked') return json(403, { error: 'revoked' });", ""],
+  ['wrong codes not counted for rate limit', 'server/core/api.ts',
+    "await store.recordFailure(key, deps.now().toISOString());\n      return json(404, { error: 'invalid_code' });\n    }\n    if (license.status", "return json(404, { error: 'invalid_code' });\n    }\n    if (license.status"],
+  ['rate limit one attempt too generous', 'server/core/api.ts',
+    ">= config.failureLimit", "> config.failureLimit"],
+  ['admin endpoints open without token', 'server/core/api.ts',
+    "!safeEqual(auth, `Bearer ${config.adminToken}`)", "false"],
+  ['double payment issues two licences (D1)', 'server/worker/d1Store.ts',
+    " AND license_code IS NULL", ""],
 ];
 
+const only = process.env.ONLY ? new RegExp(process.env.ONLY, 'i') : null;
 let survived = 0;
+let ran = 0;
 for (const [name, file, from, to] of muts) {
+  if (only && !only.test(name + ' ' + file)) continue;
+  ran++;
   const original = readFileSync(file, 'utf8');
   if (!original.includes(from)) { console.log(`?? pattern not found: ${name}`); survived++; continue; }
   writeFileSync(file, original.replace(from, to));
@@ -165,4 +197,4 @@ for (const [name, file, from, to] of muts) {
   if (!killed) survived++;
   console.log(`${killed ? 'KILLED  ' : 'SURVIVED'}  ${name}`);
 }
-console.log(`\n${muts.length - survived}/${muts.length} mutations caught`);
+console.log(`\n${ran - survived}/${ran} mutations caught`);

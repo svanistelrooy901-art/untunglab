@@ -58,7 +58,7 @@ export async function makeWorld(over: Partial<Config> = {}) {
   const json = async (res: Response) => (await res.json()) as Record<string, any>;
 
   const buyer = { name: 'Aminah', email: 'aminah@example.com', phone: '0123456789' };
-  const order = async () => json(await call('POST', '/api/order', buyer));
+  const order = async () => (await json(await call('POST', '/api/order', buyer))) as { orderId: string; payUrl: string };
   const callbackBody = (o: { orderId: string }, over: Record<string, string> = {}) => {
     const f = { refno: 'TP1', status: '1', reason: 'ok', billcode: state.billCode, order_id: o.orderId, amount: '59.00', transaction_time: '2026-09-30 16:00:00', ...over };
     return { ...f, hash: over.hash ?? md5('sekret' + f.status + f.order_id + f.refno + 'ok') };
