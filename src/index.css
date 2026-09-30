@@ -1,0 +1,52 @@
+@import '@fontsource-variable/inter';
+@import 'tailwindcss';
+
+/* Design tokens from Doc 04 §2. Neutral SaaS direction; the old forest-green/cream palette is retired. */
+@theme {
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-canvas: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-ink: #111827;
+  --color-muted: #475569;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --color-primary: #0f766e;
+  --color-primary-soft: #f0fdfa;
+  --color-primary-line: #99f6e4;
+  --color-highlight: #14b8a6;
+
+  --color-loss: #b91c1c;
+  --color-loss-soft: #fee2e2;
+  --color-loss-line: #fca5a5;
+  --color-low: #9a3412;
+  --color-low-soft: #ffedd5;
+  --color-low-line: #fdba74;
+  --color-watch: #854d0e;
+  --color-watch-soft: #fef9c3;
+  --color-watch-line: #fde047;
+  --color-healthy: #166534;
+  --color-healthy-soft: #dcfce7;
+  --color-healthy-line: #86efac;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
