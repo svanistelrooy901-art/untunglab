@@ -6,3 +6,4 @@ export * from './operating';
 export * from './costing';
 export * from './priceChange';
 export * from './scenario';
+export * from './priceHistory';
