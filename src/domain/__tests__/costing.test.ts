@@ -229,3 +229,65 @@ describe('determinism and purity', () => {
     expect(computeMenuCost(menu, biz)).toEqual(computeMenuCost(menu, biz));
   });
 });
+
+describe('missing setup values are named, never guessed (Phase 6, D-30, D-32)', () => {
+  const codes = (r: MenuCostResult) => r.issues.map((i) => i.code);
+
+  it('Nilai Masa not entered + production time > 0 is incomplete', () => {
+    const r = computeMenuCost(bareMenu({ productionMinutesPerBatch: 30 }), business({ valueOfTimePerHour: null }));
+    expect(r.complete).toBe(false);
+    expect(codes(r)).toContain('nilai_masa_missing');
+  });
+
+  it('Nilai Masa not entered but no production time costs no labour and stays complete', () => {
+    const r = complete(computeMenuCost(bareMenu({ productionMinutesPerBatch: 0 }), business({ valueOfTimePerHour: null })));
+    expect(r.perPortion.labour).toBe(0);
+  });
+
+  it('a Nilai Masa of RM0 is a real value: complete with zero labour', () => {
+    const r = complete(computeMenuCost(bareMenu({ productionMinutesPerBatch: 60 }), business({ valueOfTimePerHour: 0 })));
+    expect(r.perPortion.labour).toBe(0);
+  });
+
+  it('tariff not set + equipment in use is incomplete', () => {
+    const r = computeMenuCost(
+      bareMenu({ equipment: [{ watts: 2000, durationMinutes: 45 }] }),
+      business({ electricityTariffPerKwh: null }),
+    );
+    expect(r.complete).toBe(false);
+    expect(codes(r)).toContain('electricity_tariff_missing');
+  });
+
+  it('tariff not set but no equipment is fine', () => {
+    complete(computeMenuCost(bareMenu(), business({ electricityTariffPerKwh: null })));
+  });
+
+  it('equipment with zero duration needs no tariff', () => {
+    complete(computeMenuCost(bareMenu({ equipment: [{ watts: 2000, durationMinutes: 0 }] }), business({ electricityTariffPerKwh: null })));
+  });
+
+  it('C05 still holds with a real tariff', () => {
+    const r = complete(computeMenuCost(bareMenu({ equipment: [{ watts: 2000, durationMinutes: 45 }] }), business({ electricityTariffPerKwh: 0.5 })));
+    expect(r.batch.utilities).toBeCloseTo(0.75, 12);
+  });
+
+  it('a packaging line whose item no longer exists is named, not skipped', () => {
+    const r = computeMenuCost(bareMenu({ packaging: [{ packaging: null, ref: 'kotak-x', quantityUsed: 1, semantics: 'per_portion' }] }), business());
+    expect(r.complete).toBe(false);
+    expect(r.issues).toContainEqual({ code: 'packaging_missing', ref: 'kotak-x' });
+  });
+
+  it('an equipment line whose appliance no longer exists is named, not skipped', () => {
+    const r = computeMenuCost(bareMenu({ equipment: [{ watts: null, ref: 'oven-x', durationMinutes: 30 }] }), business());
+    expect(r.complete).toBe(false);
+    expect(r.issues).toContainEqual({ code: 'equipment_missing', ref: 'oven-x' });
+  });
+
+  it('reports every missing thing at once', () => {
+    const r = computeMenuCost(
+      bareMenu({ productionMinutesPerBatch: 30, equipment: [{ watts: 500, durationMinutes: 10 }] }),
+      business({ valueOfTimePerHour: null, electricityTariffPerKwh: null, expectedMonthlySales: null }),
+    );
+    expect(codes(r).sort()).toEqual(['electricity_tariff_missing', 'expected_sales_missing', 'nilai_masa_missing']);
+  });
+});
