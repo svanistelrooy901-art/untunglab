@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { formatPct, formatRM, type OperatingCategory } from '../../domain';
+import { energyKwh, formatPct, formatRM, type OperatingCategory } from '../../domain';
 import {
   currentTariff,
   ensureBusiness,
   getBusiness,
+  listEquipment,
   getCostProfile,
   listOperatingCosts,
   resetOperatingDetail,
@@ -363,6 +364,7 @@ function WorkspaceFields(p: {
 function ElectricityFields({ shared, setShared, error, monthly }: { shared: string; setShared: (v: string) => void; error?: string | undefined; monthly: number | null }) {
   const ctx = useData();
   const tariff = useLive((c) => currentTariff(c));
+  const equipment = useLive((c) => listEquipment(c));
   const [rate, setRate] = useState('');
   const [rateError, setRateError] = useState<string>();
   const [rateSaved, setRateSaved] = useState(false);
@@ -371,6 +373,21 @@ function ElectricityFields({ shared, setShared, error, monthly }: { shared: stri
       <p role="note" className="mt-3 rounded-xl border border-watch-line bg-watch-soft p-3 text-sm text-watch">⚠ {t('ops.elektrikAmaran')}</p>
       <Field label={t('ops.elektrikAm')} inputMode="decimal" value={shared} onChange={(e) => setShared(e.target.value)} error={error} hint={t('ops.elektrikAmNota')} />
       <Result monthly={monthly} formula={t('ops.rumus.elektrik')} />
+
+      <div className="mt-4 rounded-xl border border-border p-3">
+        <h3 className="text-sm font-bold">{t('ops.alatSenaraiTajuk')}</h3>
+        <p className="text-xs text-muted">{t('ops.alatSenaraiNota')}</p>
+        {equipment && equipment.length === 0 && <p className="mt-2 text-sm text-muted">{t('ops.alatTiada')}</p>}
+        <ul className="mt-2 divide-y divide-border">
+          {(equipment ?? []).map((e) => (
+            <li key={e.id} className="flex items-baseline justify-between gap-3 py-2 text-sm">
+              <span>{e.name} · {e.powerWatts.toLocaleString('en-US')} W</span>
+              <span className="font-semibold">{tariff ? `${formatRM(energyKwh(e.powerWatts, 60) * tariff.ratePerKwh)} / ${t('ops.alatKosJam')}` : '—'}</span>
+            </li>
+          ))}
+        </ul>
+        {!tariff && equipment && equipment.length > 0 && <p className="mt-1 text-xs text-muted">{t('ops.alatPerluKadar')}</p>}
+      </div>
 
       <div className="mt-4 rounded-xl border border-border p-3">
         <Field

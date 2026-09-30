@@ -5,6 +5,7 @@ import { Layout } from './components/Layout';
 import { DataProvider } from './data';
 import { BahanPage } from './pages/Bahan';
 import { KosOperasiPage } from './pages/KosOperasi';
+import { MenuEditorPage, MenuListPage } from './pages/Menu';
 import { MulaPage } from './pages/Mula';
 import { Lagi, Placeholder } from './pages/Pages';
 import { PembungkusanPage } from './pages/Pembungkusan';
@@ -15,6 +16,7 @@ import { ROUTES } from './routes';
 const PAGES: Record<string, ComponentType> = {
   '/': MulaPage,
   '/kos-operasi': KosOperasiPage,
+  '/menu': MenuListPage,
   '/bahan': BahanPage,
   '/pembungkusan': PembungkusanPage,
   '/peralatan': PeralatanPage,
@@ -44,6 +46,7 @@ export function App() {
                 />
               );
             })}
+            <Route path="/menu/:id" element={<MenuEditorPage />} />
             <Route path="/lagi" element={<Lagi />} />
           </Route>
         </Routes>

@@ -116,6 +116,19 @@ describe('Menu storage (Doc 05 §2)', () => {
   });
 });
 
+describe('line order', () => {
+  it('lines come back in the order the user entered them', async () => {
+    const { ctx } = freshContext();
+    const { draft, flour } = await seed(ctx);
+    const more = [];
+    for (const n of ['Z', 'M', 'A', 'K', 'B', 'Y']) more.push(await createIngredient(ctx, { name: n, purchasePrice: 1, packageQuantity: 1, packageUnit: 'kg' }));
+    const lines = [...more.map((i) => ({ ingredientId: i.id, quantity: 1, usageUnit: 'g' })), { ingredientId: flour.id, quantity: 2, usageUnit: 'g' }];
+    const saved = await saveMenu(ctx, { ...draft, ingredients: lines });
+    expect((await getMenu(ctx, saved.menuId))?.ingredients.map((l) => l.ingredientId)).toEqual(lines.map((l) => l.ingredientId));
+    expect((await listMenus(ctx))[0]?.ingredients.map((l) => l.ingredientId)).toEqual(lines.map((l) => l.ingredientId));
+  });
+});
+
 describe('loadCostingData is read-only and complete', () => {
   it('returns everything the costing assembler needs from one read transaction', async () => {
     const { ctx, db } = freshContext('2026-09-30T08:00:00');

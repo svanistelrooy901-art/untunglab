@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { getCostProfile, listEquipment, listIngredients, listOperatingCosts, listPackaging } from '../../db';
+import { getCostProfile, listEquipment, listIngredients, listMenus, listOperatingCosts, listPackaging } from '../../db';
 import { t, type MsKey } from '../../i18n/ms';
 import { Icon } from '../components/Icon';
 import { Loading, PageHeader } from '../components/ui';
@@ -15,14 +15,15 @@ interface Step {
 /** Guided setup (Doc 02 §2). Progress is derived from real data, so it can never drift from what is saved. */
 export function MulaPage() {
   const data = useLive(async (c) => {
-    const [profile, ops, ingredients, packaging, equipment] = await Promise.all([
+    const [profile, ops, ingredients, packaging, equipment, menus] = await Promise.all([
       getCostProfile(c),
       listOperatingCosts(c),
       listIngredients(c),
       listPackaging(c),
       listEquipment(c),
+      listMenus(c),
     ]);
-    return { profile, ops: ops.length, ingredients: ingredients.length, packaging: packaging.length, equipment: equipment.length };
+    return { profile, ops: ops.length, ingredients: ingredients.length, packaging: packaging.length, equipment: equipment.length, menus: menus.length };
   });
   if (!data) return <Loading />;
 
@@ -33,7 +34,7 @@ export function MulaPage() {
     { key: 'mula.s4', to: '/bahan', done: data.ingredients > 0 },
     { key: 'mula.s5', to: '/pembungkusan', done: data.packaging > 0, optional: true },
     { key: 'mula.s6', to: '/peralatan', done: data.equipment > 0, optional: true },
-    { key: 'mula.s7', to: null, done: false },
+    { key: 'mula.s7', to: '/menu', done: data.menus > 0 },
   ];
   const finished = steps.filter((s) => s.done).length;
 

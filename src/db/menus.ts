@@ -103,13 +103,15 @@ export async function saveMenu(ctx: Context, draft: MenuDraft): Promise<{ menuId
       await db.recipePackaging.where('recipeId').equals(recipe.id).delete();
       await db.recipeEquipmentUsage.where('recipeId').equals(recipe.id).delete();
 
-      await db.recipeIngredients.bulkAdd(draft.ingredients.map((l): RecipeIngredient => ({ id: ctx.newId(), recipeId: recipe.id, ...l })));
-      await db.recipePackaging.bulkAdd(draft.packaging.map((l): RecipePackaging => ({ id: ctx.newId(), recipeId: recipe.id, ...l })));
-      await db.recipeEquipmentUsage.bulkAdd(draft.equipment.map((l): RecipeEquipmentUsage => ({ id: ctx.newId(), recipeId: recipe.id, ...l })));
+      await db.recipeIngredients.bulkAdd(draft.ingredients.map((l, position): RecipeIngredient => ({ id: ctx.newId(), recipeId: recipe.id, position, ...l })));
+      await db.recipePackaging.bulkAdd(draft.packaging.map((l, position): RecipePackaging => ({ id: ctx.newId(), recipeId: recipe.id, position, ...l })));
+      await db.recipeEquipmentUsage.bulkAdd(draft.equipment.map((l, position): RecipeEquipmentUsage => ({ id: ctx.newId(), recipeId: recipe.id, position, ...l })));
       return { menuId: menu.id, recipeId: recipe.id };
     },
   );
 }
+
+const byPosition = (a: { position: number }, b: { position: number }) => a.position - b.position;
 
 function stored(menu: Menu, recipe: Recipe, ing: RecipeIngredient[], pack: RecipePackaging[], eq: RecipeEquipmentUsage[]): StoredMenu {
   return {
@@ -121,9 +123,9 @@ function stored(menu: Menu, recipe: Recipe, ing: RecipeIngredient[], pack: Recip
     yield: recipe.yield,
     productionMinutesPerBatch: recipe.productionMinutesPerBatch,
     sellingPrice: menu.sellingPrice,
-    ingredients: ing.map(({ ingredientId, quantity, usageUnit }) => ({ ingredientId, quantity, usageUnit })),
-    packaging: pack.map(({ packagingId, quantityUsed, usageSemantics }) => ({ packagingId, quantityUsed, usageSemantics })),
-    equipment: eq.map(({ equipmentId, durationMinutes }) => ({ equipmentId, durationMinutes })),
+    ingredients: [...ing].sort(byPosition).map(({ ingredientId, quantity, usageUnit }) => ({ ingredientId, quantity, usageUnit })),
+    packaging: [...pack].sort(byPosition).map(({ packagingId, quantityUsed, usageSemantics }) => ({ packagingId, quantityUsed, usageSemantics })),
+    equipment: [...eq].sort(byPosition).map(({ equipmentId, durationMinutes }) => ({ equipmentId, durationMinutes })),
   };
 }
 

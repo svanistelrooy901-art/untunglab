@@ -141,6 +141,8 @@ export interface Recipe {
 export interface RecipeIngredient {
   id: string;
   recipeId: string;
+  /** Order the user entered the line in. */
+  position: number;
   ingredientId: string;
   quantity: number;
   usageUnit: string;
@@ -149,6 +151,8 @@ export interface RecipeIngredient {
 export interface RecipePackaging {
   id: string;
   recipeId: string;
+  /** Order the user entered the line in. */
+  position: number;
   packagingId: string;
   quantityUsed: number;
   usageSemantics: PackagingSemantics;
@@ -158,6 +162,8 @@ export interface RecipePackaging {
 export interface RecipeEquipmentUsage {
   id: string;
   recipeId: string;
+  /** Order the user entered the line in. */
+  position: number;
   equipmentId: string;
   durationMinutes: number;
 }
