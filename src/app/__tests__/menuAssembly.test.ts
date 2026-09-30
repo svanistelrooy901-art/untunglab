@@ -3,7 +3,7 @@ import { createIngredient, ensureBusiness, saveOperatingCost } from '../../db/re
 import { addCustomEquipment, createPackaging, setIngredientActive, updateEquipment } from '../../db/masterData';
 import { loadCostingData, saveMenu, type MenuDraft } from '../../db/menus';
 import { saveCostProfile, setTariff } from '../../db/settings';
-import { freshContext } from '../../db/__tests__/helpers';
+import { freshContext, fillOperatingZeros } from '../../db/__tests__/helpers';
 import { computeAllMenus } from '../menuAssembly';
 
 /** Doc 06 M01 / M02 through the real storage path: rows in, engine out. */
@@ -15,6 +15,9 @@ async function world() {
   await saveCostProfile(ctx, { valueOfTimePerHour: 25, expectedMonthlySales: 3000 });
   await setTariff(ctx, 0.5, '2026-01-01');
   await saveOperatingCost(ctx, { businessId: biz.id, category: 'gas', mode: 'simple', simpleAmount: 600, active: true, classification: 'shared' });
+  // Elektrik in Kira Lebih Tepat (general bill RM0) so appliances are costed per recipe (D-71); the rest are explicit RM0 (D-70).
+  await saveOperatingCost(ctx, { businessId: biz.id, category: 'elektrik', mode: 'detailed', simpleAmount: 0, detail: { kind: 'electricity', sharedMonthlyAmount: 0 }, active: true, classification: 'shared' });
+  await fillOperatingZeros(ctx, biz.id);
   return t;
 }
 

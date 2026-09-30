@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createIngredient, dismissInsight, ensureBusiness, listAllHistory, listDismissedInsightKeys, saveOperatingCost, updateIngredient } from '../../db';
 import { loadCostingData, saveMenu, saveCostProfile, setTariff, createPackaging } from '../../db';
-import { freshContext } from '../../db/__tests__/helpers';
+import { freshContext, fillOperatingZeros } from '../../db/__tests__/helpers';
 import { computeAllMenus } from '../menuAssembly';
 import { PRICE_ALERT_PCT, buildDashboard, buildTrails } from '../insights';
 
@@ -11,6 +11,7 @@ async function world() {
   await saveCostProfile(t.ctx, { valueOfTimePerHour: 25, expectedMonthlySales: 3000 });
   await setTariff(t.ctx, 0.5, '2026-01-01');
   await saveOperatingCost(t.ctx, { businessId: biz.id, category: 'gas', mode: 'simple', simpleAmount: 600, active: true, classification: 'shared' });
+  await fillOperatingZeros(t.ctx, biz.id);
   const ayam = await createIngredient(t.ctx, { name: 'Ayam', purchasePrice: 15, packageQuantity: 1, packageUnit: 'kg' });
   const lain = await createIngredient(t.ctx, { name: 'Bahan lain', purchasePrice: 50.4, packageQuantity: 1, packageUnit: 'kg' });
   const kotak = await createPackaging(t.ctx, { name: 'Kotak', purchasePrice: 0.7, purchaseQuantity: 1, purchaseUnit: 'pcs' });

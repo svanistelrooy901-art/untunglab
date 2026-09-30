@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CODE_ALPHABET, generateCode, normaliseCode } from '../code';
-import { FREE_LIMITS, canAdd, canUseDetailedOperating, limitState } from '../entitlement';
+import { FREE_LIMITS, canAdd, canUseDetailedOperating, detailedOperatingAccess, limitState } from '../entitlement';
 import { generateKeyPair, signLicense, verifyLicense, type LicensePayload } from '../token';
 
 const payload = (over: Partial<LicensePayload> = {}): LicensePayload => ({ v: 1, plan: 'lifetime', deviceId: 'dev-1', codeHint: 'K3M7', issuedAt: '2026-09-30T00:00:00.000Z', ...over });
@@ -96,5 +96,15 @@ describe('free plan limits (D-58)', () => {
     expect(limitState('free', 'menus', 2)).toEqual({ used: 2, limit: 2, canAdd: false });
     expect(limitState('free', 'ingredients', 3)).toEqual({ used: 3, limit: 10, canAdd: true });
     expect(limitState('pro', 'menus', 9)).toEqual({ used: 9, limit: null, canAdd: true });
+  });
+});
+
+describe('detailed operating costs on the free plan (D-72)', () => {
+  it('free users can open the tab but only edit a row that is already detailed; pro always edits', () => {
+    expect(detailedOperatingAccess('free', 'simple')).toBe('preview');
+    expect(detailedOperatingAccess('free', null)).toBe('preview');
+    expect(detailedOperatingAccess('free', 'detailed')).toBe('edit');
+    expect(detailedOperatingAccess('pro', 'simple')).toBe('edit');
+    expect(detailedOperatingAccess('pro', null)).toBe('edit');
   });
 });

@@ -291,3 +291,14 @@ describe('missing setup values are named, never guessed (Phase 6, D-30, D-32)', 
     expect(codes(r).sort()).toEqual(['electricity_tariff_missing', 'expected_sales_missing', 'nilai_masa_missing']);
   });
 });
+
+describe('mandatory Kos Operasi categories (D-70)', () => {
+  it('missing categories make the menu incomplete with one named issue, and no allocation is invented', () => {
+    const r = computeMenuCost(bareMenu(), business({ missingOperatingCategories: ['air', 'gas'] }));
+    expect(r.complete).toBe(false);
+    expect(r.issues).toEqual([{ code: 'operating_costs_missing', ref: 'air,gas' }]);
+  });
+  it('an empty list changes nothing', () => {
+    expect(computeMenuCost(bareMenu(), business({ missingOperatingCategories: [] })).complete).toBe(true);
+  });
+});

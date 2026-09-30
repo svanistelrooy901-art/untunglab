@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import type { OperatingCostEntry } from '../types';
 import {
   OperatingCostError,
+  appliancesCounted,
+  missingCategories,
   allocateOperating,
   allocatedOperatingCost,
   businessPctFromArea,
@@ -171,5 +174,25 @@ describe('workspace method switch keeps both inputs (Phase 5, D-30)', () => {
   });
   it('without a method, both areas present still decide (D-10)', () => {
     expect(finalMonthlyAmount({ ...base, detail })).toBe(400);
+  });
+});
+
+describe('appliancesCounted (D-71)', () => {
+  const row = (mode: 'simple' | 'detailed', active = true): OperatingCostEntry => ({ category: 'elektrik', mode, simpleAmount: 100, active, classification: 'shared' });
+  it('only an active Elektrik row in Kira Lebih Tepat counts appliances', () => {
+    expect(appliancesCounted([row('detailed')])).toBe(true);
+    expect(appliancesCounted([row('simple')])).toBe(false);
+    expect(appliancesCounted([row('detailed', false)])).toBe(false);
+    expect(appliancesCounted([])).toBe(false);
+    expect(appliancesCounted([{ ...row('detailed'), category: 'air' }])).toBe(false);
+  });
+});
+
+describe('missingCategories (D-70)', () => {
+  const e = (category: OperatingCostEntry['category'], active = true): OperatingCostEntry => ({ category, mode: 'simple', simpleAmount: 0, active, classification: 'shared' });
+  it('lists required categories with no row; a row of any kind counts as filled', () => {
+    expect(missingCategories([e('gas'), e('air', false)], ['gas', 'air', 'elektrik'])).toEqual(['elektrik']);
+    expect(missingCategories([], ['gas'])).toEqual(['gas']);
+    expect(missingCategories([e('gas')], ['gas'])).toEqual([]);
   });
 });
