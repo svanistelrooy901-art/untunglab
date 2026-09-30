@@ -45,4 +45,4 @@ Every screen calls `src/domain`.
 
 ## Status
 
-Phases 1 to 10 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi, Dashboard + Jejak Harga + Insights, Kesan Harga, Sandaran, Lesen). The licence server is in `server/` (see `server/README.md`); it needs your Cloudflare, ToyyibPay and Brevo setup before it can sell. QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.
+Phases 1 to 11 are done (foundation, costing engine, storage + Jejak Harga, master data screens, Kos Operasi + setup checklist, Menu / Resipi, Dashboard + Jejak Harga + Insights, Kesan Harga, Sandaran, Lesen, Laporan + release QA). The licence server is in `server/` (see `server/README.md`); it needs your Cloudflare, ToyyibPay and Brevo setup before it can sell. QA evidence: `docs/qa/`. Decisions: `DECISIONS.md`.

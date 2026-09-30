@@ -180,6 +180,16 @@ const muts = [
     "!safeEqual(auth, `Bearer ${config.adminToken}`)", "false"],
   ['double payment issues two licences (D1)', 'server/worker/d1Store.ts',
     " AND license_code IS NULL", ""],
+  ['spreadsheet formulas not neutralised in CSV', 'src/app/report.ts',
+    "if (/^[=+\\-@\\t\\r]/.test(s)) s = `'${s}`;", ""],
+  ['CSV uses typographic minus', 'src/app/report.ts',
+    "return /^-0(\\.0+)?$/.test(s) ? s.slice(1) : s;", "return s.replace('-', '\\u2212');"],
+  ['report includes archived menus', 'src/app/report.ts',
+    "if (!menu.active) continue;", ""],
+  ['report sums profit across menus', 'src/app/report.ts',
+    "return { menus: menus.sort(byName), incomplete: incomplete.sort(byName), byStatus };", "return { menus: menus.sort(byName), incomplete: incomplete.sort(byName), byStatus, totalProfit: menus.reduce((a, m) => a + m.profit, 0) } as Report;"],
+  ['incomplete menu shown with invented numbers', 'src/app/report.ts',
+    "lines.push([csvCell(m.name), '', ''", "lines.push([csvCell(m.name), '0.00', ''"],
 ];
 
 const only = process.env.ONLY ? new RegExp(process.env.ONLY, 'i') : null;

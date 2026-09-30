@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createIngredient, ensureBusiness, saveOperatingCost } from '../../db/repo';
-import { addCustomEquipment, createPackaging, setIngredientActive } from '../../db/masterData';
+import { addCustomEquipment, createPackaging, setIngredientActive, updateEquipment } from '../../db/masterData';
 import { loadCostingData, saveMenu, type MenuDraft } from '../../db/menus';
 import { saveCostProfile, setTariff } from '../../db/settings';
 import { freshContext } from '../../db/__tests__/helpers';
@@ -84,6 +84,23 @@ describe('menus costed from stored rows', () => {
     const r = (await run(t)).results.get(saved.menuId)?.result;
     if (!r?.complete) throw new Error('expected complete');
     expect(r.batch.utilities).toBeCloseTo(0.75, 12);
+  });
+
+  it('Doc 06 §5: one saved appliance is reused by several recipes, and editing its wattage updates every one of them', async () => {
+    const t = await world();
+    const oven = await addCustomEquipment(t.ctx, { name: 'Oven', powerWatts: 2000 });
+    const a = await saveMenu(t.ctx, { name: 'Roti', yield: 1, productionMinutesPerBatch: 0, sellingPrice: 10, ingredients: [], packaging: [], equipment: [{ equipmentId: oven.id, durationMinutes: 45 }] });
+    const b = await saveMenu(t.ctx, { name: 'Kek', yield: 1, productionMinutesPerBatch: 0, sellingPrice: 10, ingredients: [], packaging: [], equipment: [{ equipmentId: oven.id, durationMinutes: 60 }] });
+    const batch = async (id: string) => {
+      const r = (await run(t)).results.get(id)?.result;
+      if (!r?.complete) throw new Error('expected complete');
+      return r.batch.utilities;
+    };
+    expect(await batch(a.menuId)).toBeCloseTo(0.75, 12); // 2 kW x 0.75 h x RM0.50
+    expect(await batch(b.menuId)).toBeCloseTo(1.0, 12); //  2 kW x 1 h x RM0.50
+    await updateEquipment(t.ctx, oven.id, { powerWatts: 1000 });
+    expect(await batch(a.menuId)).toBeCloseTo(0.375, 12);
+    expect(await batch(b.menuId)).toBeCloseTo(0.5, 12);
   });
 
   it('an archived ingredient is still costed live', async () => {

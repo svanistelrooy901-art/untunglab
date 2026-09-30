@@ -89,12 +89,12 @@ describe('CSV export', () => {
     const csv = menuReportCsv(buildReport(await loadCostingData(t.ctx)));
     expect(csv.startsWith('﻿')).toBe(true);
     const lines = csv.slice(1).split('\r\n');
-    expect(lines[0]).toBe('Menu,Harga Jual (RM),Bahan (RM),Pembungkusan (RM),Masa (RM),Utiliti Pengeluaran (RM),Kos Operasi Bersama (RM),Kos Sebenar (RM),Anggaran Untung (RM),Margin (%),Status');
+    expect(lines[0]).toBe('Menu,Harga Jual (RM),Bahan (RM),Pembungkusan (RM),Masa (RM),Utiliti Pengeluaran (RM),Kos Operasi Bersama (RM),Kos Lain (RM),Kos Sebenar (RM),Anggaran Untung (RM),Margin (%),Status');
     const nasi = lines.find((l) => l.startsWith('Nasi Lemak'))!.split(',');
-    expect(nasi[8]).toBe('-0.44');
-    expect(nasi[7]).toBe('12.44');
-    expect(nasi[9]).toBe('-3.7');
-    expect(nasi[10]).toBe('Menu Ini Rugi');
+    expect(nasi[9]).toBe('-0.44');
+    expect(nasi[8]).toBe('12.44');
+    expect(nasi[10]).toBe('-3.7');
+    expect(nasi[11]).toBe('Menu Ini Rugi');
     expect(nasi.join(',')).not.toContain('−');
   });
 

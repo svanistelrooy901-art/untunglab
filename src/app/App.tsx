@@ -5,6 +5,7 @@ import { Layout } from './components/Layout';
 import { DataProvider } from './data';
 import { LicenseProvider } from './license';
 import { LesenPage } from './pages/Lesen';
+import { LaporanPage } from './pages/Laporan';
 import { BahanPage } from './pages/Bahan';
 import { KosOperasiPage } from './pages/KosOperasi';
 import { MenuEditorPage, MenuListPage } from './pages/Menu';
@@ -24,6 +25,7 @@ const PAGES: Record<string, ComponentType> = {
   '/kesan-harga': KesanHargaPage,
   '/sandaran': SandaranPage,
   '/lesen': LesenPage,
+  '/laporan': LaporanPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,
   '/bahan': BahanPage,

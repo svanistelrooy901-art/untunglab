@@ -56,7 +56,7 @@ export function DashboardPage() {
     <p className="mt-3 rounded-2xl border border-watch-line bg-watch-soft px-4 py-3 text-sm" data-testid="peringatan-sandaran">
       <span aria-hidden="true">! </span>
       {reminder.kind === 'never' ? t('sandaran.peringatanNever') : t('sandaran.peringatanStale').replace('{n}', String(reminder.days))}{' '}
-      <Link to="/sandaran" className="font-semibold text-primary underline">
+      <Link to="/sandaran" className="inline-flex min-h-11 items-center font-semibold text-primary underline">
         {t('sandaran.peringatanCta')}
       </Link>
     </p>
