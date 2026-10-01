@@ -1,0 +1,1 @@
+Brownies A-Z video generator. cap.mjs drives the real app (dist-e2e on :4181) and saves screen states; build2.py builds video2.html; render2.mjs renders frames; audio2.py makes music+SFX; mux with ffmpeg. Needs the Kak Untung character code from the character sheet.
