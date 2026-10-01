@@ -1,3 +1,4 @@
+import { newUuid } from './uuid';
 import type { Context } from './repo';
 import type { LicenseRow } from './types';
 
@@ -15,7 +16,7 @@ export async function ensureDeviceId(ctx: Context): Promise<string> {
   return ctx.db.transaction('rw', ctx.db.license, async () => {
     const existing = await getDeviceId(ctx);
     if (existing) return existing;
-    const deviceId = crypto.randomUUID();
+    const deviceId = newUuid();
     await ctx.db.license.put({ id: 'device', deviceId, createdAt: ctx.now().toISOString() });
     return deviceId;
   });

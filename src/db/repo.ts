@@ -1,3 +1,4 @@
+import { newUuid } from './uuid';
 import { normalisedUnitCost, purchaseDataChanged, sortHistory, type PackMapping } from '../domain';
 import { UntungLabDB } from './db';
 import type {
@@ -20,7 +21,7 @@ export function createContext(db: UntungLabDB, overrides: Partial<Omit<Context, 
   return {
     db,
     now: overrides.now ?? (() => new Date()),
-    newId: overrides.newId ?? (() => crypto.randomUUID()),
+    newId: overrides.newId ?? (() => newUuid()),
   };
 }
 

@@ -27,7 +27,8 @@ export function DataProvider({ children, fallback, failed }: { children: ReactNo
     let live = true;
     start().then(
       (ctx) => live && setState({ ctx }),
-      () => {
+      (err) => {
+        console.error('UntungLab: gagal buka pangkalan data', err);
         started = null;
         if (live) setState({ error: true });
       },
