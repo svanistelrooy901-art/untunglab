@@ -4,6 +4,7 @@ export * from './format';
 export * from './status';
 export * from './operating';
 export * from './costing';
+export * from './suggestPrice';
 export * from './priceChange';
 export * from './scenario';
 export * from './priceHistory';

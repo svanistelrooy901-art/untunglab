@@ -366,7 +366,7 @@ function MenuEditor({ data, existing }: { data: CostingData; existing: StoredMen
       {errors.lines && <p role="alert" className="mt-4 text-sm font-medium text-loss">{errors.lines}</p>}
 
       <div className="mt-6">
-        <MenuResultView result={live.result} input={live.input} business={live.business} nameOf={nameOfKind} />
+        <MenuResultView result={live.result} input={live.input} business={live.business} nameOf={nameOfKind} onUsePrice={(p) => set('price', String(p))} />
       </div>
 
       {saveError && <p role="alert" className="mt-3 text-sm font-medium text-loss">{t('common.gagalSimpan')}</p>}

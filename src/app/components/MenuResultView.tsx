@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPct, formatRM, type BusinessInput, type Issue, type MenuCostResult, type MenuInput, type OperatingCategory, type StatusCode } from '../../domain';
+import { formatPct, formatRM, suggestPrice, SUGGEST_MARGIN_CHIPS, type BusinessInput, type Issue, type MenuCostResult, type MenuInput, type OperatingCategory, type StatusCode } from '../../domain';
 import { t } from '../../i18n/ms';
 import { explainMenu } from '../menuExplain';
 
@@ -40,16 +41,61 @@ export function issueText(issue: Issue, nameOf: (ref: string | undefined) => str
   return t(`menu.isu.${issue.code}`).replace('{name}', nameOf(issue.ref));
 }
 
+function SuggestedPrice({ input, business, onUse }: { input: MenuInput; business: BusinessInput; onUse?: (price: number) => void }) {
+  const [target, setTarget] = useState<number>(30);
+  const s = suggestPrice(input, business, target);
+  return (
+    <section className="mt-4 rounded-xl border border-border bg-canvas p-3" data-testid="cadangan-harga">
+      <h3 className="text-sm font-bold">{t('menu.cadTajuk')}</h3>
+      <p className="mt-1 text-xs text-muted">{t('menu.cadIntro')}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label={t('menu.cadMargin')}>
+        {SUGGEST_MARGIN_CHIPS.map((m) => (
+          <button
+            key={m}
+            type="button"
+            aria-pressed={target === m}
+            data-testid={`cad-chip-${m}`}
+            onClick={() => setTarget(m)}
+            className={`inline-flex min-h-11 min-w-14 items-center justify-center rounded-full border px-4 text-sm font-semibold ${target === m ? 'border-primary bg-primary text-white' : 'border-border bg-surface'}`}
+          >
+            {m}%
+          </button>
+        ))}
+      </div>
+      {s.ok ? (
+        <>
+          <div className="mt-3 flex items-baseline justify-between gap-3">
+            <span className="text-sm text-muted">{t('menu.cadHarga')} ({formatPct(s.targetMarginPct, 0)})</span>
+            <span className="text-2xl font-bold" data-testid="cad-harga">{formatRM(s.price)}</span>
+          </div>
+          {onUse && (
+            <button type="button" className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary underline" data-testid="cad-guna" onClick={() => onUse(Math.round(s.price * 100) / 100)}>
+              {t('menu.cadGuna')}
+            </button>
+          )}
+          <p className="mt-2 text-xs text-muted">{t('menu.cadNota')}</p>
+        </>
+      ) : s.reason === 'infeasible' ? (
+        <p role="status" className="mt-3 text-sm font-medium text-watch">{t('menu.cadInfeasible')}</p>
+      ) : s.reason === 'incomplete' ? (
+        <p role="status" className="mt-3 text-sm text-muted">{t('menu.cadBelum')}</p>
+      ) : null}
+    </section>
+  );
+}
+
 export function MenuResultView({
   result,
   input,
   business,
   nameOf,
+  onUsePrice,
 }: {
   result: MenuCostResult;
   input: MenuInput;
   business: BusinessInput;
   nameOf: (kind: 'ing' | 'pack' | 'eq', ref: string | undefined) => string;
+  onUsePrice?: (price: number) => void;
 }) {
   const ex = explainMenu(input, business);
   const ing = (ref: string | undefined) => nameOf('ing', ref);
@@ -170,6 +216,8 @@ export function MenuResultView({
           </ul>
         </div>
       )}
+
+      <SuggestedPrice input={input} business={business} onUse={onUsePrice} />
 
       <h3 className="mt-4 text-sm font-bold">{t('menu.pecahan')}</h3>
       <ul className="mt-1 divide-y divide-border">

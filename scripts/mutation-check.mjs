@@ -2,6 +2,12 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 const muts = [
+  ['suggested price ignores operating share of price', 'src/domain/suggestPrice.ts',
+    'const denom = 1 - r - m;',
+    'const denom = 1 - m;'],
+  ['infeasible margin forced to a price', 'src/domain/suggestPrice.ts',
+    'if (denom <= 1e-9) return',
+    'if (denom <= -1e9) return'],
   ['cached cost beats live source', 'src/domain/costing.ts',
     'if (line.ingredient) {\n        ingredientBatch += ingredientCostFromSource(line.ingredient, line.quantity, line.unit);',
     'if (line.ingredient && !isNonNegative(line.cachedCost)) {\n        ingredientBatch += ingredientCostFromSource(line.ingredient, line.quantity, line.unit);'],
