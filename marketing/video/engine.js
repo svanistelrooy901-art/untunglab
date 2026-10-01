@@ -8,11 +8,11 @@ const SC=[
 // mascot waypoints: scene id, local start, duration, x, y, label, side
 const WP=[
  ['hook',.4,.9,240,300,'Mana pergi duit?','a'],
- ['calc',.5,.9,284,330,'Cukup ke?','a'],
+ ['calc',.6,.9,296,520,'Cukup ke?','a'],
  ['real',.6,.9,60,445,'Ini pun kos!','a'],['real',2.9,.8,284,445,'Nampak?','a'],
  ['reass',.5,.9,284,500,'Serah pada kami','a'],
  ['templ',.5,.9,284,300,'Isi je!','a'],['templ',3.2,.8,284,470,'Dah hampir siap','a'],
- ['menu',.5,.9,284,238,'Isi bahan je','a'],['menu',3.5,.8,280,100,'Untung ke rugi?','l'],
+ ['menu',.5,.9,284,238,'Isi bahan je','a'],['menu',2.3,.9,300,122,'Untung ke rugi?','a'],
  ['price',.7,.9,284,330,'Dah kira semula','a'],
  ['offl',.5,.9,236,140,'Offline pun boleh','a'],
  ['dash',.4,.9,296,205,'Semua di sini','l'],['dash',1.9,.8,292,262,'Menu rugi','a'],['dash',3.2,.8,292,560,'Kedudukan menu','a'],
@@ -124,12 +124,12 @@ function mascot(t){
  const wsc=SC.find(c=>c.id===WP[k][0]);
  const hideAt=Math.min(endShow,wsc.s+wsc.d-.25);
  const bp=easeBack(clamp((t-(w.t+w.d+.05))/.28));
- const on=t>=w.t+w.d+.05&&t<hideAt;
+ const on=t>=w.t+w.d+.05&&t<Math.min(hideAt,w.t+w.d+1.7);
  b.textContent=w.l;
  const bw=b.offsetWidth||90;
  if(on){
   const bx=w.side==='a'?x+56-bw:x-8-bw,by=w.side==='a'?y-36:y+11;
-  b.style.opacity=clamp(bp)*(1-clamp((t-(hideAt-.2))/.2));
+  b.style.opacity=clamp(bp)*(1-clamp((t-(Math.min(hideAt,w.t+w.d+1.7)-.2))/.2));
   b.style.transform=`translate(${Math.max(4,bx)}px,${by}px) scale(${.6+.4*clamp(bp)})`;
  }else b.style.opacity=0;
 }
