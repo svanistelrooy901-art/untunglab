@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { t } from '../../i18n/ms';
 import { ROUTES } from '../routes';
 import { Icon } from './Icon';
@@ -16,6 +16,8 @@ const ActiveBar = ({ isActive }: { isActive: boolean }) =>
 
 export function Layout() {
   const primary = ROUTES.filter((r) => r.primary);
+  // The Dashboard has two columns on a wide screen, so it gets a wider page than the form screens.
+  const wide = useLocation().pathname === '/';
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -47,7 +49,7 @@ export function Layout() {
           </nav>
         </aside>
 
-        <main className="mx-auto w-full max-w-3xl px-5 pt-5 pb-28 md:pb-10">
+        <main className={`mx-auto w-full px-5 pt-5 pb-28 md:pb-10 ${wide ? 'max-w-3xl lg:max-w-5xl' : 'max-w-3xl'}`}>
           <Outlet />
         </main>
       </div>

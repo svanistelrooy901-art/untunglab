@@ -322,6 +322,23 @@ export const ms = {
   dash: {
     title: 'Dashboard',
     intro: 'Apa yang perlu anda tahu hari ini.',
+    hero: {
+      purata: 'Purata margin semua menu',
+      daripada: 'daripada {n} menu',
+      terbaik: 'Menu paling untung ialah {name} ({pct}).',
+      rugi: '{n} menu sedang rugi dan perlu perhatian hari ini.',
+      belumLengkap: '{n} menu belum lengkap, jadi belum masuk purata.',
+      semuaOk: 'Semua menu ada untung.',
+      tiada: 'Belum ada menu yang lengkap untuk dikira purata.',
+    },
+    kad: {
+      untung: 'Untung',
+      untungNota: 'menu ada untung',
+      rugi: 'Rugi',
+      rugiNota: 'perlu dibetulkan',
+      belum: 'Belum lengkap',
+      belumNota: 'kos belum boleh dikira',
+    },
     perhatianTajuk: 'Perlu perhatian',
     tiadaPerhatian: 'Tiada yang mendesak. Semua menu lengkap dan tiada perubahan harga besar.',
     rugi1: '{name} sedang rugi',

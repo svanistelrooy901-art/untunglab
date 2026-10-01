@@ -12,7 +12,7 @@ PWA pengiraan kos dan untung untuk perniagaan makanan rumah. Bahasa Melayu dahul
 | `src/license` | Kod lesen, token luar talian, had percuma. |
 | `server` | Pelayan lesen (Cloudflare Worker + D1). |
 | `docs/qa` | Bukti QA setiap fasa, jejak ujian, senarai semak telefon. |
-| `DECISIONS.md` | Semua keputusan (D-01 hingga D-73) dan sebabnya. |
+| `DECISIONS.md` | Semua keputusan (D-01 hingga D-75) dan sebabnya. |
 
 ## Peraturan yang tidak boleh dilanggar
 1. Satu enjin kos. Skrin tidak mengira formula sendiri.

@@ -110,6 +110,32 @@ export interface DashboardModel {
   ranking: RankedMenu[];
   incomplete: IncompleteMenu[];
   insights: InsightItem[];
+  summary: DashboardSummary;
+}
+
+export interface DashboardSummary {
+  /** Complete menus that make a profit (status low, watch or healthy). */
+  profitable: number;
+  loss: number;
+  incomplete: number;
+  completeCount: number;
+  /** Plain mean of the complete menus' margin. Null when there is none, never a made-up zero. No sales volume is stored, so it is not weighted (D-75). */
+  averageMarginPct: number | null;
+  best: { name: string; marginPct: number } | null;
+}
+
+/** `ranking` must already be sorted best margin first. */
+export function summariseMenus(ranking: readonly RankedMenu[], incompleteCount: number): DashboardSummary {
+  const loss = ranking.filter((r) => r.status === 'loss').length;
+  const top = ranking[0];
+  return {
+    profitable: ranking.length - loss,
+    loss,
+    incomplete: incompleteCount,
+    completeCount: ranking.length,
+    averageMarginPct: ranking.length === 0 ? null : ranking.reduce((sum, r) => sum + r.marginPct, 0) / ranking.length,
+    best: top ? { name: top.name, marginPct: top.marginPct } : null,
+  };
 }
 
 export function buildDashboard(data: CostingData, history: readonly PriceHistoryRecord[], dismissed: ReadonlySet<string> = new Set()): DashboardModel {
@@ -175,5 +201,5 @@ export function buildDashboard(data: CostingData, history: readonly PriceHistory
     insights.push({ type: 'incomplete', severity: 'info', menus: refs, to: refs.length === 1 ? `/menu/${refs[0]!.id}` : '/menu' });
   }
 
-  return { menuCount: menus.length, ranking, incomplete, insights };
+  return { menuCount: menus.length, ranking, incomplete, insights, summary: summariseMenus(ranking, incomplete.length) };
 }

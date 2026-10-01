@@ -160,6 +160,7 @@ for (const r of ['/', '/menu', '/laporan', '/kos-operasi', '/lesen']) {
   await page.waitForTimeout(300);
   const ov = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   ok(`320 ${r}: no horizontal overflow`, ov <= 0, ov);
+  if (ov > 0) console.log('  widest offenders:', await page.evaluate(() => [...document.querySelectorAll('main *')].filter((e) => e.getBoundingClientRect().right > innerWidth + 0.5).slice(0, 4).map((e) => `${e.tagName}.${String(e.className).slice(0, 60)} right=${Math.round(e.getBoundingClientRect().right)}`)));
 }
 
 ok('no console errors', errors.length === 0, errors.slice(0, 3));

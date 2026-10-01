@@ -70,6 +70,11 @@ await page.getByText('Nasi Lemak sedang rugi').waitFor();
 ok('loss insight first', await page.getByTestId('insights').locator('li').first().innerText().then((x) => x.includes('Nasi Lemak sedang rugi')));
 const rank = await page.getByTestId('ranking').innerText();
 ok('ranking shows RM12.44 / −RM0.44 / −3.7% / Menu Ini Rugi', /RM12\.44/.test(rank) && /−RM0\.44/.test(rank) && /−3\.7%/.test(rank) && /Menu Ini Rugi/.test(rank));
+// D-75: hero average margin and the three tiles come from the same engine result (one complete menu at -3.7%)
+ok('hero shows average margin −3.7% from 1 menu', (await page.getByTestId('purata-margin').innerText()) === '−3.7%' && /daripada 1 menu/.test(await page.getByTestId('hero-margin').innerText()));
+ok('tiles: 0 untung, 1 rugi', /^0\b/.test(await page.getByTestId('kad-untung').innerText()) && /^1\b/.test(await page.getByTestId('kad-rugi').innerText()));
+ok('hero does not call a losing menu the most profitable', !/paling untung/.test(await page.getByTestId('hero-margin').innerText()));
+ok('hero names the loss in words', /1 menu sedang rugi/.test(await page.getByTestId('hero-margin').innerText()));
 await page.screenshot({ path: `${S}/p7-02-dashboard-rugi.png`, fullPage: true });
 await page.goto(url + '#/menu');
 const list = await page.getByText(/Kos Sebenar RM12\.44/).first().innerText();
