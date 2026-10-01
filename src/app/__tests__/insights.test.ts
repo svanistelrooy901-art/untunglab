@@ -3,7 +3,7 @@ import { createIngredient, dismissInsight, ensureBusiness, listAllHistory, listD
 import { loadCostingData, saveMenu, saveCostProfile, setTariff, createPackaging } from '../../db';
 import { freshContext, fillOperatingZeros } from '../../db/__tests__/helpers';
 import { computeAllMenus } from '../menuAssembly';
-import { PRICE_ALERT_PCT, buildDashboard, buildTrails } from '../insights';
+import { PRICE_ALERT_PCT, buildDashboard, buildTrails, summariseMenus, type RankedMenu } from '../insights';
 
 async function world() {
   const t = freshContext('2026-09-01T08:00:00');
@@ -229,5 +229,36 @@ describe('Jejak Harga trails', () => {
     const { data, history } = await load(w);
     const names = buildTrails(data, history).map((x) => x.ingredient.name);
     expect(names).toEqual(['Bahan lain', 'Ayam']);
+  });
+});
+
+const row = (name: string, marginPct: number, status: RankedMenu['status']): RankedMenu => ({ menuId: name, name, sellingPrice: 10, fullCost: 5, profit: 5, marginPct, status });
+
+describe('dashboard summary (D-75)', () => {
+  it('counts profitable, loss and incomplete menus; low/watch/healthy all count as profitable', () => {
+    const s = summariseMenus([row('a', 70, 'healthy'), row('b', 50, 'watch'), row('c', 20, 'low'), row('d', -4, 'loss')], 2);
+    expect(s).toMatchObject({ profitable: 3, loss: 1, incomplete: 2, completeCount: 4 });
+  });
+  it('the average margin is the plain mean of the complete menus, and the best menu is the top of the ranking', () => {
+    const s = summariseMenus([row('a', 40, 'healthy'), row('b', 30, 'low'), row('c', -10, 'loss')], 0);
+    expect(s.averageMarginPct).toBeCloseTo(20, 10);
+    expect(s.best).toEqual({ name: 'a', marginPct: 40 });
+  });
+  it('a negative average stays negative (shown with the minus sign by the screen)', () => {
+    expect(summariseMenus([row('a', -10, 'loss'), row('b', -2, 'loss')], 0).averageMarginPct).toBeCloseTo(-6, 10);
+  });
+  it('nothing complete: no average and no best, never a made-up zero', () => {
+    expect(summariseMenus([], 3)).toEqual({ profitable: 0, loss: 0, incomplete: 3, completeCount: 0, averageMarginPct: null, best: null });
+  });
+  it('the dashboard model carries it, and incomplete or inactive menus do not enter the average', async () => {
+    const w = await world();
+    await saveMenu(w.ctx, { name: 'Tiada harga', yield: 5, productionMinutesPerBatch: 0, sellingPrice: 0, ingredients: [], packaging: [], equipment: [] });
+    const { data, history } = await load(w);
+    const d = buildDashboard(data, history);
+    expect(d.summary.completeCount).toBe(2);
+    expect(d.summary.incomplete).toBe(1);
+    const mean = (d.ranking[0]!.marginPct + d.ranking[1]!.marginPct) / 2;
+    expect(d.summary.averageMarginPct).toBeCloseTo(mean, 10);
+    expect(d.summary.best?.name).toBe(d.ranking[0]!.name);
   });
 });
