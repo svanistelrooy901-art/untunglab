@@ -19,10 +19,16 @@ function start(): Promise<Context> {
   return started;
 }
 
+/** Short, technical description of why startup failed, shown on the error screen so it can be reported. */
+function describeError(err: unknown): string {
+  const e = err as { name?: string; message?: string } | null;
+  return [e?.name, e?.message].filter(Boolean).join(': ') || String(err);
+}
+
 const DataContext = createReactContext<Context | null>(null);
 
-export function DataProvider({ children, fallback, failed }: { children: ReactNode; fallback: ReactNode; failed: ReactNode }) {
-  const [state, setState] = useState<{ ctx: Context } | { error: true } | null>(null);
+export function DataProvider({ children, fallback, failed }: { children: ReactNode; fallback: ReactNode; failed: (detail: string) => ReactNode }) {
+  const [state, setState] = useState<{ ctx: Context } | { error: string } | null>(null);
   useEffect(() => {
     let live = true;
     start().then(
@@ -30,7 +36,7 @@ export function DataProvider({ children, fallback, failed }: { children: ReactNo
       (err) => {
         console.error('UntungLab: gagal buka pangkalan data', err);
         started = null;
-        if (live) setState({ error: true });
+        if (live) setState({ error: describeError(err) });
       },
     );
     return () => {
@@ -38,7 +44,7 @@ export function DataProvider({ children, fallback, failed }: { children: ReactNo
     };
   }, []);
   if (!state) return <>{fallback}</>;
-  if ('error' in state) return <>{failed}</>;
+  if ('error' in state) return <>{failed(state.error)}</>;
   return <DataContext.Provider value={state.ctx}>{children}</DataContext.Provider>;
 }
 

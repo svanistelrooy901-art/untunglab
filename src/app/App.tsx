@@ -37,11 +37,12 @@ export function App() {
   return (
     <DataProvider
       fallback={<p className="p-6 text-sm text-muted">{t('common.memuatkan')}</p>}
-      failed={
-        <p role="alert" className="p-6 text-sm font-medium text-loss">
-          {t('common.gagalMuat')}
-        </p>
-      }
+      failed={(detail) => (
+        <div role="alert" className="p-6">
+          <p className="text-sm font-medium text-loss">{t('common.gagalMuat')}</p>
+          <p data-testid="ralat-teknikal" className="mt-3 break-words rounded-md border border-border bg-canvas p-3 font-mono text-xs text-muted">{detail}</p>
+        </div>
+      )}
     >
       <LicenseProvider>
       <HashRouter>
