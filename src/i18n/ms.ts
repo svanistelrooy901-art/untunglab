@@ -7,6 +7,7 @@ export const ms = {
   app: {
     name: 'UntungLab',
     tagline: 'Tahu kos sebenar menu anda.',
+    slogan: 'Kira dengan bijak, untung dengan yakin',
   },
   nav: {
     dashboard: 'Dashboard',

@@ -1,16 +1,24 @@
 @import '@fontsource-variable/inter';
 @import 'tailwindcss';
 
-/* Design tokens from Doc 04 §2. Neutral SaaS direction; the old forest-green/cream palette is retired. */
+/* Design tokens from Doc 04 §2. Neutral SaaS direction; the old forest-green/cream palette is retired.
+   Brand colours are taken from the UntungLab logo (D-74): deep ink background, mint accent. Mint is only used on the dark
+   brand surfaces (header, navigation); on white, text and buttons keep the deeper teal for contrast. */
 @theme {
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --color-canvas: #f7f8fa;
+  --color-canvas: #f2f8f7;
   --color-surface: #ffffff;
   --color-ink: #111827;
   --color-muted: #475569;
-  --color-border: #e2e8f0;
+  --color-border: #d9e7e5;
   --color-border-strong: #cbd5e1;
+
+  --color-brand-ink: #011416;
+  --color-brand-ink-2: #072a2d;
+  --color-brand-line: #0f3d40;
+  --color-brand-mint: #75f8e8;
+  --color-brand-muted: #a3bfbe;
 
   --color-primary: #0f766e;
   --color-primary-soft: #f0fdfa;

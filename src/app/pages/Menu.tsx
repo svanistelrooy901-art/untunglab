@@ -229,7 +229,7 @@ function MenuEditor({ data, existing }: { data: CostingData; existing: StoredMen
       <PageHeader title={existing ? t('menu.tajukEdit') : t('menu.tajukBaru')} />
 
       {/* Compact live summary stays visible while lines are edited. */}
-      <div className="sticky top-0 z-10 -mx-5 mt-2 border-b border-border bg-canvas/95 px-5 py-2 backdrop-blur" aria-live="polite">
+      <div className="sticky top-14 z-10 -mx-5 mt-2 border-b border-border bg-canvas/95 px-5 py-2 backdrop-blur" aria-live="polite">
         {live.result.complete ? (
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <span>

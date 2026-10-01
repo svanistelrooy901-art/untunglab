@@ -22,8 +22,8 @@ export default defineConfig({
         scope: './',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#F7F8FA',
-        theme_color: '#0F766E',
+        background_color: '#011416',
+        theme_color: '#011416',
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
