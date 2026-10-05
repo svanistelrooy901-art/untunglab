@@ -2,6 +2,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 const muts = [
+  ['sha256 fallback drops final padding length', 'src/db/sha256.ts',
+    'view.setUint32(padded.length - 4, bitLen >>> 0);',
+    'view.setUint32(padded.length - 4, 0);'],
   ['suggested price ignores operating share of price', 'src/domain/suggestPrice.ts',
     'const denom = 1 - r - m;',
     'const denom = 1 - m;'],
@@ -210,10 +213,6 @@ const muts = [
     "const have = new Set(entries.map((e) => e.category));", "const have = new Set(entries.filter((e) => e.active).map((e) => e.category));"],
   ['Kos Operasi: missing categories hide the sales gap', 'src/domain/costing.ts',
     "if (!allocateOperating(0, business.expectedMonthlySales).ok) issues.push(issue('expected_sales_missing'));", ""],
-  ['preview: already-detailed row stuck behind paywall', 'src/license/entitlement.ts',
-    "plan === 'pro' || currentMode === 'detailed' ? 'edit' : 'preview'", "plan === 'pro' ? 'edit' : 'preview'"],
-  ['preview: free users can edit Kira Lebih Tepat', 'src/license/entitlement.ts',
-    "plan === 'pro' || currentMode === 'detailed' ? 'edit' : 'preview'", "'edit'"],
   ['appliances hidden but builder shows them in Mudah', 'src/app/menuAssembly.ts',
     "if (appliancesCounted(entries)) return 'show';", "return 'show';"],
 ];

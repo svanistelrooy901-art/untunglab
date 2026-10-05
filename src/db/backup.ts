@@ -1,4 +1,5 @@
 import type { Context } from './repo';
+import { sha256Hex } from './sha256';
 
 /**
  * Backup and restore (Doc 05 §9 "backup/export capability recommended"). With no cloud sync, this file is the only
@@ -113,8 +114,7 @@ const NON_NEGATIVE = ['simpleAmount', 'ratePerKwh', 'powerWatts', 'purchasePrice
 const POSITIVE = ['packageQuantity', 'purchaseQuantity', 'yield'];
 
 async function sha256(text: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return 'sha256:' + [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return 'sha256:' + (await sha256Hex(text));
 }
 
 export async function createBackup(ctx: Context): Promise<BackupFile> {
