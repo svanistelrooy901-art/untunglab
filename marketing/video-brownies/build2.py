@@ -60,10 +60,9 @@ phone_scene('rev1',70,7,'REVEAL','Untung sebenar sebiji?',s7,[[0.6,2.1,"Jom teng
 # S7b
 pop=f'<div class="pop" id="pop7"><div class="p1">KALAU TAK MASUK SEMUA KOS</div><div class="p2">Untung RM5.09 &middot; 84.8%</div><div class="pr" id="pr7"><div class="p3">UNTUNG SEBENAR</div><div class="p4">RM1.35</div><div class="p5">22.5% &middot; RM540 sebulan</div></div></div>'
 phone_scene('rev2',77,9,'REVEAL','Untung sebenar sebiji?',[('s7_1',0),('s7_2',5.0)],[[2.6,8.8,"Bukan RM5.09. Cuma RM1.35."]],[],[('wave','think'),('wave','wow')],[[0,"wave|think"],[1.5,"wave|wow"]],extra=pop)
-# S8 graphic
-rows=''.join(f'<div class="tr" id="tr{i}"><span>Margin {a}</span><b>{b}</b></div>' for i,(a,b) in enumerate([('20%','RM5.81'),('30%','RM6.64'),('40%','RM7.75'),('50%','RM9.30')]))
-s8=f'<div class="bg dark"></div><div class="cap dk"><div class="tag">BAHAGIAN 7 &middot; GRAFIK</div><div class="ttl wh">Nak margin berapa? Jual berapa?</div></div><div class="tbl">{rows}</div><div class="mk" id="mk"><b>Markup bukan margin.</b><br>RM4.65 &times; 1.30 = RM6.05<br>Itu markup 30%, margin cuma 23.1%.</div><div class="bubble dk" id="b-harga"></div><div class="kuwrap">'+kus([('point','proud')])+'</div>'
-add('harga',86,14,s8,kind="harga",bubbles=[[1.0,4.8,"Kira ikut formula."],[9.8,13.5,"Bukan tekaan."]],ku=[[0,"point|proud"]])
+# S8 Cadangan Harga (real screen, D-76)
+s8=[('s8_20',0.3),('s8_30',3.2),('s8_40',6.0),('s8_50',8.4)]
+phone_scene('target',86,14,'BAHAGIAN 7','Nak margin berapa? Jual berapa?',s8,[[0.8,3.0,"Pilih margin sasaran."],[3.4,5.8,"30%? RM6.78."],[8.6,10.0,"50%? RM10.40."],[10.6,13.8,"Kira ikut formula. Bukan tekaan."]],[(10.2,13.95,'<b>Markup bukan margin</b><br>RM4.65 &times; 1.30 = RM6.05<br><small>Itu markup 30%, margin cuma 23.1%.</small>')],[('point','proud')],[[0,"point|proud"]])
 # S9 volume
 vv=[('100',3.00),('200',1.50),('400',0.75),('600',0.50),('1,000',0.30)]
 bars=''.join(f'<div class="vr" id="vr{i}"><div class="vl">{a}</div><div class="vt"><div class="vb" data-w="{v/3*100:.0f}"></div></div><div class="vv">RM{v:.2f}</div></div>' for i,(a,v) in enumerate(vv))

@@ -88,9 +88,9 @@ for c in cfg['scenes']:
         stamp(s+2.6); boom(s+2.75,.8); ding(s+2.8,1046,.3); ding(s+2.95,1568,.2)
         # low sad->bright motif
         for k,n in enumerate([60,64,67,72]): add(tone(mid(n+12),.5,'bell',r=.4),s+3.1+k*.14,.12)
-    if c['id']=='harga':
-        for k in range(4): pop(s+.7+k*.55+.1,900+k*110,.22)
-        pop(s+5.3,600,.3)
+    if c['id']=='target':
+        for k,t in enumerate((3.2,6.0,8.4)): pop(s+t+.05,900+k*110,.22)
+        pop(s+10.3,600,.3)
     if c['id']=='volum':
         for k in range(5): tick(s+.9+k*.4,900+k*200,.14)
     if c['id']=='end':
