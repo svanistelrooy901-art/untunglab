@@ -95,11 +95,11 @@ await page.screenshot({ path: `${S}/p10-04-menu-penuh.png` });
 
 await page.goto(url + '#/kos-operasi');
 await page.getByRole('button', { name: /Ruang Kerja/ }).click();
-ok('detailed tab is NOT locked on free (marketing preview, D-72)', await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).isEnabled());
+ok('detailed tab is open on free (D-77: trial has every feature)', await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).isEnabled());
 await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
-ok('preview explanation shown', await page.getByTestId('tab-pratonton').isVisible());
-ok('detailed fields are disabled on free', await page.getByRole('textbox', { name: 'Kos rumah atau sewa sebulan (RM)', exact: true }).isDisabled());
-ok('detailed Simpan is disabled on free', await page.getByRole('button', { name: 'Simpan' }).last().isDisabled());
+ok('no preview lock shown', (await page.getByTestId('tab-pratonton').count()) === 0);
+ok('detailed fields are editable on free', await page.getByRole('textbox', { name: 'Kos rumah atau sewa sebulan (RM)', exact: true }).isEnabled());
+ok('detailed Simpan is enabled on free', await page.getByRole('button', { name: 'Simpan' }).last().isEnabled());
 await page.screenshot({ path: `${S}/p10-05-tab-pratonton.png` });
 await page.keyboard.press('Escape');
 

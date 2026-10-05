@@ -483,7 +483,7 @@ export const ms = {
     title: 'Lesen',
     pelanPercuma: 'Versi Percuma',
     pelanPro: 'UntungLab Penuh',
-    percumaIsi: 'Versi percuma: 2 menu, 10 bahan, 2 pembungkusan dan Kos Operasi mudah. Semua fungsi lain boleh digunakan.',
+    percumaIsi: 'Versi percuma: 2 menu, 10 bahan dan 2 pembungkusan. Semua fungsi lain boleh digunakan.',
     proIsi: 'Terima kasih! Semua had dibuka, sekali bayar untuk selamanya. Berfungsi tanpa internet.',
     kodHint: 'Kod anda: {hint}',
     tajukAktif: 'Masukkan kod lesen',

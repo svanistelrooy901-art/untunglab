@@ -1,7 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { detailedOperatingAccess } from '../../license/entitlement';
-import { useLicense } from '../license';
 import { energyKwh, formatPct, formatRM, type OperatingCategory } from '../../domain';
 import {
   currentTariff,
@@ -189,10 +186,6 @@ function SettingsForm({ ctx, initial }: { ctx: ReturnType<typeof useData>; initi
 function CategoryForm({ category, row, onDone }: { category: OperatingCategory; row: OperatingCostRow | null; onDone: () => void }) {
   const ctx = useData();
   const canAdvance = ADVANCED.includes(category);
-  const { plan, ready } = useLicense();
-  // Free plan (D-72): Kira Lebih Tepat can be opened and looked at, but its fields are disabled. A row that is already
-  // detailed stays editable so existing numbers are never stuck behind the paywall.
-  const preview = ready && detailedOperatingAccess(plan, row?.mode ?? null) === 'preview';
   const [tab, setTab] = useState<'simple' | 'detailed'>(row?.mode === 'detailed' && canAdvance ? 'detailed' : 'simple');
   const [simple, setSimple] = useState(row ? String(row.simpleAmount) : '');
   const [submitted, setSubmitted] = useState(false);
@@ -237,7 +230,6 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
     e.preventDefault();
     setSubmitted(true);
     setFailed(false);
-    if (tab === 'detailed' && preview) return;
     const business = await ensureBusiness(ctx);
     const common = { businessId: business.id, category, active: true, classification: 'shared' as const };
     try {
@@ -279,16 +271,6 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
         </div>
       )}
 
-      {canAdvance && tab === 'detailed' && preview && (
-        <div className="mt-3 rounded-xl border border-primary-line bg-primary-soft p-3 text-sm" data-testid="tab-pratonton">
-          <p className="font-medium">{t('lesen.pratonton')}</p>
-          <p className="mt-1 text-xs text-muted">{t('lesen.pratontonNota')}</p>
-          <Link to="/lesen" className="mt-1 inline-flex min-h-11 items-center font-semibold text-primary underline">
-            {t('lesen.naiktaraf')}
-          </Link>
-        </div>
-      )}
-
       {tab === 'simple' && (
         <Field
           label={t('ops.jumlahSebulan')}
@@ -308,7 +290,7 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
         </div>
       )}
 
-      <fieldset disabled={tab === 'detailed' && preview} className={tab === 'detailed' && preview ? 'opacity-60' : ''} data-testid="medan-tepat">
+      <fieldset data-testid="medan-tepat">
       {tab === 'detailed' && category === 'ruang_kerja' && (
         <WorkspaceFields
           {...{ home, setHome, wsMethod, setWsMethod, wsPct, setWsPct, homeArea, setHomeArea, bizArea, setBizArea }}
@@ -329,7 +311,7 @@ function CategoryForm({ category, row, onDone }: { category: OperatingCategory; 
       {(category === 'ruang_kerja' || tab === 'detailed') && <p className="mt-3 text-xs text-muted">{category === 'ruang_kerja' ? t('ops.anggaranNota') : ''}</p>}
       {failed && <p role="alert" className="mt-3 text-sm font-medium text-loss">{t('common.gagalSimpan')}</p>}
       <div className="mt-4 flex flex-wrap gap-3">
-        <button type="submit" className={btnPrimary} disabled={tab === 'detailed' && preview}>{t('common.simpan')}</button>
+        <button type="submit" className={btnPrimary}>{t('common.simpan')}</button>
         <button type="button" className={btnSecondary} onClick={onDone}>{t('common.batal')}</button>
         {row?.detail && (
           <button

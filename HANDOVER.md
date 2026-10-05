@@ -21,7 +21,7 @@ PWA pengiraan kos dan untung untuk perniagaan makanan rumah. Bahasa Melayu dahul
 4. Jejak Harga tidak boleh diubah atau dipadam (kecuali semasa pulihkan penuh).
 5. Nombor negatif dipaparkan dengan tanda −, ikon dan label, bukan warna sahaja.
 6. Had percuma hanya menyekat penambahan; data sedia ada tidak dipadam dan nombor tidak berubah mengikut pelan.
-7. Keenam-enam kategori Kos Operasi wajib diisi (RM0 dikira sebagai diisi). Elektrik peralatan hanya dikira bila Elektrik ialah Kira Lebih Tepat (D-70, D-71). Pengguna percuma boleh melihat Kira Lebih Tepat tetapi medannya dilumpuhkan (D-72).
+7. Keenam-enam kategori Kos Operasi wajib diisi (RM0 dikira sebagai diisi). Elektrik peralatan hanya dikira bila Elektrik ialah Kira Lebih Tepat (D-70, D-71). Versi percuma (trial) ada semua fungsi, hanya had bilangan: 2 menu, 10 bahan, 2 pembungkusan (D-77, ganti D-72).
 
 ## Perintah
 `npm run dev` · `npm test` · `npm run typecheck` · `npm run typecheck:server` · `npm run build`
