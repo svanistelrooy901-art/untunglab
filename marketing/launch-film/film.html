@@ -1,0 +1,268 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8"><title>UntungLab Launching Soon</title>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+<style>
+@font-face{font-family:Inter;src:url(/tmp/vid2/assets/inter.woff2) format("woff2");font-weight:100 900}
+*{box-sizing:border-box}html,body{margin:0;background:#000}
+#st{position:relative;width:1920px;height:1080px;overflow:hidden;font-family:Inter,sans-serif;background:#010608;color:#fff}
+.abs{position:absolute}
+.dkbg{position:absolute;inset:0;background:radial-gradient(1000px 700px at 70% 40%,#0c3b43 0,#04171b 50%,#010608 100%)}
+.dkglow{position:absolute;inset:0;background:radial-gradient(520px 420px at 22% 88%,rgba(120,90,255,.2),transparent 70%)}
+.ltbg{position:absolute;inset:0;background:radial-gradient(900px 700px at 78% 45%,#d9fbf6 0,#eef6f6 55%,#f4f2fb 100%);clip-path:polygon(100% 0,100% 0,100% 100%,100% 100%)}
+.ltbg2{position:absolute;inset:0;background:radial-gradient(500px 400px at 20% 90%,rgba(140,120,255,.14),transparent 70%)}
+.tg{position:absolute;font-size:22px;letter-spacing:.14em;font-weight:700;text-transform:uppercase}
+.big{position:absolute;font-weight:800;letter-spacing:-3px;line-height:1.02;white-space:nowrap}
+.mint{color:#75f8e8}.sub{position:absolute;font-size:30px;line-height:1.45;white-space:nowrap}
+.blk{opacity:0}
+.hl{position:absolute;left:130px;top:335px;opacity:0}
+.hl .tg{position:relative;color:#0f766e;margin-bottom:22px}
+.hl h1{margin:0;font-size:90px;line-height:1.04;font-weight:800;letter-spacing:-3px;color:#04181a;white-space:nowrap}
+.hl h1 em{font-style:normal;background:linear-gradient(90deg,#0aa89a,#2f7bff 70%,#7a5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hl p{font-size:28px;line-height:1.45;color:#4d6668;margin:26px 0 0;max-width:560px}
+#rigw{position:absolute;left:1120px;top:0;width:800px;height:1080px;perspective:2400px;opacity:0}
+.rig{position:absolute;left:150px;top:90px;width:430px;height:900px;transform-style:preserve-3d}
+.phone{position:absolute;inset:0;border-radius:78px;background:linear-gradient(135deg,#d7dde0 0,#8a9498 18%,#e9eef0 40%,#7c868a 62%,#cdd4d6 100%);padding:11px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 2px 0 #aab3b6,0 4px 0 #8f999c,0 6px 0 #7b8588,0 8px 0 #687073,0 10px 0 #5a6366,0 60px 90px rgba(5,30,34,.35),0 20px 40px rgba(5,30,34,.25)}
+.bez{width:100%;height:100%;border-radius:68px;background:#05090a;padding:12px;position:relative}
+.scr{width:100%;height:100%;border-radius:56px;overflow:hidden;position:relative;background:#fff}
+.scr img{position:absolute;left:0;top:34px;width:100%;height:calc(100% - 34px);object-fit:cover;object-position:top;opacity:0;transform-origin:50% 0}
+.di{position:absolute;left:50%;top:22px;width:122px;height:36px;margin-left:-61px;border-radius:20px;background:#000;z-index:5}
+.glare{position:absolute;inset:0;border-radius:56px;background:linear-gradient(115deg,rgba(255,255,255,.28) 0,rgba(255,255,255,.06) 28%,transparent 40%);z-index:6}
+.btn{position:absolute;width:6px;border-radius:3px;background:linear-gradient(90deg,#6d777a,#c9d0d2)}
+.shadow{position:absolute;left:40px;right:-30px;bottom:-60px;height:70px;border-radius:50%;background:rgba(5,30,34,.28);filter:blur(34px)}
+.card{position:absolute;border-radius:26px;background:rgba(255,255,255,.76);backdrop-filter:blur(18px);border:1.5px solid rgba(255,255,255,.9);box-shadow:0 30px 60px rgba(8,50,56,.22);padding:22px 26px;opacity:0;color:#0b1f21;width:310px}
+.card small{display:block;font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0f766e}
+.card b{display:block;white-space:nowrap;font-size:44px;font-weight:800;letter-spacing:-1px;margin-top:4px;line-height:1.1}
+.card span{font-size:18px;color:#4d6668}
+.pill{display:inline-block;margin-top:8px;padding:6px 14px;border-radius:99px;background:#fdecc8;color:#8a4b00;font-weight:700;font-size:17px}
+.chips{display:flex;gap:8px;margin-top:12px}.chips i{font-style:normal;font-weight:700;font-size:18px;padding:7px 14px;border-radius:99px;background:#fff;border:1.5px solid #cfe3e1}.chips i.on{background:#0f766e;color:#fff;border-color:#0f766e}
+#fl{position:absolute;left:0;top:0;width:800px;height:900px;transform-origin:50% 50%;pointer-events:none;z-index:20}
+#bub{position:absolute;z-index:30;padding:16px 26px;border-radius:26px;background:rgba(1,20,22,.88);color:#fff;font-size:30px;font-weight:700;border:1.5px solid rgba(117,248,234,.5);box-shadow:0 20px 50px rgba(0,0,0,.35);opacity:0;white-space:nowrap}
+.light #bub{}
+#cta{position:absolute;left:0;right:0;text-align:center;top:850px;opacity:0}
+.ctapill{display:inline-block;padding:22px 48px;border-radius:99px;background:linear-gradient(90deg,#0aa89a,#2f7bff 70%,#7a5cff);font-size:36px;font-weight:800;color:#fff;box-shadow:0 0 60px rgba(47,123,255,.4)}
+.bar{position:absolute;background:#011416;border-radius:30px;padding:26px 50px;box-shadow:0 30px 70px rgba(5,30,34,.35);opacity:0}
+.bar img{height:92px;display:block}
+#fade{position:absolute;inset:0;background:#000;opacity:1;z-index:99;pointer-events:none}
+.strikeline{position:absolute;height:12px;background:#ff5a5f;border-radius:6px;box-shadow:0 0 30px rgba(255,90,95,.7)}
+</style></head><body>
+<div id="st">
+ <div class="dkbg"></div><div class="dkglow"></div>
+ <!-- S1 -->
+ <div id="s1">
+  <div class="tg mint" style="left:130px;top:330px" id="s1tg">MASALAH</div>
+  <div class="big blk" id="s1a" style="left:130px;top:390px;font-size:84px;color:#9fbfc0">Jual brownies RM6.</div>
+  <div class="big blk" id="s1b" style="left:130px;top:500px;font-size:150px">Untung</div>
+  <div class="big blk mint" id="s1c" style="left:130px;top:650px;font-size:150px">berapa?</div>
+ </div>
+ <!-- S2 -->
+ <div id="s2">
+  <div class="tg mint" style="left:130px;top:230px">KEJUTAN</div>
+  <div class="big blk" id="s2a" style="left:130px;top:290px;font-size:190px;color:#fff">RM5.09</div>
+  <div class="strikeline" id="s2x" style="left:122px;top:395px;width:0"></div>
+  <div class="sub blk" id="s2b" style="left:136px;top:520px;color:#9fbfc0">Anggaran biasa: harga jual tolak kos bahan.</div>
+  <div class="big blk mint" id="s2c" style="left:130px;top:640px;font-size:210px;text-shadow:0 0 60px rgba(117,248,234,.45)">RM1.35</div>
+  <div class="sub blk" id="s2d" style="left:136px;top:880px;color:#9fbfc0">Untung sebenar, selepas semua kos.</div>
+ </div>
+ <!-- S3 dark text under the light wipe -->
+ <div id="s3t">
+  <div class="tg mint" style="left:130px;top:300px">PERALIHAN</div>
+  <div class="big blk" id="s3a" style="left:130px;top:360px;font-size:92px;line-height:1.05;white-space:normal">Ada cara<br>yang lebih<br>jelas.</div>
+ </div>
+ <div class="ltbg" id="lt"></div><div class="ltbg2" id="lt2" style="opacity:0"></div>
+ <div class="bar" id="s3bar" style="left:1180px;top:790px"><img src="/tmp/vid2/assets/logo-penuh.png"></div>
+ <!-- headlines light -->
+ <div class="hl" id="h4"><div class="tg">BAHAN</div><h1>Isi bahan.<br><em>Kos terus muncul.</em></h1><p>Harga pek dan kuantiti. UntungLab kira kos seunit sendiri.</p></div>
+ <div class="hl" id="h5"><div class="tg">KOS OPERASI</div><h1>Sewa, api, air<br><em>pun dikira.</em></h1><p>Enam kategori kos tersembunyi masuk ke dalam harga setiap sebiji.</p></div>
+ <div class="hl" id="h6"><div class="tg">HASIL</div><h1>Untung sebenar.<br><em>Bukan tekaan.</em></h1><p>Kos sebenar, untung dan margin dikira dengan satu enjin yang sama.</p></div>
+ <div class="hl" id="h7"><div class="tg">CADANGAN HARGA</div><h1>Nak untung <span id="h7p">30%?</span><br><em>Jual <span id="h7r">RM6.78.</span></em></h1><p>Pilih margin sasaran. UntungLab kira harga yang perlu.</p></div>
+ <div class="hl" id="h8"><div class="tg">DASHBOARD</div><h1>Semua menu.<br><em>Satu skrin.</em></h1><p>Nampak yang rugi dan yang sihat terus.</p></div>
+ <!-- phone -->
+ <div id="rigw"><div class="rig" id="rig"><div class="shadow"></div>
+  <div class="phone"><div class="bez"><div class="scr" id="scr">
+   <img id="i_bahan" src="/tmp/ph/bahan.png"><img id="i_form" src="/tmp/ph/form_top.png"><img id="i_ops" src="/tmp/ph/ops.png">
+   <img id="i_det" src="/tmp/ph/detail_top.png"><img id="i_res" src="/tmp/ph/result.png">
+   <img id="i_c20" src="/tmp/ph/cad20.png"><img id="i_c30" src="/tmp/ph/cad.png"><img id="i_c40" src="/tmp/ph/cad40.png"><img id="i_c50" src="/tmp/ph/cad50.png">
+   <img id="i_dash" src="/tmp/ph/dash.png">
+   <div class="di"></div><div class="glare"></div></div></div></div>
+  <div class="btn" style="left:-6px;top:150px;height:56px"></div><div class="btn" style="left:-6px;top:240px;height:96px"></div><div class="btn" style="left:-6px;top:350px;height:96px"></div><div class="btn" style="right:-6px;top:280px;height:140px"></div>
+  <div class="card" id="k_butter" style="left:-280px;top:310px"><small>Butter</small><b>RM48.00 / kg</b><span>RM12.00 untuk 250 g</span></div>
+  <div class="card" id="k_jum" style="right:-170px;top:590px"><small>Jumlah bahan</small><b>RM18.22</b><span>lima bahan, satu batch</span></div>
+  <div class="card" id="k_elek" style="left:-280px;top:290px"><small>Elektrik oven</small><b>RM0.75</b><span>2 kW × 45 min sebatch</span></div>
+  <div class="card" id="k_sewa" style="right:-170px;top:600px"><small>Sewa ruang kerja</small><b>RM300</b><span>sebulan, 20% guna perniagaan</span></div>
+  <div class="card" id="k_untung" style="left:-280px;top:300px"><small>Untung sebenar</small><b>RM1.35</b><span>22.5% sebiji</span><br><span class="pill">▼ Margin Rendah</span></div>
+  <div class="card" id="k_tanpa" style="right:-170px;top:610px"><small>Tanpa kos operasi</small><b id="k_tanpab" style="color:#7b8f91">RM5.09</b><span>nampak cantik, tapi salah</span></div>
+  <div class="card" id="k_harga" style="left:-290px;top:300px;width:330px"><small id="kh_s">Cadangan harga</small><b id="kh_b">RM6.78</b><span id="kh_sp">margin sasaran 30%</span><div class="chips" id="kh_c"><i>20%</i><i class="on">30%</i><i>40%</i><i>50%</i></div></div>
+  <div class="card" id="k_avg" style="left:-280px;top:300px"><small>Purata margin</small><b>22.5%</b><span>dari semua menu</span></div>
+ </div></div>
+ <!-- closer -->
+ <div id="s9">
+  <img class="abs" id="s9logo" src="/tmp/vid2/assets/logo-penuh.png" style="left:70px;top:50px;width:380px;opacity:0">
+  <div class="big blk" id="s9a" style="left:0;right:0;text-align:center;top:690px;font-size:104px">Kira betul. <span class="mint">Untung jelas.</span></div>
+  <div id="cta"><span class="ctapill" id="ctap">Launching soon</span><div class="sub" style="position:relative;margin-top:26px;font-size:26px;color:#9fbfc0;white-space:normal">2 menu percuma · semua fungsi dibuka</div></div>
+ </div>
+ <canvas id="fl" width="800" height="900"></canvas>
+ <div id="bub"></div>
+ <div id="fade"></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eo=x=>1-Math.pow(1-clamp(x),3);
+const eob=x=>{x=clamp(x);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const win=(t,a,b,fi=.35,fo=.35)=>clamp((t-a)/fi)*clamp((b-t)/fo);
+// ---------- three flask
+const W=800,H=900;
+const rdr=new THREE.WebGLRenderer({canvas:$('fl'),antialias:true,alpha:true});rdr.setSize(W,H,false);rdr.setPixelRatio(1);
+rdr.toneMapping=THREE.ACESFilmicToneMapping;rdr.toneMappingExposure=1.05;
+const scene=new THREE.Scene();
+const pm=new THREE.PMREMGenerator(rdr);scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;scene.environmentIntensity=0.9;
+const cam=new THREE.PerspectiveCamera(30,W/H,0.1,100);cam.position.set(0,0.3,13.2);
+const k=new THREE.DirectionalLight(0xffffff,2.2);k.position.set(4,5,6);scene.add(k);
+const rim=new THREE.PointLight(0x75f8e8,90,30);rim.position.set(-4,1,-3);scene.add(rim);
+const rim2=new THREE.PointLight(0x4aa8ff,50,30);rim2.position.set(5,-2,-3);scene.add(rim2);
+const prof=[[0.0,-1.95],[1.0,-1.95],[1.55,-1.9],[1.86,-1.7],[1.9,-1.45],[1.55,-0.35],[0.95,0.75],[0.56,1.45],[0.5,1.9],[0.5,2.4],[0.64,2.5],[0.64,2.64]].map(p=>new THREE.Vector2(p[0],p[1]));
+const glass=new THREE.MeshPhysicalMaterial({color:0xd9fffb,metalness:0,roughness:0.04,transmission:1,thickness:0.5,ior:1.45,transparent:true,opacity:1,clearcoat:1,clearcoatRoughness:0.03,attenuationColor:new THREE.Color(0x75f8e8),attenuationDistance:6,side:THREE.DoubleSide});
+const flask=new THREE.Group();flask.add(new THREE.Mesh(new THREE.LatheGeometry(new THREE.SplineCurve(prof).getPoints(120),96),glass));
+const lq=[[0,-1.82],[1.0,-1.82],[1.5,-1.78],[1.76,-1.6],[1.8,-1.4],[1.6,-0.8],[1.5,-0.55]].map(p=>new THREE.Vector2(p[0],p[1]));
+const liqM=new THREE.MeshStandardMaterial({color:0x1fd2bd,emissive:0x0f9a8c,emissiveIntensity:0.9,roughness:0.25});
+const liq=new THREE.Mesh(new THREE.LatheGeometry(new THREE.SplineCurve(lq).getPoints(60),96),liqM);flask.add(liq);
+const surf=new THREE.Mesh(new THREE.CircleGeometry(1.5,64),new THREE.MeshBasicMaterial({color:0xb9fff6}));surf.rotation.x=-Math.PI/2;surf.position.y=-0.55;flask.add(surf);
+const dc=document.createElement('canvas');dc.width=dc.height=256;const dx=dc.getContext('2d');dx.font='900 190px Inter, Arial';dx.textAlign='center';dx.textBaseline='middle';dx.shadowColor='#bffff8';dx.shadowBlur=24;dx.fillStyle='#eafffd';dx.fillText('$',128,138);
+const dl=new THREE.Mesh(new THREE.PlaneGeometry(1.7,1.7),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(dc),alphaTest:0.4}));dl.position.set(0,-1.2,1.92);dl.rotation.x=-0.12;flask.add(dl);
+const bm=new THREE.MeshStandardMaterial({color:0xeafffd,emissive:0x9ff7ee,emissiveIntensity:0.6,roughness:0.1});
+const bubbles=[[0.7,-0.2,0.12],[-0.4,0.1,0.08],[0.2,0.45,0.055],[-0.8,-0.5,0.06]].map(b=>{const m=new THREE.Mesh(new THREE.SphereGeometry(b[2],24,24),bm);m.position.set(b[0],b[1],0.9);m.userData={x:b[0],y:b[1]};flask.add(m);return m});
+const face=new THREE.Group();face.position.set(0,0.35,1.47);face.rotation.x=-0.5;
+const eyeW=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.25});
+const pupM=new THREE.MeshStandardMaterial({color:0x061214,roughness:0.2});
+const browM=new THREE.MeshStandardMaterial({color:0x061214,roughness:0.4});
+function mkEye(x){const e=new THREE.Group();const w=new THREE.Mesh(new THREE.SphereGeometry(0.30,48,48),eyeW);w.scale.set(1,1.18,0.55);e.add(w);
+ const p=new THREE.Mesh(new THREE.SphereGeometry(0.135,32,32),pupM);p.scale.set(1,1,0.7);p.position.z=0.12;e.add(p);
+ const hl=new THREE.Mesh(new THREE.SphereGeometry(0.04,16,16),new THREE.MeshBasicMaterial({color:0xffffff}));hl.position.z=0.2;e.add(hl);e.position.x=x;e.userData={p,hl};face.add(e);return e}
+const eL=mkEye(-0.43),eR=mkEye(0.43);
+function mkBrow(){const b=new THREE.Mesh(new THREE.CapsuleGeometry(0.05,0.5,8,16),browM);face.add(b);return b}
+const bL=mkBrow(),bR=mkBrow();flask.add(face);scene.add(flask);
+const EXPR={neutral:{ba:-0.06,by:0.42,es:1,ly:0,bl:0.5},happy:{ba:-0.2,by:0.52,es:1,ly:0.3,bl:0.5},wow:{ba:-0.12,by:0.64,es:1.2,ly:0.2,bl:0.4},think:{ba:0.08,by:0.46,es:0.95,ly:0.25,bl:0.5}};
+function exprAt(list,t){let cur=list[0];let prev=list[0];for(const e of list){if(t>=e[0]){prev=cur;cur=e}}
+ const a=EXPR[prev[1]],b=EXPR[cur[1]];const f=eio((t-cur[0])/0.3);const o={};for(const kk in a)o[kk]=lerp(a[kk],b[kk],f);return o}
+function drawFlask(p){ // p: {ex, lookx, looky, blink, yaw, roll, pitch, sx, sy, bob}
+ const e=p.ex;
+ [eL,eR].forEach((eye,i)=>{const s=e.es;eye.scale.set(s,s*(1-p.blink*0.9),s);
+  eye.userData.p.position.set(p.lookx*0.1,(p.looky+e.ly)*0.08,0.12);eye.userData.hl.position.set(p.lookx*0.1+0.05,(p.looky+e.ly)*0.08+0.07,0.2)});
+ bL.rotation.z=Math.PI/2+e.ba;bR.rotation.z=Math.PI/2-e.ba;
+ bL.position.set(-0.43,e.by,0.06);bR.position.set(0.43,e.by,0.06);
+ flask.rotation.set(p.pitch,p.yaw,p.roll);flask.scale.set(p.sx,p.sy,p.sx);flask.position.y=p.bob;
+ bubbles.forEach((b,i)=>{b.position.y=b.userData.y+0.06*Math.sin(p.t*1.6+i*1.7)});
+ rdr.render(scene,cam);}
+// ---------- timeline
+const T={s1:[0,6],s2:[6,13],s3:[13,19],s4:[19,29],s5:[29,38],s6:[38,47],s7:[47,56],s8:[56,62],s9:[62,68]};
+const flaskExpr=[[0,'neutral'],[3,'think'],[5.2,'neutral'],[6,'neutral'],[9.4,'wow'],[12.6,'neutral'],[14.2,'happy'],[19,'happy'],[29,'neutral'],[31,'happy'],[38,'happy'],[42.2,'wow'],[45,'happy'],[47,'happy'],[56,'happy'],[62,'happy']];
+// flask placement keyframes: [t, cssLeft, cssTop, scale(css)]
+const FP=[[0,1130,90,0.875],[13,1130,90,0.875],[14.2,1150,-10,0.775],[18.2,1150,-10,0.775],[19.6,120,690,0.375],[61,120,690,0.375],[62.4,560,-70,0.95],[68,560,-70,0.95]];
+function fpos(t){let a=FP[0],b=FP[FP.length-1];for(let i=0;i<FP.length-1;i++){if(t>=FP[i][0]&&t<=FP[i+1][0]){a=FP[i];b=FP[i+1];break}}
+ const f=b[0]===a[0]?1:eio((t-a[0])/(b[0]-a[0]));return [lerp(a[1],b[1],f),lerp(a[2],b[2],f),lerp(a[3],b[3],f)]}
+const BUB=[ // t0,t1,text, mode
+ [3.0,5.6,'Betul ke untung RM5?','d'],[10.3,12.6,'Cuma RM1.35?!','d'],[15.2,17.8,'Jom kira betul.','l'],
+ [20.2,23.6,'Harga pek, kuantiti. Siap.','l'],[30.0,33.2,'Sewa pun masuk.','l'],[43.0,46.2,'Inilah untung sebenar.','l'],
+ [48.0,52.4,'Pilih margin, harga terus keluar.','l'],[57.0,60.4,'Nampak yang rugi terus.','l'],[63.0,65.4,'Jom!','d']];
+function seek(t){
+ const st=$('st');
+ // fade
+ $('fade').style.opacity=Math.max(clamp(1-t/0.6),clamp((t-67.2)/0.8));
+ // ---- dark scenes text
+ const reveal=(el,t0,dy=24,dur=0.5)=>{const p=eo((t-t0)/dur);el.style.opacity=p;el.style.transform=`translateY(${(1-p)*dy}px)`;el.style.filter=`blur(${(1-p)*8}px)`};
+ const s1v=clamp((13.4-t)/0.4);
+ $('s1').style.opacity=t<6?1:clamp((6.4-t)/0.4);
+ reveal($('s1a'),0.5);reveal($('s1b'),1.3,40,0.6);reveal($('s1c'),1.9,40,0.6);
+ $('s2').style.opacity=t<6?0:(t<13?clamp((t-6)/0.01)*clamp((13.6-t)/0.5):0);
+ if(t>=6){reveal($('s2a'),6.4,30);
+  const x=eio((t-8.4)/0.55);$('s2x').style.width=(x*470)+'px';
+  const rep=t>9.2;$('s2a').style.color=rep?'#7b8f91':'#fff';
+  if(t>9.0&&t<9.5){$('s2a').style.transform=`translate(${(Math.sin(t*90)*6)}px,${Math.cos(t*80)*4}px)`}
+  reveal($('s2b'),7.0,14);
+  const p=eob((t-9.9)/0.55);$('s2c').style.opacity=clamp(p*2);$('s2c').style.transform=`scale(${0.7+0.3*p})`;$('s2c').style.transformOrigin='left center';$('s2c').style.filter='none';
+  reveal($('s2d'),11.0,14)}
+ // s3 text + wipe
+ const wipe=eio((t-13.0)/1.3); // 0..1
+ const bx=lerp(130,48,wipe);const bx2=t>16.6?lerp(48,-8,eio((t-16.6)/1.6)):bx;
+ const x1=Math.max(bx2,-8);
+ $('lt').style.clipPath=`polygon(${x1+8}% 0,100% 0,100% 100%,${x1-8}% 100%)`;
+ if(t>=14.6)$('lt').style.clipPath=`polygon(${x1+8}% 0,100% 0,100% 100%,${x1-8}% 100%)`;
+ $('lt2').style.opacity=t>14.4?1:0;
+ $('s3t').style.opacity=t<13?0:(t<18.4?1:0);
+ reveal($('s3a'),13.4,20);
+ const barp=eob((t-14.8)/0.6)*clamp((18.9-t)/0.4);$('s3bar').style.opacity=clamp(barp);$('s3bar').style.transform=`translateY(${(1-clamp(barp))*40}px) scale(${0.9+0.1*clamp(barp)})`;
+ // ---- headlines
+ const H=[['h4',19,29],['h5',29,38],['h6',38,47],['h7',47,56],['h8',56,62]];
+ H.forEach(([id,a,b])=>{const e=$(id);const pin=eo((t-(a+0.3))/0.5),pout=clamp((b-t)/0.35);const o=pin*pout;e.style.opacity=o;e.style.transform=`translateY(${(1-pin)*28}px)`;e.style.filter=`blur(${(1-o)*8}px)`});
+ // h7 dynamic
+ const seg7=t<49.5?'20%':t<52?'30%':t<54?'40%':'50%';const pr={'20%':'RM5.78.','30%':'RM6.78.','40%':'RM8.21.','50%':'RM10.40.'}[seg7];
+ $('h7p').textContent=seg7+'?';$('h7r').textContent=pr;
+ // ---- phone
+ const pin=eo((t-18.9)/0.9),pout=clamp((62.2-t)/0.5);
+ $('rigw').style.opacity=pin*pout;
+ const dr=Math.sin(t*0.5),dr2=Math.sin(t*0.7);
+ const ent=(1-pin);
+ $('rig').style.transform=`translateX(${ent*520}px) rotateY(${-24+3*dr+ent*20}deg) rotateX(${7+1.2*dr2}deg) rotateZ(${2}deg) translateY(${8*dr2}px)`;
+ // screens
+ const SC=[['i_bahan',19.4,25.2],['i_form',24.8,29.4],['i_ops',29,38.4],['i_det',37.8,41.6],['i_res',41,47.4],['i_c20',46.8,49.8],['i_c30',49.4,52.2],['i_c40',51.8,54.2],['i_c50',53.8,56.4],['i_dash',56,62.3]];
+ SC.forEach(([id,a,b])=>{const e=$(id);const i=eo((t-a)/0.5),o=clamp((b-t)/0.5);const v=Math.min(i,o>0?1:0)*1;const op=t<a?0:(t>b?0:clamp(Math.min((t-a)/0.45,(b-t)/0.45)));e.style.opacity=(id==='i_bahan'||true)?Math.min(1,op*1.0):0;
+  const z=1+0.04*clamp((t-a)/(b-a));e.style.transform=`scale(${z}) translateY(${(1-eo((t-a)/0.6))*34}px)`});
+ // fix bottom layering: ensure earlier image stays under next while crossfading (opacity handles)
+ // cards
+ const card=(id,a,b,dz=0)=>{const e=$(id);const p=eob((t-a)/0.55),o=clamp((b-t)/0.4);const v=clamp(p)*o;e.style.opacity=v;
+  const fl=Math.sin(t*1.3+a)*6;e.style.transform=`translateZ(${160+dz}px) translateY(${(1-clamp(p))*34+fl}px) scale(${0.82+0.18*clamp(p)})`};
+ card('k_butter',21.4,25.0);card('k_jum',24.6,28.8,30);
+ card('k_elek',31.0,35.2);card('k_sewa',34.0,37.9,30);
+ // untung card with shake pop
+ card('k_untung',42.4,46.8);
+ const sh=t>42.4&&t<42.8?Math.sin(t*120)*5:0;$('k_untung').style.marginLeft=sh+'px';
+ card('k_tanpa',44.2,46.9,30);$('k_tanpab').style.textDecoration=t>45.2?'line-through':'none';
+ card('k_harga',47.4,55.9);
+ const chip=seg7;const chipEls=$('kh_c').children;[...chipEls].forEach(c=>c.className=c.textContent===chip?'on':'');
+ $('kh_b').textContent=pr.slice(0,-1);$('kh_sp').textContent='margin sasaran '+chip;
+ card('k_avg',57.3,61.8);
+ // ---- closer
+ const sp=t>=62;
+ $('s9').style.opacity=sp?1:0;
+ if(sp){const l=eo((t-62.6)/0.6);$('s9logo').style.opacity=l;
+  reveal($('s9a'),63.2,30);
+  const cp=eob((t-64.6)/0.6);$('cta').style.opacity=clamp(cp*2);$('cta').style.transform=`scale(${0.8+0.2*clamp(cp)})`;
+  const pu=t>65.4?1+0.04*Math.sin((t-65.4)*6):1;$('ctap').style.transform=`scale(${pu})`}
+ // dark bg fade for closer (light layer clip out)
+ if(t>=61.6){const o=eio((t-61.6)/0.8);$('lt').style.opacity=1-o;$('lt2').style.opacity=1-o}else{$('lt').style.opacity=1}
+ // ---- flask
+ const [fx,fy,fs]=fpos(t);
+ const fl=$('fl');fl.style.transform=`translate(${fx}px,${fy}px) scale(${fs})`;fl.style.transformOrigin='0 0';
+ const visible=true;
+ // look
+ let lookx=Math.sin(t*0.9)*0.8,looky=0.1*Math.sin(t*0.5);
+ if(t<5.5){lookx=Math.sin(t*1.4)*1.0}
+ if(t>=19&&t<62){lookx=-0.2+0.0*t;looky=0}
+ if(t>=19&&t<62){ // look toward phone (right) and cards
+  lookx=0.8+0.3*Math.sin(t*0.8);looky=0.1}
+ if(t>=62){lookx=0.3*Math.sin(t*1.1);looky=0.15}
+ const blink=((t%3.4)<0.13)?Math.sin(((t%3.4)/0.13)*Math.PI):0;
+ // yaw, roll, bounce
+ let yaw=-0.3+0.12*Math.sin(t*0.7),roll=-0.04+0.03*Math.sin(t*0.9),pitch=0.03*Math.sin(t*0.6),sx=1,sy=1,bob=0.06*Math.sin(t*1.8);
+ if(t>=14.2&&t<16.0){const f=eio((t-14.2)/1.6);yaw=lerp(-0.3,-0.3+Math.PI*2,f);roll=0.05*Math.sin(f*Math.PI)}
+ if(t>=9.4&&t<10.0){const f=(t-9.4)/0.6;sy=1+0.08*Math.sin(f*Math.PI);sx=1-0.04*Math.sin(f*Math.PI);bob+=0.25*Math.sin(f*Math.PI)}
+ if(t>=42.2&&t<42.9){const f=(t-42.2)/0.7;sy=1+0.07*Math.sin(f*Math.PI);sx=1-0.04*Math.sin(f*Math.PI)}
+ if(t>=62){yaw=0.15*Math.sin(t*1.3)+(t<63.6?lerp(-Math.PI*2*0.5,0,eo((t-62)/1.6)):0);bob+=0.12*Math.abs(Math.sin((t-62)*3.2))}
+ if(t>=19&&t<62){yaw=0.35+0.1*Math.sin(t*0.8)}
+ drawFlask({ex:exprAt(flaskExpr,t),lookx,looky,blink,yaw,roll,pitch,sx,sy,bob,t});
+ // bubble
+ const b=BUB.find(x=>t>=x[0]&&t<x[1]);const be=$('bub');
+ if(b){const p=eob((t-b[0])/0.35),o=clamp((b[1]-t)/0.25);be.textContent=b[2];be.style.opacity=clamp(p)*o;
+  let bxp=fx+fs*W*0.22,byp=fy+fs*H*0.1;
+  if(t>=19&&t<62){bxp=fx+fs*W*0.85;byp=fy+fs*H*0.18}
+  if(t>=62){bxp=1180;byp=130}
+  be.style.left=bxp+'px';be.style.top=byp+'px';be.style.transform=`scale(${0.8+0.2*clamp(p)})`;be.style.transformOrigin='left bottom';
+  be.style.background=(t>=13.5&&t<62)?'rgba(255,255,255,.92)':'rgba(1,20,22,.88)';be.style.color=(t>=13.5&&t<62)?'#04181a':'#fff';be.style.borderColor=(t>=13.5&&t<62)?'rgba(15,118,110,.5)':'rgba(117,248,234,.5)'}
+ else be.style.opacity=0;
+}
+window.seek=seek;
+document.fonts.ready.then(()=>{seek(0);window.READY=true});
+</script></body></html>
