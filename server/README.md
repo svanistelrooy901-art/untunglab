@@ -27,19 +27,19 @@ Prasyarat: Node 20+, `npm i -g wrangler`, `wrangler login`.
    kemudian `wrangler d1 execute untunglab-license --remote --file=schema.sql`.
 3. **Tetapan** dalam `wrangler.toml` (`[vars]`): `TOYYIB_CATEGORY` (kod kategori ToyyibPay), `PUBLIC_BASE_URL` (alamat Worker),
    `APP_ORIGIN` dan `APP_URL` (tempat aplikasi dihoskan), `BREVO_SENDER_EMAIL` (mesti sender yang telah disahkan di Brevo).
-   `PRICE_SEN = "5900"` ialah harga (RM59). Tukar di sini untuk tukar harga; tiada kemas kini aplikasi diperlukan.
+   `PRICE_SEN = "4900"` ialah harga (RM49). `EARLY_BIRD_PRICE_SEN = "3900"` dan `EARLY_BIRD_SLOTS = "15"`: RM39 untuk 15 pembeli (berbayar) pertama (D-80); `"0"` untuk matikan. Tukar di sini untuk tukar harga; tiada kemas kini aplikasi diperlukan.
 4. **Rahsia** (tidak pernah dalam fail): `wrangler secret put TOYYIB_SECRET`, `LICENSE_PRIVATE_KEY` (tampal JSON kunci privat),
    `ADMIN_TOKEN` (rentetan rawak panjang), `BREVO_API_KEY`.
 5. `wrangler deploy`
 6. **Ujian sandbox** (WAJIB sebelum jual): biarkan `TOYYIB_BASE_URL=https://dev.toyyibpay.com` dan guna kunci/kategori sandbox.
-   Set `PRICE_SEN=100` sementara. Buka `<PUBLIC_BASE_URL>/beli`, bayar bil sandbox, dan pastikan:
+   Set `PRICE_SEN=100` dan `EARLY_BIRD_SLOTS=0` sementara. Buka `<PUBLIC_BASE_URL>/beli`, bayar bil sandbox, dan pastikan:
    - kod tiba di emel (semak juga folder spam),
    - `/terima` memaparkan kod,
    - kod boleh diaktifkan dalam aplikasi,
    - bayar dua kali tidak keluarkan dua kod untuk satu pesanan.
    Jika ToyyibPay menolak permintaan atau bentuk balasan berbeza, ubah `server/core/toyyibpay.ts` sahaja (ada ujian).
    Rumus hash callback (`md5(secret + status + order_id + refno + "ok")`) juga perlu disahkan dengan dokumentasi/sandbox semasa.
-7. **Produksi**: tukar `TOYYIB_BASE_URL=https://toyyibpay.com`, kunci dan kategori produksi, `PRICE_SEN=5900`, deploy semula.
+7. **Produksi**: tukar `TOYYIB_BASE_URL=https://toyyibpay.com`, kunci dan kategori produksi, `PRICE_SEN=4900`, `EARLY_BIRD_SLOTS=15`, deploy semula.
 8. **Aplikasi**: bina dengan
    `VITE_LICENSE_PUBLIC_KEY='<json kunci awam>' VITE_LICENSE_API_URL='<PUBLIC_BASE_URL>' VITE_BUY_URL='<PUBLIC_BASE_URL>/beli' npm run build`
    Tanpa tiga pemboleh ubah ini aplikasi berjalan sebagai versi percuma dan skrin Lesen menyatakan aktivasi belum tersedia.

@@ -5,7 +5,11 @@ import { renderBuyPage, renderReturnPage } from './pages';
 import type { Mailer, Order, Store, ToyyibClient } from './ports';
 
 export interface Config {
+  /** Normal price in sen. */
   priceSen: number;
+  /** Early-bird price in sen for the first `earlyBirdSlots` paid orders (D-80). Optional; 0 slots = no early bird. */
+  earlyBirdPriceSen?: number;
+  earlyBirdSlots?: number;
   toyyibSecret: string;
   adminToken: string;
   privateKeyJwk: JsonWebKey;
@@ -60,7 +64,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     try {
       const path = url.pathname.replace(/\/+$/, '') || '/';
       if (req.method === 'GET' && path === '/') return Response.redirect(`${config.publicBaseUrl}/beli`, 302);
-      if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(config.priceSen));
+      if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice())));
       if (req.method === 'GET' && path === '/terima') return html(renderReturnPage());
 
       if (req.method === 'POST' && path === '/api/order') return await createOrder(req, json);
@@ -99,6 +103,16 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
 
   // ---------- buying ----------
 
+  /** Price now and early-bird places left (null when there is no early bird or it is used up). The price is always decided here, never by the client. */
+  async function currentPrice(): Promise<[number, number | null, number]> {
+    const slots = config.earlyBirdSlots ?? 0;
+    if (slots > 0 && config.earlyBirdPriceSen !== undefined) {
+      const paid = await store.countPaidOrders();
+      if (paid < slots) return [config.earlyBirdPriceSen, slots - paid, config.priceSen];
+    }
+    return [config.priceSen, null, config.priceSen];
+  }
+
   async function createOrder(req: Request, json: Json): Promise<Response> {
     const body = await readJson(req);
     const name = str(body.name, 100);
@@ -106,11 +120,12 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     const phone = str(body.phone, 20);
     if (!name || !EMAIL.test(email) || !PHONE.test(phone)) return json(400, { error: 'invalid_input' });
 
+    const [price] = await currentPrice();
     const orderId = hex(deps.randomBytes(16));
     let bill: { billCode: string; payUrl: string };
     try {
       bill = await toyyib.createBill({
-        amountSen: config.priceSen, // the price is never taken from the request
+        amountSen: price, // the price is never taken from the request
         orderId,
         name,
         email,
@@ -125,7 +140,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     if (!bill.billCode) return json(502, { error: 'payment_unavailable' });
 
     const order: Order = {
-      id: orderId, name, email, phone, amountSen: config.priceSen, status: 'pending', billCode: bill.billCode,
+      id: orderId, name, email, phone, amountSen: price, status: 'pending', billCode: bill.billCode,
       licenseCode: null, emailSentAt: null, createdAt: deps.now().toISOString(), paidAt: null,
     };
     await store.createOrder(order);

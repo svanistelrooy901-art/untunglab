@@ -79,6 +79,14 @@ export function describeStore(name: string, make: () => Promise<Store>) {
       expect(await s.listDevices(c)).toEqual([]);
     });
 
+    it('counts only paid orders', async () => {
+      const s = await make();
+      await s.createOrder(order());
+      expect(await s.countPaidOrders()).toBe(0);
+      await s.markOrderPaid('o1', 'UL-AAAA-BBBB-CCCC', '2026-09-30T01:00:00.000Z');
+      expect(await s.countPaidOrders()).toBe(1);
+    });
+
     it('counts failures only inside the window', async () => {
       const s = await make();
       await s.recordFailure('1.1.1.1', '2026-09-30T00:00:00.000Z');

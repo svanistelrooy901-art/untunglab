@@ -277,6 +277,49 @@ describe('browser access', () => {
   });
 });
 
+describe('early bird (D-80)', () => {
+  const early = { priceSen: 4900, earlyBirdPriceSen: 3900, earlyBirdSlots: 2 };
+  const buy = async (w: Awaited<ReturnType<typeof makeWorld>>, n: number) => {
+    const res = await w.call('POST', '/api/order', { name: 'A', email: `a${n}@b.co`, phone: '0123456789' });
+    return (await w.json(res)).orderId as string;
+  };
+  it('charges RM39 for the first slots of paid orders, then RM49', async () => {
+    const w = await makeWorld(early);
+    const o1 = await buy(w, 1);
+    expect(w.bills[0]!.amountSen).toBe(3900);
+    // a pending order does not use up a place
+    const o2 = await buy(w, 2);
+    expect(w.bills[1]!.amountSen).toBe(3900);
+    await w.store.markOrderPaid(o1, 'UL-AAAA-BBBB-CCCC', '2026-10-06T00:00:00.000Z');
+    const o3 = await buy(w, 3);
+    expect(w.bills[2]!.amountSen).toBe(3900);
+    await w.store.markOrderPaid(o2, 'UL-AAAA-BBBB-DDDD', '2026-10-06T00:00:00.000Z');
+    await buy(w, 4);
+    expect(w.bills[3]!.amountSen).toBe(4900);
+    // the price of an order already created stays what it was
+    expect((await w.store.getOrder(o3))?.amountSen).toBe(3900);
+  });
+  it('without early-bird config the normal price applies', async () => {
+    const w = await makeWorld({ priceSen: 4900 });
+    await buy(w, 1);
+    expect(w.bills[0]!.amountSen).toBe(4900);
+  });
+  it('the buy page shows the early-bird price and places left, then the normal price', async () => {
+    const w = await makeWorld(early);
+    let html = await (await w.call('GET', '/beli')).text();
+    expect(html).toContain('RM39');
+    expect(html).toContain('2 pembeli pertama');
+    expect(html).toContain('RM49');
+    const o1 = await buy(w, 1);
+    const o2 = await buy(w, 2);
+    await w.store.markOrderPaid(o1, 'UL-AAAA-BBBB-CCCC', '2026-10-06T00:00:00.000Z');
+    await w.store.markOrderPaid(o2, 'UL-AAAA-BBBB-DDDD', '2026-10-06T00:00:00.000Z');
+    html = await (await w.call('GET', '/beli')).text();
+    expect(html).not.toContain('early bird');
+    expect(html).toContain('RM49');
+  });
+});
+
 describe('pages', () => {
   it('the buy page shows the price from config and links nothing secret', async () => {
     const w = await makeWorld();

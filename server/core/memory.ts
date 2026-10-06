@@ -61,6 +61,9 @@ export class MemoryStore implements Store {
   async recordFailure(key: string, at: string) {
     this.failures.set(key, [...(this.failures.get(key) ?? []), at]);
   }
+  async countPaidOrders() {
+    return [...this.orders.values()].filter((o) => o.status === 'paid').length;
+  }
   async countFailures(key: string, since: string) {
     return (this.failures.get(key) ?? []).filter((t) => t >= since).length;
   }

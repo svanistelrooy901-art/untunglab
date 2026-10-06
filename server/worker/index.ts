@@ -9,6 +9,8 @@ export interface Env {
   DB: D1Database;
   // plain variables (wrangler.toml)
   PRICE_SEN: string;
+  EARLY_BIRD_PRICE_SEN?: string;
+  EARLY_BIRD_SLOTS?: string;
   TOYYIB_BASE_URL: string;
   TOYYIB_CATEGORY: string;
   PUBLIC_BASE_URL: string;
@@ -49,6 +51,8 @@ export default {
       randomBytes: (n) => crypto.getRandomValues(new Uint8Array(n)),
       config: {
         priceSen: Number(env.PRICE_SEN),
+        earlyBirdPriceSen: env.EARLY_BIRD_PRICE_SEN ? Number(env.EARLY_BIRD_PRICE_SEN) : undefined,
+        earlyBirdSlots: env.EARLY_BIRD_SLOTS ? Number(env.EARLY_BIRD_SLOTS) : 0,
         toyyibSecret: env.TOYYIB_SECRET,
         adminToken: env.ADMIN_TOKEN,
         privateKeyJwk,

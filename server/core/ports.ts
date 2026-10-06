@@ -45,6 +45,8 @@ export interface Store {
   clearDevices(code: string): Promise<void>;
   recordFailure(key: string, at: string): Promise<void>;
   countFailures(key: string, since: string): Promise<number>;
+  /** Orders that are paid; decides whether early-bird places remain. */
+  countPaidOrders(): Promise<number>;
 }
 
 export interface Transaction {

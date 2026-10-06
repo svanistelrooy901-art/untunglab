@@ -84,6 +84,10 @@ export class D1Store implements Store {
     await this.db.prepare('INSERT INTO failures (key, at) VALUES (?,?)').bind(key, at).run();
   }
 
+  async countPaidOrders() {
+    const r = await this.db.prepare("SELECT COUNT(*) AS n FROM orders WHERE status = 'paid'").first<{ n: number }>();
+    return r?.n ?? 0;
+  }
   async countFailures(key: string, since: string) {
     const r = await this.db.prepare('SELECT COUNT(*) AS n FROM failures WHERE key = ? AND at >= ?').bind(key, since).first<{ n: number }>();
     return r?.n ?? 0;

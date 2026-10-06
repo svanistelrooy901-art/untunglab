@@ -16,11 +16,12 @@ button[disabled]{opacity:.5}
 .err{color:#B91C1C;font-weight:600}
 </style></head><body><main>${body}</main></body></html>`;
 
-export function renderBuyPage(priceSen: number): string {
+export function renderBuyPage(priceSen: number, earlyLeft: number | null = null, normalSen: number = priceSen): string {
   return shell(
     'Beli UntungLab',
     `<h1>UntungLab</h1>
 <p>Tahu kos sebenar menu anda. Bayaran sekali ${rm(priceSen)}, akses seumur hidup, boleh digunakan pada 2 peranti.</p>
+${earlyLeft !== null ? `<p><strong>Harga early bird</strong>: ${rm(priceSen)} untuk ${earlyLeft} pembeli pertama yang tinggal. Selepas itu ${rm(normalSen)}.</p>` : ''}
 <div class="card">
 <form id="f">
 <label for="n">Nama</label><input id="n" autocomplete="name" required maxlength="100">
