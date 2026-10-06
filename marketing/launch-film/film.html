@@ -43,6 +43,36 @@
 .bar img{height:92px;display:block}
 #fade{position:absolute;inset:0;background:#000;opacity:1;z-index:99;pointer-events:none}
 .strikeline{position:absolute;height:12px;background:#ff5a5f;border-radius:6px;box-shadow:0 0 30px rgba(255,90,95,.7)}
+
+#bub{--bg:rgba(1,20,22,.88)}
+#bub::after{content:"";position:absolute;top:50%;margin-top:-11px;border:11px solid transparent}
+#bub.L::after{right:-21px;border-left-color:var(--bg)}
+#bub.R::after{left:-21px;border-right-color:var(--bg)}
+body.v #bub{white-space:normal;max-width:300px;font-size:28px}
+body.v #st{width:1080px;height:1920px}
+body.v .hl{left:80px;top:130px}
+body.v .hl h1{font-size:76px}
+body.v .hl p{font-size:27px;max-width:880px}
+body.v #rigw{left:0;top:470px;width:1080px;height:1400px;transform:scale(1.1);transform-origin:540px 0}
+body.v .rig{left:325px;top:40px}
+body.v #k_butter,body.v #k_elek,body.v #k_untung,body.v #k_avg{left:-230px!important}
+body.v #k_harga{left:-240px!important}
+body.v #s1tg{left:80px!important;top:230px!important}
+body.v #s1a{left:80px!important;top:290px!important;font-size:60px!important}
+body.v #s1b{left:80px!important;top:380px!important;font-size:140px!important}
+body.v #s1c{left:80px!important;top:530px!important;font-size:140px!important}
+body.v #s2 .tg{left:80px!important;top:190px!important}
+body.v #s2a{left:80px!important;top:250px!important;font-size:170px!important}
+body.v #s2x{left:72px!important;top:346px!important}
+body.v #s2b{left:86px!important;top:470px!important;font-size:28px!important}
+body.v #s2c{left:80px!important;top:560px!important;font-size:190px!important}
+body.v #s2d{left:86px!important;top:800px!important;font-size:28px!important}
+body.v #s3t .tg{left:80px!important;top:230px!important}
+body.v #s3a{left:80px!important;top:300px!important;font-size:100px!important}
+body.v #s3bar{left:215px!important;top:1610px!important}
+body.v #s9logo{left:350px!important;top:70px!important;width:380px!important}
+body.v #s9a{top:1330px!important;font-size:92px!important;white-space:normal!important;line-height:1.08}
+body.v #cta{top:1560px!important}
 </style></head><body>
 <div id="st">
  <div class="dkbg"></div><div class="dkglow"></div>
@@ -104,6 +134,7 @@
  <div id="fade"></div>
 </div>
 <script type="module">
+const V=location.search.includes('v=1');if(V)document.body.classList.add('v');
 import * as THREE from 'three';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 const $=id=>document.getElementById(id);
@@ -160,7 +191,7 @@ function drawFlask(p){ // p: {ex, lookx, looky, blink, yaw, roll, pitch, sx, sy,
 const T={s1:[0,6],s2:[6,13],s3:[13,19],s4:[19,29],s5:[29,38],s6:[38,47],s7:[47,56],s8:[56,62],s9:[62,68]};
 const flaskExpr=[[0,'neutral'],[3,'think'],[5.2,'neutral'],[6,'neutral'],[9.4,'wow'],[12.6,'neutral'],[14.2,'happy'],[19,'happy'],[29,'neutral'],[31,'happy'],[38,'happy'],[42.2,'wow'],[45,'happy'],[47,'happy'],[56,'happy'],[62,'happy']];
 // flask placement keyframes: [t, cssLeft, cssTop, scale(css)]
-const FP=[[0,1130,90,0.875],[13,1130,90,0.875],[14.2,1150,-10,0.775],[18.2,1150,-10,0.775],[19.6,120,690,0.375],[61,120,690,0.375],[62.4,560,-70,0.95],[68,560,-70,0.95]];
+const FP=V?[[0,140,800,0.95],[13,140,800,0.95],[14.2,160,760,0.85],[18.2,160,760,0.85],[19.6,40,1550,0.3],[61,40,1550,0.3],[62.4,140,330,0.95],[68,140,330,0.95]]:[[0,1130,90,0.875],[13,1130,90,0.875],[14.2,1150,-10,0.775],[18.2,1150,-10,0.775],[19.6,120,690,0.375],[61,120,690,0.375],[62.4,560,-70,0.95],[68,560,-70,0.95]];
 function fpos(t){let a=FP[0],b=FP[FP.length-1];for(let i=0;i<FP.length-1;i++){if(t>=FP[i][0]&&t<=FP[i+1][0]){a=FP[i];b=FP[i+1];break}}
  const f=b[0]===a[0]?1:eio((t-a[0])/(b[0]-a[0]));return [lerp(a[1],b[1],f),lerp(a[2],b[2],f),lerp(a[3],b[3],f)]}
 const BUB=[ // t0,t1,text, mode
@@ -178,7 +209,7 @@ function seek(t){
  reveal($('s1a'),0.5);reveal($('s1b'),1.3,40,0.6);reveal($('s1c'),1.9,40,0.6);
  $('s2').style.opacity=t<6?0:(t<13?clamp((t-6)/0.01)*clamp((13.6-t)/0.5):0);
  if(t>=6){reveal($('s2a'),6.4,30);
-  const x=eio((t-8.4)/0.55);$('s2x').style.width=(x*470)+'px';
+  const x=eio((t-8.4)/0.55);$('s2x').style.width=(x*(V?420:470))+'px';
   const rep=t>9.2;$('s2a').style.color=rep?'#7b8f91':'#fff';
   if(t>9.0&&t<9.5){$('s2a').style.transform=`translate(${(Math.sin(t*90)*6)}px,${Math.cos(t*80)*4}px)`}
   reveal($('s2b'),7.0,14);
@@ -191,7 +222,7 @@ function seek(t){
  $('lt').style.clipPath=`polygon(${x1+8}% 0,100% 0,100% 100%,${x1-8}% 100%)`;
  if(t>=14.6)$('lt').style.clipPath=`polygon(${x1+8}% 0,100% 0,100% 100%,${x1-8}% 100%)`;
  $('lt2').style.opacity=t>14.4?1:0;
- $('s3t').style.opacity=t<13?0:(t<18.4?1:0);
+ $('s3t').style.opacity=t<13?0:(V?clamp((15.8-t)/0.5):(t<18.4?1:0));
  reveal($('s3a'),13.4,20);
  const barp=eob((t-14.8)/0.6)*clamp((18.9-t)/0.4);$('s3bar').style.opacity=clamp(barp);$('s3bar').style.transform=`translateY(${(1-clamp(barp))*40}px) scale(${0.9+0.1*clamp(barp)})`;
  // ---- headlines
@@ -256,10 +287,13 @@ function seek(t){
  // bubble
  const b=BUB.find(x=>t>=x[0]&&t<x[1]);const be=$('bub');
  if(b){const p=eob((t-b[0])/0.35),o=clamp((b[1]-t)/0.25);be.textContent=b[2];be.style.opacity=clamp(p)*o;
-  let bxp=fx+fs*W*0.22,byp=fy+fs*H*0.1;
-  if(t>=19&&t<62){bxp=fx+fs*W*0.85;byp=fy+fs*H*0.18}
-  if(t>=62){bxp=1180;byp=130}
-  be.style.left=bxp+'px';be.style.top=byp+'px';be.style.transform=`scale(${0.8+0.2*clamp(p)})`;be.style.transformOrigin='left bottom';
+  const dk=(t<13.5||t>=62);const cx=fx+fs*W*0.5,hw=fs*W*0.31;
+  let side=(t>=19||V)?'R':'L';if(t>=62)side='R';
+  let bxp,byp;
+  if(side==='L'){bxp=cx-hw-26;byp=fy+fs*900*0.3}else{bxp=cx+hw+26;byp=fy+fs*900*(t>=62?0.45:0.35)}
+  if(V&&t>=19&&t<62){bxp=fx+fs*W*0.62+20;byp=fy-60;side='R'}
+  be.className=side;be.style.setProperty('--bg',dk?'rgba(1,20,22,.88)':'rgba(255,255,255,.92)');
+  be.style.left=bxp+'px';be.style.top=byp+'px';be.style.transform=`translate(${side==='L'?'-100%':'0'},-50%) scale(${0.8+0.2*clamp(p)})`;be.style.transformOrigin=side==='L'?'right center':'left center';
   be.style.background=(t>=13.5&&t<62)?'rgba(255,255,255,.92)':'rgba(1,20,22,.88)';be.style.color=(t>=13.5&&t<62)?'#04181a':'#fff';be.style.borderColor=(t>=13.5&&t<62)?'rgba(15,118,110,.5)':'rgba(117,248,234,.5)'}
  else be.style.opacity=0;
 }
