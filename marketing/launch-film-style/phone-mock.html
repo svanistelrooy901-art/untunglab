@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Inter;src:url(/tmp/vid2/assets/inter.woff2) format("woff2");font-weight:100 900}
+*{box-sizing:border-box}html,body{margin:0}
+body{width:1920px;height:1080px;overflow:hidden;font-family:Inter,sans-serif;background:#eef4f4;position:relative;color:#0b1f21}
+.bg{position:absolute;inset:0;background:radial-gradient(900px 700px at 78% 45%,#d9fbf6 0,#eef6f6 55%,#f4f2fb 100%)}
+.bg2{position:absolute;inset:0;background:radial-gradient(500px 400px at 20% 90%,rgba(140,120,255,.14),transparent 70%)}
+.t{position:absolute;left:150px;top:300px}
+.t h1{font-size:112px;line-height:1.02;margin:0;font-weight:800;letter-spacing:-3px;color:#04181a}
+.t h1 em{font-style:normal;background:linear-gradient(90deg,#0aa89a,#2f7bff 70%,#7a5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.t p{font-size:30px;line-height:1.45;color:#4d6668;margin:30px 0 0;max-width:600px}
+.scene{position:absolute;left:1000px;top:0;width:800px;height:1080px;perspective:2400px}
+.rig{position:absolute;left:150px;top:90px;width:430px;height:900px;transform-style:preserve-3d;transform:rotateY(-24deg) rotateX(7deg) rotateZ(2deg)}
+.phone{position:absolute;inset:0;border-radius:78px;background:linear-gradient(135deg,#d7dde0 0,#8a9498 18%,#e9eef0 40%,#7c868a 62%,#cdd4d6 100%);padding:11px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 2px 0 #aab3b6,0 4px 0 #8f999c,0 6px 0 #7b8588,0 8px 0 #687073,0 10px 0 #5a6366,0 60px 90px rgba(5,30,34,.35),0 20px 40px rgba(5,30,34,.25)}
+.bez{width:100%;height:100%;border-radius:68px;background:#05090a;padding:12px;position:relative}
+.scr{width:100%;height:100%;border-radius:56px;overflow:hidden;position:relative;background:#fff}
+.scr img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.di{position:absolute;left:50%;top:22px;width:122px;height:36px;margin-left:-61px;border-radius:20px;background:#000;z-index:5}
+.glare{position:absolute;inset:0;border-radius:56px;background:linear-gradient(115deg,rgba(255,255,255,.28) 0,rgba(255,255,255,.06) 28%,transparent 40%);z-index:6;pointer-events:none}
+.btn{position:absolute;width:6px;border-radius:3px;background:linear-gradient(90deg,#6d777a,#c9d0d2)}
+.shadow{position:absolute;left:40px;right:-30px;bottom:-60px;height:70px;border-radius:50%;background:rgba(5,30,34,.28);filter:blur(34px);transform:translateZ(-60px)}
+.card{position:absolute;border-radius:26px;background:rgba(255,255,255,.72);backdrop-filter:blur(18px);border:1.5px solid rgba(255,255,255,.9);box-shadow:0 30px 60px rgba(8,50,56,.22);padding:22px 26px;transform-style:preserve-3d}
+.c1{left:-210px;top:300px;width:300px;transform:translateZ(150px)}
+.c2{right:-160px;top:560px;width:300px;transform:translateZ(190px)}
+.card small{display:block;font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0f766e}
+.card b{display:block;font-size:50px;font-weight:800;letter-spacing:-1px;margin-top:4px}
+.card span{font-size:18px;color:#4d6668}
+.pill{display:inline-block;margin-top:8px;padding:6px 14px;border-radius:99px;background:#fdecc8;color:#8a4b00;font-weight:700;font-size:17px}
+.chips{display:flex;gap:8px;margin-top:10px}.chips i{font-style:normal;font-weight:700;font-size:18px;padding:7px 14px;border-radius:99px;background:#fff;border:1.5px solid #cfe3e1}.chips i.on{background:#0f766e;color:#fff;border-color:#0f766e}
+</style></head><body><div class="bg"></div><div class="bg2"></div>
+<div class="t"><h1>Kira betul.<br><em>Untung jelas.</em></h1><p>Kos sebenar, margin dan harga jual yang betul. Semua dalam satu app.</p></div>
+<div class="scene"><div class="rig">
+ <div class="shadow"></div>
+ <div class="phone"><div class="bez"><div class="scr"><img id="s" src="cad.png"><div class="di"></div><div class="glare"></div></div></div></div>
+ <div class="btn" style="left:-6px;top:150px;height:56px"></div><div class="btn" style="left:-6px;top:240px;height:96px"></div><div class="btn" style="left:-6px;top:350px;height:96px"></div><div class="btn" style="right:-6px;top:280px;height:140px"></div>
+ <div class="card c1"><small>Untung sebenar</small><b>RM1.35</b><span>22.5% sebiji</span><br><span class="pill">▼ Margin Rendah</span></div>
+ <div class="card c2"><small>Cadangan harga</small><b>RM6.78</b><div class="chips"><i>20%</i><i class="on">30%</i><i>40%</i></div></div>
+</div></div></body></html>
