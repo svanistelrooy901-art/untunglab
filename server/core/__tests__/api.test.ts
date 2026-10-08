@@ -82,11 +82,20 @@ describe('ToyyibPay callback', () => {
     const w = await makeWorld();
     for (const status of ['2', '3', '4']) {
       const o = await w.order();
-      w.confirmPaid(o.orderId);
       await w.callback(w.callbackBody(o, { status }));
       expect((await w.json(await w.call('GET', `/api/order/${o.orderId}`))).status).toBe('pending');
     }
     expect(w.store.licenseCount()).toBe(0);
+  });
+  it('polling the order confirms a paid bill even if the callback never arrives', async () => {
+    const w = await makeWorld();
+    const o = await w.order();
+    expect((await w.json(await w.call('GET', `/api/order/${o.orderId}`))).status).toBe('pending');
+    w.confirmPaid(o.orderId);
+    const r = await w.json(await w.call('GET', `/api/order/${o.orderId}`));
+    expect(r.status).toBe('paid');
+    await w.call('GET', `/api/order/${o.orderId}`);
+    expect(w.store.licenseCount()).toBe(1);
   });
   it('a genuine-looking callback that ToyyibPay does not confirm issues nothing', async () => {
     const w = await makeWorld();

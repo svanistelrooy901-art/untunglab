@@ -151,39 +151,25 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     return json(200, { orderId, payUrl: bill.payUrl });
   }
 
-  async function orderStatus(id: string, json: Json): Promise<Response> {
-    const order = await store.getOrder(id);
-    if (!order) return json(404, { error: 'not_found' });
-    return order.status === 'paid' && order.licenseCode ? json(200, { status: 'paid', code: order.licenseCode }) : json(200, { status: 'pending' });
-  }
-
   /**
-   * ToyyibPay's callback is never trusted on its own: the hash must match AND ToyyibPay must confirm the payment
-   * (right order, paid status, right amount) when asked directly. Only then is a licence issued.
+   * Asks ToyyibPay directly whether this order's bill is paid (right status, right amount) and, only then, issues the licence.
+   * Shared by the callback and by the return page's polling, so confirmation never depends on the callback alone.
    */
-  async function callback(req: Request): Promise<Response> {
-    const f = new URLSearchParams(await req.text());
-    const status = f.get('status') ?? '';
-    const orderId = f.get('order_id') ?? '';
-    const refno = f.get('refno') ?? '';
-    const hash = f.get('hash') ?? '';
-    if (!status || !orderId || !refno || !hash) return new Response('bad request', { status: 400 });
-    if (!safeEqual(hash.toLowerCase(), md5(config.toyyibSecret + status + orderId + refno + 'ok'))) return new Response('bad hash', { status: 400 });
-    if (status !== '1') return new Response('OK');
-
-    const order = await store.getOrder(orderId);
-    if (!order || order.status === 'paid') return new Response('OK');
-
+  async function confirmAndIssue(order: Order): Promise<boolean> {
     let transactions;
     try {
       transactions = await toyyib.getTransactions(order.billCode);
     } catch (e) {
       console.error('getTransactions failed', e);
-      return new Response('try again', { status: 500 });
+      return false;
     }
-    const confirmed = transactions.some((t) => t.orderId === order.id && t.status === '1' && t.amountSen === order.amountSen);
-    if (!confirmed) return new Response('OK');
-
+    const confirmed = transactions.some(
+      (t) => (t.orderId === '' || t.orderId === order.id) && t.status === '1' && t.amountSen === order.amountSen,
+    );
+    if (!confirmed) {
+      console.log('payment not confirmed for order', order.id, JSON.stringify(transactions));
+      return false;
+    }
     let issued: { code: string; first: boolean } | null = null;
     for (let attempt = 0; attempt < 5 && !issued; attempt++) {
       try {
@@ -200,7 +186,41 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
         console.error('email failed; the code is on the order and can be resent', e);
       }
     }
-    return new Response('OK');
+    return true;
+  }
+
+  async function orderStatus(id: string, json: Json): Promise<Response> {
+    let order = await store.getOrder(id);
+    if (!order) return json(404, { error: 'not_found' });
+    if (order.status !== 'paid') {
+      await confirmAndIssue(order);
+      order = (await store.getOrder(id)) ?? order;
+    }
+    return order.status === 'paid' && order.licenseCode ? json(200, { status: 'paid', code: order.licenseCode }) : json(200, { status: 'pending' });
+  }
+
+  /**
+   * ToyyibPay's callback is never trusted on its own: the hash must match AND ToyyibPay must confirm the payment
+   * when asked directly. Only then is a licence issued.
+   */
+  async function callback(req: Request): Promise<Response> {
+    const f = new URLSearchParams(await req.text());
+    const status = f.get('status') ?? '';
+    const orderId = f.get('order_id') ?? '';
+    const refno = f.get('refno') ?? '';
+    const hash = f.get('hash') ?? '';
+    console.log('callback received', JSON.stringify({ status, orderId, refno, hasHash: !!hash }));
+    if (!status || !orderId || !refno || !hash) return new Response('bad request', { status: 400 });
+    if (!safeEqual(hash.toLowerCase(), md5(config.toyyibSecret + status + orderId + refno + 'ok'))) {
+      console.error('callback hash mismatch for order', orderId);
+      return new Response('bad hash', { status: 400 });
+    }
+    if (status !== '1') return new Response('OK');
+
+    const order = await store.getOrder(orderId);
+    if (!order || order.status === 'paid') return new Response('OK');
+    const ok = await confirmAndIssue(order);
+    return ok ? new Response('OK') : new Response('try again', { status: 500 });
   }
 
   // ---------- devices ----------
