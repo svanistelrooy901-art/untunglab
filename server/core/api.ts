@@ -69,7 +69,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       const path = url.pathname.replace(/\/+$/, '') || '/';
       if (req.method === 'GET' && path === '/') return Response.redirect(`${config.publicBaseUrl}/beli`, 302);
       if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice()), config.appUrl));
-      if (req.method === 'GET' && path === '/terima') return html(renderReturnPage());
+      if (req.method === 'GET' && path === '/terima') return html(renderReturnPage(config.appUrl));
 
       if (req.method === 'POST' && path === '/api/order') return await createOrder(req, json);
       const orderMatch = /^\/api\/order\/([0-9a-f]{32})$/.exec(path);

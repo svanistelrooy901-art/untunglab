@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { clearActivation, saveActivation } from '../../db';
 import { t } from '../../i18n/ms';
 import { activateDevice, releaseDevice, type ActivateError, type DeviceInfo } from '../../license/client';
@@ -27,7 +28,8 @@ function deviceLabel(): string {
 export function LesenPage() {
   const ctx = useData();
   const { plan, ready, deviceId, codeHint } = useLicense();
-  const [code, setCode] = useState('');
+  const [params] = useSearchParams();
+  const [code, setCode] = useState(() => params.get('kod') ?? '');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [devices, setDevices] = useState<DeviceInfo[] | null>(null);

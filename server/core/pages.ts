@@ -200,12 +200,13 @@ document.getElementById('f').addEventListener('submit',async(ev)=>{
 <style>${SALES_CSS}</style></head><body>${body}</body></html>`;
 }
 
-export function renderReturnPage(): string {
+export function renderReturnPage(appUrl = ''): string {
   return shell(
     'Kod lesen UntungLab',
     `<h1>Terima kasih</h1>
 <div class="card" id="c"><p id="s">Menunggu pengesahan bayaran…</p></div>
 <script>
+const APP=${JSON.stringify(appUrl.replace(/\/?$/, '/'))};
 const id=new URLSearchParams(location.search).get('order_id');
 const c=document.getElementById('c');
 let tries=0;
@@ -214,7 +215,8 @@ async function poll(){
  try{
   const r=await fetch('/api/order/'+id);const j=await r.json();
   if(j.status==='paid'&&j.code){
-   c.innerHTML='<p>Kod lesen anda:</p><div class="code" id="k"></div><p>Kod ini juga dihantar ke emel anda. Buka UntungLab, pergi ke <b>Lagi &gt; Lesen</b> dan masukkan kod ini.</p>';
+   const link=APP+'#/lesen?kod='+encodeURIComponent(j.code);
+   c.innerHTML='<p>Bayaran berjaya. Kod lesen anda:</p><div class="code" id="k"></div><p style="margin:18px 0 6px"><b>Langkah seterusnya (2 saat sahaja):</b></p><ol style="margin:0 0 18px 20px;padding:0;line-height:1.6"><li>Tekan butang di bawah. UntungLab akan terbuka dan kod terisi sendiri.</li><li>Tekan <b>Aktifkan</b>. Siap.</li></ol><p class="cta-row"><a class="btn" id="go" href="'+link+'">Buka UntungLab &amp; aktifkan</a></p><p style="margin-top:14px;font-size:.92rem;opacity:.8">Kod ini juga dihantar ke emel anda. Simpan emel itu. Kalau butang tidak berfungsi: buka UntungLab, pilih <b>Lesen</b> (di telefon: Lagi &gt; Lesen) dan tampal kod di atas.</p>';
    document.getElementById('k').textContent=j.code;return;
   }
  }catch(e){}
