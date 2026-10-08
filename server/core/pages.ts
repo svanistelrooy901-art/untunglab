@@ -1,3 +1,4 @@
+import { INSTALL_CSS, LANG_CSS, LANG_HEAD_SCRIPT, salesBody } from './sales';
 const rm = (sen: number) => `RM${sen % 100 === 0 ? sen / 100 : (sen / 100).toFixed(2)}`;
 
 const shell = (title: string, body: string) => `<!doctype html>
@@ -58,13 +59,6 @@ h2{font-size:clamp(1.7rem,4.2vw,2.5rem);line-height:1.1;letter-spacing:-.025em;m
 .tiles{display:grid;gap:14px;margin-top:26px}
 .tile{border-radius:20px;padding:22px;background:rgba(255,255,255,.06);border:1px solid rgba(117,248,234,.16)}
 .tile b{display:block;font-size:1.1rem;margin-bottom:4px;color:#75F8E8}.tile span{color:#B5CDCE;font-size:.98rem}
-.inst{display:grid;gap:14px;margin-top:26px}
-.inst .c{background:#fff;border:1px solid #D9E7E7;border-radius:20px;padding:22px}
-.inst h3{margin:0 0 4px;font-size:1.15rem;font-weight:800}
-.inst .who{font-size:.85rem;color:#0F766E;font-weight:700;margin:0 0 10px}
-.inst ol{margin:0;padding-left:1.2rem;color:#33494B;line-height:1.65}
-.wrap>.tip{margin-top:20px;background:#EAF4F3;border-radius:14px;padding:14px 16px;color:#33494B;font-size:.96rem}
-@media(min-width:820px){.inst{grid-template-columns:repeat(3,1fr)}}
 .buy{background:radial-gradient(800px 500px at 20% 0,#0C3B43 0,#04171B 60%,#010608 100%);color:#fff}
 .buy .grid{display:grid;gap:28px;align-items:start}
 .price{font-size:3.6rem;font-weight:800;letter-spacing:-.04em;line-height:1}
@@ -96,152 +90,41 @@ footer a{color:#75F8E8}
 
 export function renderBuyPage(priceSen: number, earlyLeft: number | null = null, normalSen: number = priceSen, appUrl: string = ''): string {
   const base = appUrl ? (appUrl.endsWith('/') ? appUrl : appUrl + '/') : '';
-  const img = (f: string, alt: string) => (base ? `<img src="${base}sales/${f}" alt="${alt}" loading="lazy" width="540" height="1169">` : '');
-  const logo = base ? `<img src="${base}logo-penuh.png" alt="UntungLab">` : '<b style="color:#75F8E8">UntungLab</b>';
-  const tryLink = base ? `<a class="btn ghost" href="${base}">Cuba percuma dahulu</a>` : '';
-  const early = earlyLeft !== null;
-  const priceBlock = early
-    ? `<span class="badge">Harga Early Bird: ${earlyLeft} pembeli pertama yang tinggal</span><div class="price">${rm(priceSen)}<s>${rm(normalSen)}</s></div><p style="color:#A9C4C5;margin:8px 0 0">Bayar sekali, guna selamanya. Selepas ${earlyLeft} tempat ini habis, harga menjadi ${rm(normalSen)}.</p>`
-    : `<div class="price">${rm(priceSen)}</div><p style="color:#A9C4C5;margin:8px 0 0">Bayar sekali, guna selamanya.</p>`;
-  const body = `
-<header class="top"><div class="wrap">${logo}<a class="btn sm" href="#beli">Beli ${rm(priceSen)}</a></div></header>
-
-<div class="hero"><div class="wrap">
- <div>
-  <div class="eyebrow">Untuk peniaga makanan rumah</div>
-  <h1>Jual RM6. <em>Untung sebenar berapa?</em></h1>
-  <p class="lead">UntungLab kira kos sebenar setiap menu anda: bahan, pembungkusan, masa dan kos operasi seperti sewa dan api. Anda terus nampak untung sebenar, dan harga yang patut dijual.</p>
-  <div class="cta-row"><a class="btn" href="#beli">Beli sekarang, ${rm(priceSen)}</a>${tryLink}</div>
-  <div class="note">Tiada akaun, tiada log masuk. Data kekal di telefon anda. Boleh digunakan tanpa internet.</div>
- </div>
- <div class="ph"><div class="phone"><div class="in">${img('dashboard.jpg', 'Dashboard UntungLab')}</div></div></div>
-</div></div>
-
-<section><div class="wrap">
- <div class="eyebrow" style="color:#0F766E">Masalahnya</div>
- <h2>Kos bahan sahaja <em>tidak cukup</em>.</h2>
- <p class="sub">Kebanyakan peniaga kira untung dengan menolak kos bahan daripada harga jual. Sewa, elektrik, gas, bungkusan dan masa anda sendiri terlepas pandang, jadi untung nampak besar tetapi sebenarnya kecil.</p>
- <div class="compare">
-  <div class="num bad"><small>Anggaran biasa</small><b>RM5.09</b><span>harga jual tolak kos bahan</span></div>
-  <div class="num good"><small>Untung sebenar</small><b>RM1.35</b><span>selepas semua kos, 22.5% margin</span></div>
-  <div class="num"><small>Contoh</small><b>Brownies RM6</b><span>nombor sebenar daripada enjin UntungLab</span></div>
- </div>
-</div></section>
-
-<section class="alt"><div class="wrap">
- <div class="feat"><div class="t"><div class="tag">1. Bahan</div><h3>Isi harga pek dan kuantiti. Kos seunit keluar sendiri.</h3><p>Beli butter 250 g RM12? UntungLab tahu itu RM48 sekilogram dan kira kos bahan dalam resipi anda. Tak perlu kalkulator.</p></div><div class="ph"><div class="phone"><div class="in">${img('bahan.jpg', 'Senarai bahan dengan harga')}</div></div></div></div>
- <div class="feat rev"><div class="t"><div class="tag">2. Kos operasi</div><h3>Sewa, api dan air pun dikira.</h3><p>Masukkan kos bulanan perniagaan anda sekali sahaja. UntungLab membahagikannya kepada setiap menu dengan cara yang adil, jadi harga anda menanggung semuanya.</p></div><div class="ph"><div class="phone"><div class="in">${img('operasi.jpg', 'Skrin kos operasi')}</div></div></div></div>
- <div class="feat"><div class="t"><div class="tag">3. Hasil</div><h3>Untung sebenar. Bukan tekaan.</h3><p>Kos sebenar, untung sebiji dan margin, dengan status yang jelas seperti <b>Margin Sihat</b>, <b>Margin Rendah</b> atau <b>Menu Ini Rugi</b>.</p></div><div class="ph"><div class="phone"><div class="in">${img('hasil.jpg', 'Skrin hasil pengiraan')}</div></div></div></div>
- <div class="feat rev"><div class="t"><div class="tag">4. Cadangan harga</div><h3>Pilih margin. Harga terus keluar.</h3><p>Nak untung 20%, 30%, 40% atau 50%? Satu ketikan dan UntungLab beritahu harga yang patut dijual, dikira daripada kos sebenar anda.</p></div><div class="ph"><div class="phone"><div class="in">${img('cadangan.jpg', 'Skrin cadangan harga')}</div></div></div></div>
- <div class="feat"><div class="t"><div class="tag">5. Dashboard</div><h3>Semua menu. Satu skrin.</h3><p>Nampak menu mana yang menguntungkan dan mana yang rugi, serta purata margin perniagaan anda.</p></div><div class="ph"><div class="phone"><div class="in">${img('dashboard.jpg', 'Dashboard semua menu')}</div></div></div></div>
-</div></section>
-
-<section class="dark"><div class="wrap">
- <h2>Dibina supaya <em>mudah dan selamat</em>.</h2>
- <p class="sub">Tiada langganan bulanan. Tiada data anda dihantar ke mana-mana.</p>
- <div class="tiles">
-  <div class="tile"><b>Tanpa akaun</b><span>Buka dan guna. Tiada pendaftaran atau kata laluan.</span></div>
-  <div class="tile"><b>Data di telefon anda</b><span>Resipi dan harga anda kekal pada peranti anda. Ada fungsi sandaran bila anda tukar telefon.</span></div>
-  <div class="tile"><b>Boleh luar talian</b><span>Pasang ke skrin utama seperti app dan guna walaupun tiada internet.</span></div>
- </div>
-</div></section>
-
-<section class="alt"><div class="wrap">
- <div class="eyebrow" style="color:#0F766E">Cara pasang</div>
- <h2>Pasang di skrin utama. <em>Dua minit sahaja.</em></h2>
- <p class="sub">UntungLab ialah app web. Tiada Play Store atau App Store. Anda hanya perlu tambah ke skrin utama sekali, dan ia akan jadi seperti app biasa.</p>
- <div class="inst">
-  <div class="c"><h3>iPhone / iPad</h3><p class="who">Guna Safari</p><ol><li>Buka UntungLab di <b>Safari</b>.</li><li>Tekan butang <b>Kongsi</b> (kotak dengan anak panah ke atas) di bawah skrin.</li><li>Tatal dan pilih <b>Tambah ke Skrin Utama</b>.</li><li>Tekan <b>Tambah</b>. Ikon UntungLab muncul di skrin anda.</li></ol></div>
-  <div class="c"><h3>Android</h3><p class="who">Guna Chrome</p><ol><li>Buka UntungLab di <b>Chrome</b>.</li><li>Tekan menu <b>⋮</b> (tiga titik) di penjuru atas.</li><li>Pilih <b>Pasang app</b> atau <b>Tambah ke skrin utama</b>.</li><li>Tekan <b>Pasang</b>. Ikon UntungLab muncul di skrin anda.</li></ol></div>
-  <div class="c"><h3>Komputer</h3><p class="who">Chrome atau Edge</p><ol><li>Buka UntungLab di Chrome atau Edge.</li><li>Cari ikon <b>Pasang</b> di hujung bar alamat (atas, sebelah kanan).</li><li>Atau tekan menu <b>⋮</b> dan pilih <b>Pasang UntungLab</b>.</li><li>Tekan <b>Pasang</b>. UntungLab buka dalam tetingkapnya sendiri.</li></ol></div>
- </div>
- <div class="tip"><b>Penting:</b> pasang dan buka sekali semasa ada internet, supaya app boleh dipakai tanpa internet selepas itu. Data anda disimpan di peranti itu sahaja, jadi pasang di telefon yang anda guna untuk berniaga. Selepas bayar, kod lesen diaktifkan di dalam app (Lesen).</div>
- ${tryLink ? `<div class="cta-row" style="margin-top:20px">${tryLink.replace('btn ghost', 'btn')}</div>` : ''}
-</div></section>
-
-<section class="buy" id="beli"><div class="wrap"><div class="grid">
- <div>
-  <div class="eyebrow">Beli UntungLab</div>
-  <h2 style="margin-top:8px">Kira betul. <em>Untung jelas.</em></h2>
-  ${priceBlock}
-  <ul class="list">
-   <li>Akses seumur hidup, bayaran sekali sahaja</li>
-   <li>Boleh digunakan pada 2 peranti</li>
-   <li>Semua fungsi: kos operasi, hasil, cadangan harga, dashboard</li>
-   <li>Kod lesen dihantar ke emel anda selepas bayaran</li>
-   <li>Bayaran balik dalam 7 hari jika tidak sesuai</li>
-  </ul>
- </div>
- <div class="form">
-  <form id="f">
-   <label for="n">Nama</label><input id="n" autocomplete="name" required maxlength="100">
-   <label for="e">Emel (kod lesen dihantar ke sini)</label><input id="e" type="email" autocomplete="email" required maxlength="120">
-   <label for="p">Nombor telefon</label><input id="p" type="tel" autocomplete="tel" required maxlength="20">
-   <button class="btn" id="b" type="submit">Bayar ${rm(priceSen)}</button>
-   <p id="m" class="err" role="alert"></p>
-  </form>
-  <p class="fine">Pembayaran selamat melalui ToyyibPay (FPX). Bayaran balik dalam 7 hari selepas pembelian: balas emel kod lesen anda.</p>
-  <p class="fine">Nama, emel dan telefon anda hanya digunakan untuk menghantar kod lesen dan sokongan pembelian ini.</p>
- </div>
-</div></div></section>
-
-<section><div class="wrap" style="max-width:46rem">
- <h2>Soalan lazim</h2>
- <details><summary>Adakah saya boleh cuba dahulu?</summary><p>Boleh. Versi percuma membuka semua fungsi, dengan had bilangan: 2 menu, 10 bahan dan 2 pembungkusan. Beli bila anda sudah yakin.</p></details>
- <details><summary>Apa maksud akses seumur hidup?</summary><p>Anda bayar sekali dan tiada yuran bulanan. Akses seumur hidup bermaksud selagi produk UntungLab beroperasi.</p></details>
- <details><summary>Berapa peranti boleh digunakan?</summary><p>Satu kod lesen boleh digunakan pada 2 peranti, contohnya telefon dan tablet anda.</p></details>
- <details><summary>Bagaimana kalau saya tukar telefon?</summary><p>Data disimpan di telefon anda. Buat sandaran dalam UntungLab sebelum menukar telefon, kemudian pulihkan di telefon baharu dan masukkan kod lesen yang sama.</p></details>
- <details><summary>Perlukah internet?</summary><p>Hanya untuk membeli dan mengaktifkan kod lesen sekali. Selepas itu UntungLab boleh digunakan tanpa internet.</p></details>
- <details><summary>Bagaimana dengan bayaran balik?</summary><p>Dalam 7 hari selepas pembelian, balas emel kod lesen anda dan kami akan uruskan bayaran balik.</p></details>
- <details><summary>Adakah data saya dihantar kepada anda?</summary><p>Tidak. Resipi, bahan dan harga anda kekal pada peranti anda. Hanya nama, emel dan telefon digunakan untuk menghantar kod lesen dan sokongan pembelian.</p></details>
- <div style="text-align:center;margin-top:34px"><a class="btn" href="#beli">Beli ${rm(priceSen)}</a></div>
-</div></section>
-
-<footer><div class="wrap">UntungLab oleh Digital Sambal. Kira dengan betul, untung dengan yakin.</div></footer>
-
-<script>
-document.getElementById('f').addEventListener('submit',async(ev)=>{
- ev.preventDefault();const b=document.getElementById('b'),m=document.getElementById('m');
- b.disabled=true;m.textContent='';
- try{
-  const r=await fetch('/api/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:document.getElementById('n').value,email:document.getElementById('e').value,phone:document.getElementById('p').value})});
-  const j=await r.json();
-  if(r.ok&&j.payUrl){location.href=j.payUrl;return;}
-  m.textContent=r.status===400?'Semak semula nama, emel dan nombor telefon anda.':'Pembayaran tidak dapat dimulakan sekarang. Cuba sebentar lagi.'+(j.detail?' ['+j.detail+']':'');
- }catch(e){m.textContent='Tiada sambungan internet. Cuba lagi.';}
- b.disabled=false;
-});
-</script>`;
+  const body = salesBody({ priceSen, earlyLeft, normalSen, base, rm });
   return `<!doctype html>
 <html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>UntungLab: tahu untung sebenar setiap menu</title>
 <meta name="description" content="UntungLab mengira kos sebenar menu anda termasuk kos operasi, menunjukkan untung sebenar dan mencadangkan harga jualan. Bayar sekali, guna selamanya.">
 <meta name="theme-color" content="#011416">
-<style>${SALES_CSS}</style></head><body>${body}</body></html>`;
+${LANG_HEAD_SCRIPT}
+<style>${SALES_CSS}${LANG_CSS}${INSTALL_CSS}</style></head><body>${body}</body></html>`;
 }
 
 export function renderReturnPage(appUrl = ''): string {
   return shell(
     'Kod lesen UntungLab',
-    `<h1>Terima kasih</h1>
+    `<h1 id="h">Terima kasih</h1>
 <div class="card" id="c"><p id="s">Menunggu pengesahan bayaran…</p></div>
 <script>
+function T(ms,en){try{return localStorage.getItem('ul-lang')==='en'?en:ms;}catch(e){return ms;}}
 const APP=${JSON.stringify(appUrl.replace(/\/?$/, '/'))};
 const id=new URLSearchParams(location.search).get('order_id');
 const c=document.getElementById('c');
+document.getElementById('h').textContent=T('Terima kasih','Thank you');
+document.getElementById('s').textContent=T('Menunggu pengesahan bayaran…','Waiting for payment confirmation…');
 let tries=0;
 async function poll(){
- if(!id||!/^[0-9a-f]{32}$/.test(id)){c.innerHTML='<p class="err">Pautan ini tidak lengkap. Semak emel anda untuk kod lesen.</p>';return;}
+ if(!id||!/^[0-9a-f]{32}$/.test(id)){c.innerHTML='<p class="err">'+T('Pautan ini tidak lengkap. Semak emel anda untuk kod lesen.','This link is incomplete. Check your email for the licence code.')+'</p>';return;}
  try{
   const r=await fetch('/api/order/'+id);const j=await r.json();
   if(j.status==='paid'&&j.code){
    const link=APP+'#/lesen?kod='+encodeURIComponent(j.code);
-   c.innerHTML='<p>Bayaran berjaya. Kod lesen anda:</p><div class="code" id="k"></div><p style="margin:18px 0 6px"><b>Langkah seterusnya (2 saat sahaja):</b></p><ol style="margin:0 0 18px 20px;padding:0;line-height:1.6"><li>Tekan butang di bawah. UntungLab akan terbuka dan kod terisi sendiri.</li><li>Tekan <b>Aktifkan</b>. Siap.</li></ol><p class="cta-row"><a class="btn" id="go" href="'+link+'">Buka UntungLab &amp; aktifkan</a></p><p style="margin-top:14px;font-size:.92rem;opacity:.8">Kod ini juga dihantar ke emel anda (jika tiada di Inbox, semak <b>Spam</b>, <b>Promotions</b> atau <b>Important</b>). Kalau butang tidak berfungsi: buka UntungLab, pilih <b>Lesen</b> (di telefon: Lagi &gt; Lesen) dan tampal kod di atas.</p>';
+   c.innerHTML='<p>'+T('Bayaran berjaya. Kod lesen anda:','Payment successful. Your licence code:')+'</p><div class="code" id="k"></div><p style="margin:18px 0 6px"><b>'+T('Langkah seterusnya (2 saat sahaja):','Next steps (takes 2 seconds):')+'</b></p><ol style="margin:0 0 18px 20px;padding:0;line-height:1.6"><li>'+T('Tekan butang di bawah. UntungLab akan terbuka dan kod terisi sendiri.','Tap the button below. UntungLab opens with the code filled in.')+'</li><li>'+T('Tekan <b>Aktifkan</b>. Siap.','Tap <b>Aktifkan</b> (Activate). Done.')+'</li></ol><p class="cta-row"><a class="btn" id="go" href="'+link+'">'+T('Buka UntungLab &amp; aktifkan','Open UntungLab &amp; activate')+'</a></p><p style="margin-top:14px;font-size:.92rem;opacity:.8">'+T('Kod ini juga dihantar ke emel anda (jika tiada di Inbox, semak <b>Spam</b>, <b>Promotions</b> atau <b>Important</b>). Kalau butang tidak berfungsi: buka UntungLab, pilih <b>Lesen</b> (di telefon: Lagi &gt; Lesen) dan tampal kod di atas.','This code is also emailed to you (if it is not in your Inbox, check <b>Spam</b>, <b>Promotions</b> or <b>Important</b>). If the button does not work: open UntungLab, choose <b>Lesen</b> (on a phone: Lagi &gt; Lesen) and paste the code above.')+'</p>';
    document.getElementById('k').textContent=j.code;return;
   }
  }catch(e){}
  tries++;
- if(tries>40){c.innerHTML='<p>Pengesahan bayaran mengambil masa lebih lama. Kod akan dihantar ke emel anda sebaik sahaja bayaran disahkan. Jika tiada dalam masa 30 minit, hubungi kami dengan emel pembelian anda.</p>';return;}
+ if(tries>40){c.innerHTML='<p>'+T('Pengesahan bayaran mengambil masa lebih lama. Kod akan dihantar ke emel anda sebaik sahaja bayaran disahkan. Jika tiada dalam masa 30 minit, hubungi kami dengan emel pembelian anda.','Payment confirmation is taking longer. The code will be emailed to you once payment is confirmed. If you have nothing within 30 minutes, contact us with the email you purchased with.')+'</p>';return;}
  setTimeout(poll,3000);
 }
 poll();
