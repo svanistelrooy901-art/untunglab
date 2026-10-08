@@ -15,6 +15,8 @@ export interface Config {
   privateKeyJwk: JsonWebKey;
   /** The app's origin, allowed to call the API from a browser. */
   appOrigin: string;
+  /** Full address of the app (with path), used for the images and links on the sales page. Optional. */
+  appUrl?: string;
   /** Public base URL of this server, used for ToyyibPay's callback and return URLs. */
   publicBaseUrl: string;
   maxDevices: number;
@@ -64,7 +66,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     try {
       const path = url.pathname.replace(/\/+$/, '') || '/';
       if (req.method === 'GET' && path === '/') return Response.redirect(`${config.publicBaseUrl}/beli`, 302);
-      if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice())));
+      if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice()), config.appUrl));
       if (req.method === 'GET' && path === '/terima') return html(renderReturnPage());
 
       if (req.method === 'POST' && path === '/api/order') return await createOrder(req, json);

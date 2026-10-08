@@ -57,6 +57,7 @@ export default {
         adminToken: env.ADMIN_TOKEN,
         privateKeyJwk,
         appOrigin: env.APP_ORIGIN,
+        appUrl: env.APP_URL,
         publicBaseUrl: env.PUBLIC_BASE_URL.replace(/\/+$/, ''),
         maxDevices: 2,
         failureLimit: 10,
