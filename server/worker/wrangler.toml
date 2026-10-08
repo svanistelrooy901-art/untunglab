@@ -1,5 +1,5 @@
 # Cloudflare Worker for the UntungLab licence server. See ../README.md for the steps.
-name = "untunglab-license"
+name = "untunglab"
 main = "index.ts"
 compatibility_date = "2026-09-01"
 
@@ -14,7 +14,7 @@ EARLY_BIRD_PRICE_SEN = "3900"               # RM39.00 for the first EARLY_BIRD_S
 EARLY_BIRD_SLOTS = "0"  # SANDBOX TEST ONLY. Production: "15"
 TOYYIB_BASE_URL = "https://dev.toyyibpay.com"   # sandbox first; production is https://toyyibpay.com
 TOYYIB_CATEGORY = "5gqeosjy"
-PUBLIC_BASE_URL = "https://REPLACE.workers.dev" # this Worker's public address (or your own domain)
+PUBLIC_BASE_URL = "https://untunglab.svanistelrooy901.workers.dev" # this Worker's public address (or your own domain)
 APP_ORIGIN = "https://svanistelrooy901-art.github.io"       # where the UntungLab app is hosted
 APP_URL = "https://svanistelrooy901-art.github.io/untunglab/"
 BREVO_SENDER_EMAIL = "untunglab@digitalsambal.space"  # must be a sender verified in Brevo
