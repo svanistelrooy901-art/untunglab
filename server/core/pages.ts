@@ -58,6 +58,13 @@ h2{font-size:clamp(1.7rem,4.2vw,2.5rem);line-height:1.1;letter-spacing:-.025em;m
 .tiles{display:grid;gap:14px;margin-top:26px}
 .tile{border-radius:20px;padding:22px;background:rgba(255,255,255,.06);border:1px solid rgba(117,248,234,.16)}
 .tile b{display:block;font-size:1.1rem;margin-bottom:4px;color:#75F8E8}.tile span{color:#B5CDCE;font-size:.98rem}
+.inst{display:grid;gap:14px;margin-top:26px}
+.inst .c{background:#fff;border:1px solid #D9E7E7;border-radius:20px;padding:22px}
+.inst h3{margin:0 0 4px;font-size:1.15rem;font-weight:800}
+.inst .who{font-size:.85rem;color:#0F766E;font-weight:700;margin:0 0 10px}
+.inst ol{margin:0;padding-left:1.2rem;color:#33494B;line-height:1.65}
+.wrap>.tip{margin-top:20px;background:#EAF4F3;border-radius:14px;padding:14px 16px;color:#33494B;font-size:.96rem}
+@media(min-width:820px){.inst{grid-template-columns:repeat(3,1fr)}}
 .buy{background:radial-gradient(800px 500px at 20% 0,#0C3B43 0,#04171B 60%,#010608 100%);color:#fff}
 .buy .grid{display:grid;gap:28px;align-items:start}
 .price{font-size:3.6rem;font-weight:800;letter-spacing:-.04em;line-height:1}
@@ -139,6 +146,19 @@ export function renderBuyPage(priceSen: number, earlyLeft: number | null = null,
  </div>
 </div></section>
 
+<section class="alt"><div class="wrap">
+ <div class="eyebrow" style="color:#0F766E">Cara pasang</div>
+ <h2>Pasang di skrin utama. <em>Dua minit sahaja.</em></h2>
+ <p class="sub">UntungLab ialah app web. Tiada Play Store atau App Store. Anda hanya perlu tambah ke skrin utama sekali, dan ia akan jadi seperti app biasa.</p>
+ <div class="inst">
+  <div class="c"><h3>iPhone / iPad</h3><p class="who">Guna Safari</p><ol><li>Buka UntungLab di <b>Safari</b>.</li><li>Tekan butang <b>Kongsi</b> (kotak dengan anak panah ke atas) di bawah skrin.</li><li>Tatal dan pilih <b>Tambah ke Skrin Utama</b>.</li><li>Tekan <b>Tambah</b>. Ikon UntungLab muncul di skrin anda.</li></ol></div>
+  <div class="c"><h3>Android</h3><p class="who">Guna Chrome</p><ol><li>Buka UntungLab di <b>Chrome</b>.</li><li>Tekan menu <b>⋮</b> (tiga titik) di penjuru atas.</li><li>Pilih <b>Pasang app</b> atau <b>Tambah ke skrin utama</b>.</li><li>Tekan <b>Pasang</b>. Ikon UntungLab muncul di skrin anda.</li></ol></div>
+  <div class="c"><h3>Komputer</h3><p class="who">Chrome atau Edge</p><ol><li>Buka UntungLab di Chrome atau Edge.</li><li>Cari ikon <b>Pasang</b> di hujung bar alamat (atas, sebelah kanan).</li><li>Atau tekan menu <b>⋮</b> dan pilih <b>Pasang UntungLab</b>.</li><li>Tekan <b>Pasang</b>. UntungLab buka dalam tetingkapnya sendiri.</li></ol></div>
+ </div>
+ <div class="tip"><b>Penting:</b> pasang dan buka sekali semasa ada internet, supaya app boleh dipakai tanpa internet selepas itu. Data anda disimpan di peranti itu sahaja, jadi pasang di telefon yang anda guna untuk berniaga. Selepas bayar, kod lesen diaktifkan di dalam app (Lesen).</div>
+ ${tryLink ? `<div class="cta-row" style="margin-top:20px">${tryLink.replace('btn ghost', 'btn')}</div>` : ''}
+</div></section>
+
 <section class="buy" id="beli"><div class="wrap"><div class="grid">
  <div>
   <div class="eyebrow">Beli UntungLab</div>
@@ -216,7 +236,7 @@ async function poll(){
   const r=await fetch('/api/order/'+id);const j=await r.json();
   if(j.status==='paid'&&j.code){
    const link=APP+'#/lesen?kod='+encodeURIComponent(j.code);
-   c.innerHTML='<p>Bayaran berjaya. Kod lesen anda:</p><div class="code" id="k"></div><p style="margin:18px 0 6px"><b>Langkah seterusnya (2 saat sahaja):</b></p><ol style="margin:0 0 18px 20px;padding:0;line-height:1.6"><li>Tekan butang di bawah. UntungLab akan terbuka dan kod terisi sendiri.</li><li>Tekan <b>Aktifkan</b>. Siap.</li></ol><p class="cta-row"><a class="btn" id="go" href="'+link+'">Buka UntungLab &amp; aktifkan</a></p><p style="margin-top:14px;font-size:.92rem;opacity:.8">Kod ini juga dihantar ke emel anda. Simpan emel itu. Kalau butang tidak berfungsi: buka UntungLab, pilih <b>Lesen</b> (di telefon: Lagi &gt; Lesen) dan tampal kod di atas.</p>';
+   c.innerHTML='<p>Bayaran berjaya. Kod lesen anda:</p><div class="code" id="k"></div><p style="margin:18px 0 6px"><b>Langkah seterusnya (2 saat sahaja):</b></p><ol style="margin:0 0 18px 20px;padding:0;line-height:1.6"><li>Tekan butang di bawah. UntungLab akan terbuka dan kod terisi sendiri.</li><li>Tekan <b>Aktifkan</b>. Siap.</li></ol><p class="cta-row"><a class="btn" id="go" href="'+link+'">Buka UntungLab &amp; aktifkan</a></p><p style="margin-top:14px;font-size:.92rem;opacity:.8">Kod ini juga dihantar ke emel anda (jika tiada di Inbox, semak <b>Spam</b>, <b>Promotions</b> atau <b>Important</b>). Kalau butang tidak berfungsi: buka UntungLab, pilih <b>Lesen</b> (di telefon: Lagi &gt; Lesen) dan tampal kod di atas.</p>';
    document.getElementById('k').textContent=j.code;return;
   }
  }catch(e){}
