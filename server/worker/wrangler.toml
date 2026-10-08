@@ -25,3 +25,10 @@ BREVO_SENDER_NAME = "UntungLab"
 #   wrangler secret put LICENSE_PRIVATE_KEY     (from scripts/gen-keys.mjs)
 #   wrangler secret put ADMIN_TOKEN
 #   wrangler secret put BREVO_API_KEY
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
