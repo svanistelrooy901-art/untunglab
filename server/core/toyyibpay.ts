@@ -29,15 +29,24 @@ export function createToyyibClient(opts: {
         billExternalReferenceNo: input.orderId,
         billTo: input.name,
         billEmail: input.email,
-        billPhone: input.phone,
+        billPhone: input.phone.replace(/[^0-9]/g, ''),
         billPaymentChannel: '0',
         billContentEmail: 'Terima kasih. Kod lesen UntungLab akan dihantar ke emel ini selepas bayaran disahkan.',
         billChargeToCustomer: '1',
       });
       const res = await f(`${base}/index.php/api/createBill`, { method: 'POST', body: form });
-      const json = (await res.json()) as unknown;
+      const text = await res.text();
+      let json: unknown = null;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        /* not JSON: reported below */
+      }
       const billCode = Array.isArray(json) ? (json[0] as { BillCode?: unknown } | undefined)?.BillCode : undefined;
-      if (typeof billCode !== 'string' || billCode === '') throw new Error('ToyyibPay did not return a BillCode');
+      if (typeof billCode !== 'string' || billCode === '') {
+        // The reply never contains our secret; keep a short copy so the cause (wrong key, wrong category, bad field) is visible.
+        throw new Error(`ToyyibPay createBill failed: HTTP ${res.status}, reply: ${text.replace(/\s+/g, ' ').slice(0, 300)}`);
+      }
       return { billCode, payUrl: `${base}/${billCode}` };
     },
 

@@ -187,7 +187,7 @@ document.getElementById('f').addEventListener('submit',async(ev)=>{
   const r=await fetch('/api/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:document.getElementById('n').value,email:document.getElementById('e').value,phone:document.getElementById('p').value})});
   const j=await r.json();
   if(r.ok&&j.payUrl){location.href=j.payUrl;return;}
-  m.textContent=r.status===400?'Semak semula nama, emel dan nombor telefon anda.':'Pembayaran tidak dapat dimulakan sekarang. Cuba sebentar lagi.';
+  m.textContent=r.status===400?'Semak semula nama, emel dan nombor telefon anda.':'Pembayaran tidak dapat dimulakan sekarang. Cuba sebentar lagi.'+(j.detail?' ['+j.detail+']':'');
  }catch(e){m.textContent='Tiada sambungan internet. Cuba lagi.';}
  b.disabled=false;
 });

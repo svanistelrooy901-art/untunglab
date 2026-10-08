@@ -10,8 +10,10 @@ export async function makeWorld(over: Partial<Config> = {}) {
   let clock = new Date('2026-09-30T08:00:00.000Z');
   const bills: { amountSen: number; orderId: string; name: string; email: string; phone: string; callbackUrl: string; returnUrl: string }[] = [];
   const state: { transactions: Transaction[]; billCode: string } = { transactions: [], billCode: 'BILL123' };
+  let billFailure: string | null = null;
   const toyyib: ToyyibClient = {
     async createBill(input) {
+      if (billFailure) throw new Error(billFailure);
       bills.push(input);
       return { billCode: state.billCode, payUrl: `https://dev.toyyibpay.com/${state.billCode}` };
     },
@@ -79,6 +81,7 @@ export async function makeWorld(over: Partial<Config> = {}) {
   return {
     keys, store, bills, state, sent, config, call, json, order, callback, callbackBody, confirmPaid, buy,
     setMailFails: (v: boolean) => (mailFails = v),
+    failBill: (message: string | null) => (billFailure = message),
     advance: (minutes: number) => (clock = new Date(clock.getTime() + minutes * 60_000)),
     admin: (path: string, body: unknown) => call('POST', path, body, { authorization: 'Bearer admin-token' }),
   };

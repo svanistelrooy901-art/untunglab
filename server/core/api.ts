@@ -17,6 +17,8 @@ export interface Config {
   appOrigin: string;
   /** Full address of the app (with path), used for the images and links on the sales page. Optional. */
   appUrl?: string;
+  /** Sandbox only: include the payment provider's error text in a failed-order reply so setup problems are visible. */
+  debugErrors?: boolean;
   /** Public base URL of this server, used for ToyyibPay's callback and return URLs. */
   publicBaseUrl: string;
   maxDevices: number;
@@ -137,7 +139,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       });
     } catch (e) {
       console.error('createBill failed', e);
-      return json(502, { error: 'payment_unavailable' });
+      return json(502, { error: 'payment_unavailable', ...(config.debugErrors ? { detail: e instanceof Error ? e.message : String(e) } : {}) });
     }
     if (!bill.billCode) return json(502, { error: 'payment_unavailable' });
 

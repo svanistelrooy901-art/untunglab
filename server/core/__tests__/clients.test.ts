@@ -30,6 +30,17 @@ describe('ToyyibPay client (request shapes follow the public API reference; conf
     expect(b.get('billPriceSetting')).toBe('1');
     expect(b.get('billPayorInfo')).toBe('1');
   });
+  it('the phone is sent as digits only, and a failed reply is quoted in the error without the secret', async () => {
+    let body: URLSearchParams | undefined;
+    const client = createToyyibClient({ baseUrl: 'https://x', secretKey: 'topsecret', categoryCode: 'c', productName: 'p', fetchImpl: (async (_u: string, init: { body: unknown }) => {
+      body = new URLSearchParams(String(init.body));
+      return new Response(JSON.stringify({ status: 'error', msg: '[KEY-DID-NOT-EXIST]' }), { status: 200 });
+    }) as unknown as typeof fetch });
+    const err = await client.createBill({ amountSen: 100, orderId: 'o', name: 'n', email: 'e@e.co', phone: '+60 17-487 1346', callbackUrl: 'c', returnUrl: 'r' }).catch((e: Error) => e);
+    expect(body!.get('billPhone')).toBe('60174871346');
+    expect((err as Error).message).toContain('KEY-DID-NOT-EXIST');
+    expect((err as Error).message).not.toContain('topsecret');
+  });
   it('a response without a BillCode is an error, not a guess', async () => {
     const client = createToyyibClient({ baseUrl: 'https://x', secretKey: 's', categoryCode: 'c', productName: 'p', fetchImpl: (async () => new Response(JSON.stringify({ status: 'error' }))) as unknown as typeof fetch });
     await expect(client.createBill({ amountSen: 1, orderId: 'o', name: 'n', email: 'e@e.co', phone: '0123456789', callbackUrl: 'c', returnUrl: 'r' })).rejects.toThrow();

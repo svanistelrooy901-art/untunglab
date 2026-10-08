@@ -277,6 +277,19 @@ describe('browser access', () => {
   });
 });
 
+describe('sandbox diagnostics', () => {
+  it('shows the provider error text only when debugErrors is on', async () => {
+    for (const [debug, shown] of [[true, true], [false, false]] as const) {
+      const w = await makeWorld({ debugErrors: debug });
+      w.failBill?.('ToyyibPay createBill failed: HTTP 200, reply: KEY-DID-NOT-EXIST');
+      const res = await w.call('POST', '/api/order', { name: 'A', email: 'a@b.co', phone: '0123456789' });
+      expect(res.status).toBe(502);
+      const j = await w.json(res);
+      expect(Boolean(j.detail)).toBe(shown);
+    }
+  });
+});
+
 describe('early bird (D-80)', () => {
   const early = { priceSen: 4900, earlyBirdPriceSen: 3900, earlyBirdSlots: 2 };
   const buy = async (w: Awaited<ReturnType<typeof makeWorld>>, n: number) => {
