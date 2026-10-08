@@ -54,7 +54,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     const url = new URL(req.url);
     const origin = req.headers.get('origin');
     const cors: Record<string, string> = {};
-    if (origin && origin === config.appOrigin) {
+    if (origin && config.appOrigin.split(',').map((x) => x.trim()).includes(origin)) {
       cors['access-control-allow-origin'] = origin;
       cors['access-control-allow-methods'] = 'GET, POST, OPTIONS';
       cors['access-control-allow-headers'] = 'content-type, authorization';

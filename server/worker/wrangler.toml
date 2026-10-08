@@ -15,8 +15,8 @@ EARLY_BIRD_SLOTS = "0"  # SANDBOX TEST ONLY. Production: "15"
 TOYYIB_BASE_URL = "https://toyyibpay.com"   # production (sandbox is https://dev.toyyibpay.com). Testing live with RM1 (D-81)
 TOYYIB_CATEGORY = "5gqeosjy"
 PUBLIC_BASE_URL = "https://untunglab.svanistelrooy901.workers.dev" # this Worker's public address (or your own domain)
-APP_ORIGIN = "https://svanistelrooy901-art.github.io"       # where the UntungLab app is hosted
-APP_URL = "https://svanistelrooy901-art.github.io/untunglab/"
+APP_ORIGIN = "https://untunglab.space,https://svanistelrooy901-art.github.io"   # where the app is hosted (comma-separated)
+APP_URL = "https://untunglab.space/"
 BREVO_SENDER_EMAIL = "untunglab@digitalsambal.space"  # must be a sender verified in Brevo
 BREVO_SENDER_NAME = "UntungLab"
 
