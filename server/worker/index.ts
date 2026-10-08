@@ -59,7 +59,7 @@ export default {
         appOrigin: env.APP_ORIGIN,
         appUrl: env.APP_URL,
         publicBaseUrl: env.PUBLIC_BASE_URL.replace(/\/+$/, ''),
-        debugErrors: env.TOYYIB_BASE_URL.includes('dev.toyyibpay.com'),
+        debugErrors: Number(env.PRICE_SEN) <= 100, // test price only: show the provider's error text
         maxDevices: 2,
         failureLimit: 10,
         failureWindowMinutes: 60,
