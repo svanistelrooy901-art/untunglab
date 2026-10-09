@@ -67,14 +67,24 @@ export function useLive<T>(query: (ctx: Context) => Promise<T>, deps: readonly u
     let sub: { unsubscribe(): void } | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let failures = 0;
+    let watchdog: ReturnType<typeof setTimeout> | undefined;
     const run = () => {
+      // A query that neither answers nor fails within 6 seconds is started again.
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        console.warn('UntungLab: live query stalled, restarting');
+        sub?.unsubscribe();
+        if (!stopped) run();
+      }, 6000);
       sub = liveQuery(() => query(ctx)).subscribe({
         next: (v) => {
+          clearTimeout(watchdog);
           failures = 0;
           setValue(v);
         },
         error: (err) => {
           console.warn('UntungLab: live query failed, retrying', err);
+          clearTimeout(watchdog);
           sub?.unsubscribe();
           if (stopped) return;
           failures += 1;
@@ -85,6 +95,7 @@ export function useLive<T>(query: (ctx: Context) => Promise<T>, deps: readonly u
     run();
     return () => {
       stopped = true;
+      clearTimeout(watchdog);
       if (timer) clearTimeout(timer);
       sub?.unsubscribe();
     };
