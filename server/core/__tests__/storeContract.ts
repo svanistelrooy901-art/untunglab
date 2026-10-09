@@ -108,15 +108,25 @@ export function describeStore(name: string, make: () => Promise<Store>) {
       await s.addDevice('UL-AAAA-AAAA-AAAA', { deviceId: 'd1', label: 'iPhone', activatedAt: '2026-09-30T03:00:00.000Z' });
       await s.addDevice('UL-AAAA-AAAA-AAAA', { deviceId: 'd2', label: 'Laptop', activatedAt: '2026-09-30T03:00:00.000Z' });
       const st = await s.stats(2);
-      expect(st).toMatchObject({ orders: 3, paid: 2, pending: 1, revenueSen: 9800, activeLicenses: 1, revokedLicenses: 1, devices: 2 });
+      expect(st).toMatchObject({ orders: 3, paid: 2, pending: 1, revenueSen: 9800, complimentary: 0, activeLicenses: 1, revokedLicenses: 1, devices: 2 });
       expect(st.recent.map((r) => r.id)).toEqual(['o3', 'o2']);
       expect(st.recent[1]).toMatchObject({ email: 'b@x.com', status: 'paid', licenseStatus: 'revoked', amountSen: 3900 });
       expect(st.recent[0]).toMatchObject({ licenseStatus: null });
     });
 
+    it('free (RM0) licences are counted apart: not as buyers, not in revenue, not against early-bird places', async () => {
+      const s = await make();
+      await s.createOrder(order({ id: 'o1', email: 'a@x.com' }));
+      await s.createOrder(order({ id: 'o2', email: 'me@x.com', amountSen: 0, billCode: 'FREE' }));
+      await s.markOrderPaid('o1', 'UL-AAAA-AAAA-AAAA', '2026-09-30T01:00:00.000Z');
+      await s.markOrderPaid('o2', 'UL-BBBB-BBBB-BBBB', '2026-09-30T02:00:00.000Z');
+      expect(await s.countPaidOrders()).toBe(1);
+      expect(await s.stats(10)).toMatchObject({ orders: 2, paid: 1, complimentary: 1, pending: 0, revenueSen: 5900, activeLicenses: 2 });
+    });
+
     it('stats on an empty store are all zero', async () => {
       const s = await make();
-      expect(await s.stats(10)).toEqual({ orders: 0, paid: 0, pending: 0, revenueSen: 0, activeLicenses: 0, revokedLicenses: 0, devices: 0, recent: [] });
+      expect(await s.stats(10)).toEqual({ orders: 0, paid: 0, complimentary: 0, pending: 0, revenueSen: 0, activeLicenses: 0, revokedLicenses: 0, devices: 0, recent: [] });
     });
   });
 }

@@ -59,6 +59,7 @@ Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-.
 | Kosongkan peranti (pelanggan tukar telefon dan tak boleh lepaskan sendiri) | `/api/admin/reset-devices` |
 | Batalkan kod (refund/penyalahgunaan) | `/api/admin/revoke` |
 | Pulihkan kod yang tersalah batal | `/api/admin/restore` |
+| Jana kod percuma (RM0) untuk akaun sendiri/tester, body `{"name":..,"email":..}` | `/api/admin/issue` |
 | Ringkasan + 25 pesanan terkini (tanpa no. telefon) | `/api/admin/stats` |
 
 Contoh: `curl -X POST $BASE/api/admin/revoke -H "Authorization: Bearer $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"code":"UL-ABCD-EFGH-JKMN"}'`

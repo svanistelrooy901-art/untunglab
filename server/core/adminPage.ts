@@ -40,6 +40,12 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{text-align:left
     <input id="q" placeholder="Emel atau kod UL-XXXX-XXXX-XXXX" aria-label="Emel atau kod">
     <div class="row"><button id="find">Cari</button></div>
     <div class="msg" id="findMsg"></div><div id="results"></div></div>
+  <div class="card"><h2>Jana kod percuma</h2>
+    <p class="muted">Untuk akaun sendiri, tester atau hadiah (RM0). Tak guna tempat early bird dan tak dikira dalam jumlah RM. Emel kod dihantar sekali.</p>
+    <input id="iname" placeholder="Nama" aria-label="Nama"><div style="height:8px"></div>
+    <input id="iemail" type="email" placeholder="Emel" aria-label="Emel">
+    <div class="row"><button id="issue">Jana kod</button></div>
+    <div class="msg" id="issueMsg"></div><div class="mono" id="issueCode"></div></div>
   <div class="card"><h2>Pesanan terkini</h2><div style="overflow-x:auto"><table><thead><tr><th>Tarikh</th><th>Pembeli</th><th>RM</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table></div></div>
 </div>
 <script>
@@ -56,7 +62,7 @@ function msg(id,text,bad){var m=$(id);m.textContent=text;m.className='msg '+(bad
 function pill(s){return el('span','pill '+s,s)}
 function renderStats(s){
   var box=$('stats');box.textContent='';
-  var items=[['Pesanan',s.orders],['Dah bayar (pengguna)',s.paid],['Belum bayar',s.pending],['Jumlah RM',rm(s.revenueSen)],['Lesen aktif',s.activeLicenses],['Dibatalkan',s.revokedLicenses],['Peranti aktif',s.devices]];
+  var items=[['Pesanan',s.orders],['Dah bayar (pengguna)',s.paid],['Kod percuma',s.complimentary],['Belum bayar',s.pending],['Jumlah RM',rm(s.revenueSen)],['Lesen aktif',s.activeLicenses],['Dibatalkan',s.revokedLicenses],['Peranti aktif',s.devices]];
   if(s.earlyBirdLeft!==null&&s.earlyBirdLeft!==undefined)items.push(['Early bird tinggal',s.earlyBirdLeft]);
   items.forEach(function(i){var d=el('div','stat');d.appendChild(el('b','',String(i[1])));d.appendChild(el('span','',i[0]));box.appendChild(d)});
   var t=$('recent');t.textContent='';
@@ -101,6 +107,16 @@ $('enter').onclick=function(){
 $('token').addEventListener('keydown',function(e){if(e.key==='Enter')$('enter').click()});
 $('q').addEventListener('keydown',function(e){if(e.key==='Enter')$('find').click()});
 $('find').onclick=function(){find(false)};
+$('issue').onclick=function(){
+  var n=$('iname').value.trim(),e=$('iemail').value.trim();$('issueCode').textContent='';
+  if(!n||e.indexOf('@')<0){msg('issueMsg','Isi nama dan emel.',true);return}
+  var b=$('issue');b.disabled=true;
+  api('/api/admin/issue',{name:n,email:e}).then(function(j){
+    $('issueCode').textContent=j.code;
+    msg('issueMsg',j.emailed?'Kod dijana dan emel dihantar.':'Kod dijana tetapi emel GAGAL dihantar. Salin kod ini dan beri sendiri.',!j.emailed);
+    $('iname').value='';$('iemail').value='';return load();
+  }).catch(function(x){msg('issueMsg',x.message,true)}).then(function(){b.disabled=false});
+};
 $('refresh').onclick=function(){load().catch(function(e){msg('findMsg',e.message,true)})};
 $('lock').onclick=function(){token='';$('app').className='hide';$('login').className='card';$('results').textContent='';$('loginErr').textContent=''};
 })();

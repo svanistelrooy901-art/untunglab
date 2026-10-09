@@ -315,6 +315,32 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
         if (!code || !(await store.setLicenseStatus(code, 'active'))) return json(404, { error: 'invalid_code' });
         return json(200, { ok: true });
       }
+      case '/api/admin/issue': {
+        // A free licence (RM0) for the owner, testers or gifts. Same order/licence rows as a purchase, so lookup, revoke and resend all work.
+        const name = str(body.name, 100);
+        const email = str(body.email, 120);
+        if (!name || !EMAIL.test(email)) return json(400, { error: 'invalid_input' });
+        const at = deps.now().toISOString();
+        const order: Order = { id: hex(deps.randomBytes(16)), name, email, phone: '-', amountSen: 0, status: 'pending', billCode: 'FREE', licenseCode: null, emailSentAt: null, createdAt: at, paidAt: null };
+        await store.createOrder(order);
+        let issued: { code: string; first: boolean } | null = null;
+        for (let attempt = 0; attempt < 5 && !issued; attempt++) {
+          try {
+            issued = await store.markOrderPaid(order.id, generateCode(deps.randomBytes), at);
+          } catch (e) {
+            if (attempt === 4) throw e;
+          }
+        }
+        let emailed = false;
+        try {
+          await mailer.sendCode(email, name, issued!.code);
+          await store.updateOrder(order.id, { emailSentAt: deps.now().toISOString() });
+          emailed = true;
+        } catch (e) {
+          console.error('email failed for free licence; the code is shown to the admin', e);
+        }
+        return json(200, { code: issued!.code, orderId: order.id, emailed });
+      }
       case '/api/admin/stats': {
         const st = await store.stats(25);
         const slots = config.earlyBirdSlots ?? 0;

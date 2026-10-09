@@ -62,16 +62,18 @@ export class MemoryStore implements Store {
     this.failures.set(key, [...(this.failures.get(key) ?? []), at]);
   }
   async countPaidOrders() {
-    return [...this.orders.values()].filter((o) => o.status === 'paid').length;
+    return [...this.orders.values()].filter((o) => o.status === 'paid' && o.amountSen > 0).length;
   }
   async stats(recent: number): Promise<Stats> {
     const orders = [...this.orders.values()];
-    const paid = orders.filter((o) => o.status === 'paid');
+    const paid = orders.filter((o) => o.status === 'paid' && o.amountSen > 0);
+    const free = orders.filter((o) => o.status === 'paid' && o.amountSen === 0);
     const lic = [...this.licenses.values()];
     return {
       orders: orders.length,
       paid: paid.length,
-      pending: orders.length - paid.length,
+      complimentary: free.length,
+      pending: orders.length - paid.length - free.length,
       revenueSen: paid.reduce((n, o) => n + o.amountSen, 0),
       activeLicenses: lic.filter((l) => l.status === 'active').length,
       revokedLicenses: lic.filter((l) => l.status === 'revoked').length,

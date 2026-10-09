@@ -29,7 +29,10 @@ export interface DeviceRecord {
 
 export interface Stats {
   orders: number;
+  /** Paid orders with a price above RM0. */
   paid: number;
+  /** Free (RM0) licences issued by the admin. */
+  complimentary: number;
   pending: number;
   revenueSen: number;
   activeLicenses: number;
@@ -57,7 +60,7 @@ export interface Store {
   clearDevices(code: string): Promise<void>;
   recordFailure(key: string, at: string): Promise<void>;
   countFailures(key: string, since: string): Promise<number>;
-  /** Orders that are paid; decides whether early-bird places remain. */
+  /** Paid orders above RM0 (free admin-issued licences do not count); decides whether early-bird places remain. */
   countPaidOrders(): Promise<number>;
   /** Totals for the admin dashboard plus the `recent` newest orders. */
   stats(recent: number): Promise<Stats>;

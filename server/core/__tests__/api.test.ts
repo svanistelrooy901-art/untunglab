@@ -296,6 +296,29 @@ describe('admin', () => {
     expect(res.headers.get('content-security-policy')).toContain("frame-ancestors 'none'");
     expect(res.headers.get('content-security-policy')).toContain("connect-src 'self'");
   });
+  it('issue gives a free code (RM0): works in the app, is emailed, and does not use an early-bird place', async () => {
+    const w = await makeWorld({ earlyBirdPriceSen: 3900, earlyBirdSlots: 15 });
+    expect((await w.call('POST', '/api/admin/issue', { name: 'Mamu', email: 'mamu@example.com' })).status).toBe(401);
+    expect((await w.admin('/api/admin/issue', { name: '', email: 'bad' })).status).toBe(400);
+    const res = await w.admin('/api/admin/issue', { name: 'Mamu', email: 'mamu@example.com' });
+    expect(res.status).toBe(200);
+    const { code, emailed } = await w.json(res);
+    expect(code).toMatch(/^UL-/);
+    expect(emailed).toBe(true);
+    expect(w.sent).toEqual([{ to: 'mamu@example.com', code }]);
+    expect((await w.call('POST', '/api/activate', { code, deviceId: 'dev-1', deviceLabel: 'a' })).status).toBe(200);
+    const st = await w.json(await w.admin('/api/admin/stats', {}));
+    expect(st).toMatchObject({ orders: 1, paid: 0, complimentary: 1, revenueSen: 0, earlyBirdLeft: 15 });
+    const found = await w.json(await w.admin('/api/admin/lookup', { email: 'mamu@example.com' }));
+    expect(found.results[0]).toMatchObject({ code, status: 'active' });
+  });
+  it('issue still returns the code when the email fails', async () => {
+    const w = await makeWorld();
+    w.setMailFails(true);
+    const body = await w.json(await w.admin('/api/admin/issue', { name: 'Mamu', email: 'mamu@example.com' }));
+    expect(body.code).toMatch(/^UL-/);
+    expect(body.emailed).toBe(false);
+  });
   it('is disabled when no admin token is configured', async () => {
     const w = await makeWorld({ adminToken: '' });
     expect((await w.call('POST', '/api/admin/lookup', { email: 'x' }, { authorization: 'Bearer ' })).status).toBe(401);
