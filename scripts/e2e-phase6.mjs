@@ -55,7 +55,7 @@ await page.locator('#ing-1').selectOption({ label: 'Bahan lain' });
 await page.getByRole('textbox', { name: 'Kuantiti guna' }).nth(1).fill('1000');
 await page.getByRole('button', { name: '+ Tambah pembungkusan' }).click();
 await page.locator('#pack-0').selectOption({ label: 'Kotak' });
-ok('names missing Nilai Masa', await page.getByText(/Isi Nilai Masa di Kos Operasi/).first().isVisible());
+ok('names missing Nilai Masa', await page.getByText(/Isi Nilai Masa/).first().isVisible());
 ok('names missing sales', await page.getByText(/Isi Anggaran Jualan Bulanan di Kos Operasi/).first().isVisible());
 await page.screenshot({ path: `${S}/p6-02-tidak-lengkap.png`, fullPage: true });
 await page.getByRole('button', { name: 'Simpan menu' }).click();
@@ -69,6 +69,7 @@ await box('Anggaran Jualan Bulanan (RM)').fill('3000');
 await page.getByRole('button', { name: 'Simpan' }).first().click();
 await page.getByText('✓ Disimpan').waitFor();
 await page.getByRole('button', { name: /^Gas/ }).click();
+await page.getByRole('radio', { name: 'Jumlah terus' }).click({ timeout: 1200 }).catch(() => {});
 await box('Jumlah sebulan (RM)').fill('600');
 await saveSheet();
 await fillRemainingOperating(page, url);
@@ -104,7 +105,6 @@ await page.getByRole('button', { name: /Oven/ }).click();
 await saveSheet();
 await page.goto(url + '#/kos-operasi');
 await page.getByRole('button', { name: /^Elektrik/ }).click();
-await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
 await page.getByText('Oven · 2,000 W').waitFor();
 ok('appliance listed without tariff prompts for it', await page.getByText(/Simpan kadar elektrik di atas/).isVisible());
 await box('Kadar elektrik (RM sekilowatt jam)').fill('0.50');
@@ -113,9 +113,11 @@ await page.getByText('RM1.00 / sejam').waitFor();
 ok('oven RM1.00 an hour at RM0.50', true);
 await page.screenshot({ path: `${S}/p6-05-elektrik-alat.png` });
 // Appliances are costed per recipe only when Elektrik is saved in Kira Lebih Tepat (D-71).
-await box('Elektrik am sebulan (RM)').fill('0');
+await page.getByRole('radio', { name: 'Kira dari bil' }).click({ timeout: 1200 }).catch(() => {});
+await box('Bil sebulan (RM)').fill('0');
+await page.getByRole('button', { name: '5%', exact: true }).click();
 await saveSheet();
-await page.getByText('Lebih Tepat').first().waitFor();
+await page.getByText('Mudah').first().waitFor();
 
 // --- equipment in a menu: C05 RM0.75 per batch ---
 await page.goto(url + '#/menu');

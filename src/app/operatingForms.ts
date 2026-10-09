@@ -1,4 +1,4 @@
-import { businessPctFromArea, waterMonthlyCost, workspaceMonthlyCost, type ElectricityDetail, type WaterDetail, type WorkspaceDetail } from '../domain';
+import { businessPctFromArea, guidedMonthlyCost, waterMonthlyCost, workspaceMonthlyCost, type ElectricityDetail, type GuidedAmount, type WaterDetail, type WorkspaceDetail, type Worker } from '../domain';
 import { t } from '../i18n/ms';
 import { parseNumber, type FormResult } from './forms';
 
@@ -103,4 +103,41 @@ export function validateProfile(f: { time: string; sales: string }): FormResult<
 export function validateTariff(text: string): { ok: true; value: number } | { ok: false; error: string } {
   const n = parseNumber(text);
   return n !== null && n > 0 ? { ok: true, value: n } : { ok: false, error: t('ops.errTarif') };
+}
+
+/** Mudah guided: monthly bill and the share the business uses. */
+export function validateGuided(f: { bill: string; pct: string }): FormResult<{ guided: GuidedAmount; monthly: number }, 'bill' | 'pct'> {
+  const errors: Partial<Record<'bill' | 'pct', string>> = {};
+  const bill = nonNegative(f.bill);
+  const pct = pctValue(f.pct);
+  if (bill === null) errors.bill = t('ops.errJumlah');
+  if (pct === null) errors.pct = t('ops.errPeratus');
+  if (bill === null || pct === null) return { ok: false, errors };
+  return { ok: true, value: { guided: { monthlyBill: bill, businessUsePct: pct }, monthly: guidedMonthlyCost(bill, pct) } };
+}
+
+/** One Kos Lain item: a name and a monthly RM amount. */
+export function validateOtherItem(f: { name: string; amount: string }): FormResult<{ name: string; monthlyAmount: number }, 'name' | 'amount'> {
+  const errors: Partial<Record<'name' | 'amount', string>> = {};
+  const name = f.name.trim();
+  const amount = nonNegative(f.amount);
+  if (name === '') errors.name = t('ops.errNamaKos');
+  if (amount === null) errors.amount = t('ops.errJumlah');
+  if (name === '' || amount === null) return { ok: false, errors };
+  return { ok: true, value: { name, monthlyAmount: amount } };
+}
+
+/** One worker: name, monthly pay, days a month, hours a day. Hours must be more than zero. */
+export function validateWorker(f: { name: string; pay: string; days: string; hours: string }): FormResult<Omit<Worker, 'id'>, 'name' | 'pay' | 'days' | 'hours'> {
+  const errors: Partial<Record<'name' | 'pay' | 'days' | 'hours', string>> = {};
+  const name = f.name.trim();
+  const pay = nonNegative(f.pay);
+  const days = parseNumber(f.days);
+  const hours = parseNumber(f.hours);
+  if (name === '') errors.name = t('ops.errNamaPekerja');
+  if (pay === null) errors.pay = t('ops.errJumlah');
+  if (days === null || days <= 0 || days > 31) errors.days = t('ops.errHari');
+  if (hours === null || hours <= 0 || hours > 24) errors.hours = t('ops.errJam');
+  if (Object.keys(errors).length > 0 || pay === null || days === null || hours === null) return { ok: false, errors };
+  return { ok: true, value: { name, monthlyPay: pay, daysPerMonth: days, hoursPerDay: hours } };
 }

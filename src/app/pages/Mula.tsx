@@ -4,6 +4,7 @@ import { t, type MsKey } from '../../i18n/ms';
 import { Icon } from '../components/Icon';
 import { Loading, PageHeader } from '../components/ui';
 import { useLive } from '../data';
+import { hourlyRateOf } from '../menuAssembly';
 
 interface Step {
   key: MsKey;
@@ -28,7 +29,7 @@ export function SetupChecklist() {
   if (!data) return <Loading />;
 
   const steps: Step[] = [
-    { key: 'mula.s1', to: '/kos-operasi', done: data.profile.valueOfTimePerHour !== null },
+    { key: 'mula.s1', to: '/kos-operasi', done: hourlyRateOf(data.profile) !== null },
     { key: 'mula.s2', to: '/kos-operasi', done: data.ops >= OPERATING_CATEGORIES.length },
     { key: 'mula.s3', to: '/kos-operasi', done: data.profile.expectedMonthlySales !== null },
     { key: 'mula.s4', to: '/bahan', done: data.ingredients > 0 },

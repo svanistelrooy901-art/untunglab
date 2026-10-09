@@ -75,8 +75,8 @@ describe('licence token (ECDSA P-256, verified offline)', () => {
 });
 
 describe('free plan limits (D-58)', () => {
-  it('are 2 menus, 10 bahan, 2 pembungkusan', () => {
-    expect(FREE_LIMITS).toEqual({ menus: 2, ingredients: 10, packaging: 2 });
+  it('are 2 menus, 10 bahan, 2 pembungkusan, 3 kos lain', () => {
+    expect(FREE_LIMITS).toEqual({ menus: 2, ingredients: 10, packaging: 2, otherCosts: 3 });
   });
   it('free can add up to the limit and not beyond; pro is unlimited', () => {
     expect(canAdd('free', 'menus', 1)).toBe(true);

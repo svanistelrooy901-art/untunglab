@@ -196,12 +196,29 @@ export interface ElectricityDetail {
 
 export type OperatingDetail = WorkspaceDetail | WaterDetail | ElectricityDetail;
 
+/** Mudah guided input: monthly bill x the share the business uses (D-84). */
+export interface GuidedAmount {
+  monthlyBill: number;
+  businessUsePct: number;
+}
+
+/** One named monthly cost inside Kos Lain. */
+export interface OtherCostItem {
+  id: string;
+  name: string;
+  monthlyAmount: number;
+}
+
 /** One row per category. Mudah and Lebih Tepat are two ways to derive one final monthly amount. */
 export interface OperatingCostEntry {
   category: OperatingCategory;
   mode: OperatingMode;
   simpleAmount: number;
   detail?: OperatingDetail;
+  /** Mudah guided input. When present it decides the amount instead of `simpleAmount`. */
+  guided?: GuidedAmount;
+  /** Kos Lain only. When present (even empty) the item total decides the amount. */
+  items?: OtherCostItem[];
   active: boolean;
   classification: CostClassification;
 }

@@ -74,6 +74,7 @@ await box('Anggaran Jualan Bulanan (RM)').fill('3000');
 await page.getByRole('button', { name: 'Simpan' }).first().click();
 await page.getByText('✓ Disimpan').waitFor();
 await page.getByRole('button', { name: /^Gas/ }).click();
+await page.getByRole('radio', { name: 'Jumlah terus' }).click({ timeout: 1200 }).catch(() => {});
 await box('Jumlah sebulan (RM)').fill('600');
 await saveSheet();
 await page.getByTestId('ops-kemajuan').getByText('1 / 6 kategori diisi').waitFor();
@@ -90,6 +91,7 @@ for (const name of [/^Ruang Kerja/, /^Internet/, /^Kos Lain/]) {
 }
 // Elektrik in Mudah with a real monthly bill
 await page.getByRole('button', { name: /^Elektrik/ }).click();
+await page.getByRole('radio', { name: 'Jumlah terus' }).click({ timeout: 1200 }).catch(() => {});
 await box('Jumlah sebulan (RM)').fill('150');
 await saveSheet();
 await page.getByTestId('ops-kemajuan').getByText('Semua kategori telah diisi.').waitFor();
@@ -107,11 +109,12 @@ ok('Mudah with no appliance lines: section is simply gone, no clutter', (await p
 // ---- Kira Lebih Tepat: section returns, appliances cost money ----
 await page.goto(url + '#/kos-operasi');
 await page.getByRole('button', { name: /^Elektrik/ }).click();
-await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
 await box('Kadar elektrik (RM sekilowatt jam)').fill('0.50');
 await page.getByRole('button', { name: 'Simpan kadar' }).click();
 await page.getByText('Kadar semasa: RM0.5 / kWh').waitFor();
-await box('Elektrik am sebulan (RM)').fill('150');
+await page.getByRole('radio', { name: 'Kira dari bil' }).click({ timeout: 1200 }).catch(() => {});
+await box('Bil sebulan (RM)').fill('150');
+await page.getByRole('button', { name: '5%', exact: true }).click();
 await saveSheet();
 await page.goto(url + '#/menu');
 await page.getByRole('link', { name: /Roti/ }).click();
@@ -128,18 +131,21 @@ ok('Lebih Tepat: oven electricity counted (RM0.075 a portion)', /RM0\.08|RM0\.07
 // switch back to Mudah: line kept but no longer counted
 await page.goto(url + '#/kos-operasi');
 await page.getByRole('button', { name: /^Elektrik/ }).click();
-await page.getByRole('tab', { name: 'Mudah' }).click();
+await page.getByRole('radio', { name: 'Jumlah terus' }).click();
+await box('Jumlah sebulan (RM)').fill('150');
 await saveSheet();
 await page.goto(url + '#/menu');
 await page.getByRole('link', { name: /Roti/ }).click();
 await page.getByText('Hasil pengiraan').waitFor();
 const mudahOven = await costLine();
 ok('back to Mudah: appliance electricity no longer counted', /RM0\.00/.test(mudahOven), mudahOven);
-ok('back to Mudah: note explains why the oven line does not count', await page.getByTestId('peralatan-tersembunyi').getByText(/tidak dikira kerana Elektrik dalam mod Mudah/).isVisible());
+ok('back to Mudah: note explains why the oven line does not count', await page.getByTestId('peralatan-tersembunyi').getByText(/tidak dikira kerana Elektrik/).isVisible());
 ok('back to Mudah: stored oven line not deleted', await (async () => {
   await page.goto(url + '#/kos-operasi');
   await page.getByRole('button', { name: /^Elektrik/ }).click();
-  await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
+  await page.getByRole('radio', { name: 'Kira dari bil' }).click();
+  await box('Bil sebulan (RM)').fill('150');
+  await page.getByRole('button', { name: '5%', exact: true }).click();
   await page.getByRole('button', { name: 'Simpan' }).last().click();
   await page.goto(url + '#/menu');
   await page.getByRole('link', { name: /Roti/ }).click();

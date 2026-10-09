@@ -40,10 +40,11 @@ await saveSheet();
 
 await page.goto(url + '#/kos-operasi');
 await page.getByRole('button', { name: /^Elektrik/ }).click();
-await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
 await box('Kadar elektrik (RM sekilowatt jam)').fill('0.50');
 await page.getByRole('button', { name: 'Simpan kadar' }).click();
-await box('Elektrik am sebulan (RM)').fill('0');
+await page.getByRole('radio', { name: 'Kira dari bil' }).click({ timeout: 1200 }).catch(() => {});
+await box('Bil sebulan (RM)').fill('0');
+await page.getByRole('button', { name: '5%', exact: true }).click();
 await saveSheet();
 
 // ---- scene 2: menu baru ----

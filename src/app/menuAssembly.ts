@@ -4,10 +4,12 @@ import {
   finalMonthlyAmount,
   missingCategories,
   sharedOperatingTotal,
+  teamHourlyRate,
   type BusinessInput,
   type MenuCostResult,
   type MenuInput,
   type OperatingCostEntry,
+  type Worker,
 } from '../domain';
 import { OPERATING_CATEGORIES, type CostingData, type StoredMenu } from '../db';
 import { toEntry } from './operatingView';
@@ -16,6 +18,11 @@ export interface CostedMenu {
   menu: StoredMenu;
   input: MenuInput;
   result: MenuCostResult;
+}
+
+/** Team: weighted rate from the worker list (null while any worker is incomplete). Solo: Nilai Masa (D-85). */
+export function hourlyRateOf(profile: { workMode?: 'solo' | 'team'; workers?: Worker[]; valueOfTimePerHour: number | null }): number | null {
+  return profile.workMode === 'team' ? teamHourlyRate(profile.workers ?? []) : profile.valueOfTimePerHour;
 }
 
 /**
@@ -32,7 +39,7 @@ export function businessInputFrom(data: CostingData): BusinessInput {
     shared = null;
   }
   return {
-    valueOfTimePerHour: data.profile.valueOfTimePerHour,
+    valueOfTimePerHour: hourlyRateOf(data.profile),
     electricityTariffPerKwh: data.tariff?.ratePerKwh ?? null,
     sharedMonthlyOperatingCost: shared,
     expectedMonthlySales: data.profile.expectedMonthlySales,

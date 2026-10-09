@@ -46,6 +46,7 @@ await box('Anggaran Jualan Bulanan (RM)').fill('3000');
 await page.getByRole('button', { name: 'Simpan' }).first().click();
 await page.getByText('✓ Disimpan').waitFor();
 await page.getByRole('button', { name: /^Gas/ }).click();
+await page.getByRole('radio', { name: 'Jumlah terus' }).click({ timeout: 1200 }).catch(() => {});
 await box('Jumlah sebulan (RM)').fill('600');
 await saveSheet();
 await fillRemainingOperating(page, url);

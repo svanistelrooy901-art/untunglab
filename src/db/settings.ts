@@ -1,4 +1,4 @@
-import type { OperatingCategory } from '../domain';
+import type { OperatingCategory, Worker } from '../domain';
 import { RepoError, ensureBusiness, localDate, type Context } from './repo';
 import type { Business, BusinessCostProfile, OperatingCostRow, UtilityTariff } from './types';
 
@@ -32,6 +32,8 @@ export interface CostProfilePatch {
   valueOfTimePerHour?: number | null;
   /** RM per month. Must be more than zero; null = not entered. Zero is never stored (Doc 03 §8). */
   expectedMonthlySales?: number | null;
+  workMode?: 'solo' | 'team';
+  workers?: Worker[];
 }
 
 /** Omitted fields are kept. Validation happens before anything is written. */
@@ -48,6 +50,8 @@ export async function saveCostProfile(ctx: Context, patch: CostProfilePatch): Pr
       ...current,
       ...(time !== undefined ? { valueOfTimePerHour: time } : {}),
       ...(sales !== undefined ? { expectedMonthlySales: sales } : {}),
+      ...(patch.workMode !== undefined ? { workMode: patch.workMode } : {}),
+      ...(patch.workers !== undefined ? { workers: patch.workers } : {}),
       updatedAt: ctx.now().toISOString(),
     };
     await db.costProfiles.put(next);

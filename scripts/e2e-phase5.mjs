@@ -46,14 +46,14 @@ await save();
 
 // Air: 100 x 30%
 await page.getByRole('button', { name: /^Air/ }).click();
-await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
-await page.getByRole('textbox', { name: 'Purata bil air sebulan (RM)', exact: true }).fill('100');
-await page.getByRole('textbox', { name: '% air untuk bisnes', exact: true }).fill('30');
+await page.getByRole('textbox', { name: 'Bil sebulan (RM)', exact: true }).fill('100');
+await page.getByRole('textbox', { name: '% digunakan untuk bisnes', exact: true }).fill('30');
 ok('water result RM30', await page.getByText('RM30.00 sebulan').isVisible());
 await save();
 
 // Gas: Mudah 270
 await page.getByRole('button', { name: /^Gas/ }).click();
+await page.getByRole('radio', { name: 'Jumlah terus' }).click({ timeout: 1200 }).catch(() => {});
 await page.getByRole('textbox', { name: 'Jumlah sebulan (RM)', exact: true }).fill('270');
 await save();
 
@@ -65,6 +65,7 @@ await page.screenshot({ path: `${S}/p5-04-ringkasan.png`, fullPage: true });
 // Switch Ruang Kerja to Mudah 400: advanced data must survive
 await page.getByRole('button', { name: /Ruang Kerja/ }).click();
 await page.getByRole('tab', { name: 'Mudah' }).click();
+await page.getByRole('radio', { name: 'Jumlah terus' }).click({ timeout: 1200 }).catch(() => {});
 await page.getByRole('textbox', { name: 'Jumlah sebulan (RM)', exact: true }).fill('400');
 await save();
 await page.getByRole('button', { name: /Ruang Kerja/ }).click();
@@ -74,8 +75,7 @@ await page.keyboard.press('Escape');
 
 // Elektrik warning + tariff
 await page.getByRole('button', { name: /^Elektrik/ }).click();
-await page.getByRole('tab', { name: 'Kira Lebih Tepat' }).click();
-ok('double-count warning shown', await page.getByText(/dikira dua kali/).isVisible());
+ok('double-count warning shown', await page.getByText(/elektrik am sahaja/).isVisible());
 await page.getByRole('textbox', { name: 'Kadar elektrik (RM sekilowatt jam)', exact: true }).fill('0.50');
 await page.getByRole('button', { name: 'Simpan kadar' }).click();
 await page.getByText('Kadar semasa: RM0.5 / kWh').waitFor();

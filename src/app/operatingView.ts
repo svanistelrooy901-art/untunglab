@@ -29,6 +29,8 @@ export function toEntry(row: OperatingCostRow): OperatingCostEntry {
     mode: row.mode,
     simpleAmount: row.simpleAmount,
     ...(row.detail ? { detail: row.detail } : {}),
+    ...(row.guided ? { guided: row.guided } : {}),
+    ...(row.items ? { items: row.items } : {}),
     active: row.active,
     classification: row.classification,
   };

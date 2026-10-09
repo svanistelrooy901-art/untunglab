@@ -8,3 +8,4 @@ export * from './suggestPrice';
 export * from './priceChange';
 export * from './scenario';
 export * from './priceHistory';
+export * from './labour';

@@ -1,7 +1,10 @@
 import type {
   CostClassification,
+  GuidedAmount,
   OperatingCategory,
   OperatingDetail,
+  OtherCostItem,
+  Worker,
   OperatingMode,
   PackMapping,
   PackagingSemantics,
@@ -30,6 +33,9 @@ export interface BusinessCostProfile {
   businessId: string;
   valueOfTimePerHour: number | null;
   expectedMonthlySales: number | null;
+  /** Who does the work. Absent = solo (Nilai Masa). Switching never deletes the other side's numbers (D-85). */
+  workMode?: 'solo' | 'team';
+  workers?: Worker[];
   allocationMethod: 'revenue_percentage';
   updatedAt: string;
 }
@@ -42,6 +48,8 @@ export interface OperatingCostRow {
   mode: OperatingMode;
   simpleAmount: number;
   detail?: OperatingDetail;
+  guided?: GuidedAmount;
+  items?: OtherCostItem[];
   active: boolean;
   classification: CostClassification;
   updatedAt: string;

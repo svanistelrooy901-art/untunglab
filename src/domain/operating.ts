@@ -1,4 +1,4 @@
-import type { OperatingCategory, OperatingCostEntry, OperatingMode } from './types';
+import type { OperatingCategory, OperatingCostEntry, OperatingMode, OtherCostItem } from './types';
 
 export type OperatingErrorCode =
   | 'invalid_amount'
@@ -54,6 +54,24 @@ export function waterMonthlyCost(averageMonthlyBill: number, businessUsePct: num
   return (averageMonthlyBill * businessUsePct) / 100;
 }
 
+/** Mudah guided: monthly bill x business-use % (D-84). */
+export function guidedMonthlyCost(monthlyBill: number, businessUsePct: number): number {
+  assertAmount(monthlyBill, 'Monthly bill');
+  assertPct(businessUsePct);
+  return (monthlyBill * businessUsePct) / 100;
+}
+
+/** Kos Lain: the named monthly items added up. A blank name or negative amount is an error, never skipped. */
+export function otherItemsTotal(items: readonly OtherCostItem[]): number {
+  let total = 0;
+  for (const item of items) {
+    if (item.name.trim() === '') throw new OperatingCostError('invalid_amount', 'Other cost needs a name');
+    assertAmount(item.monthlyAmount, item.name);
+    total += item.monthlyAmount;
+  }
+  return total;
+}
+
 /**
  * The single monthly amount a category feeds to shared allocation, whichever mode derived it.
  * Inactive costs contribute zero.
@@ -62,6 +80,8 @@ export function finalMonthlyAmount(entry: OperatingCostEntry): number {
   if (!entry.active) return 0;
 
   if (entry.mode === 'simple') {
+    if (entry.category === 'kos_lain' && entry.items) return otherItemsTotal(entry.items);
+    if (entry.guided) return guidedMonthlyCost(entry.guided.monthlyBill, entry.guided.businessUsePct);
     assertAmount(entry.simpleAmount, 'Monthly amount');
     return entry.simpleAmount;
   }
@@ -156,9 +176,10 @@ export function missingCategories(entries: readonly OperatingCostEntry[], requir
 }
 
 /**
- * Production appliances add their own electricity to a recipe only when Elektrik is in Kira Lebih Tepat. In Mudah the
- * whole electricity bill is already a shared monthly cost, so charging appliances as well would count it twice (D-71, Doc 03 §9).
+ * Production appliances add their own electricity to a recipe only when the shared Elektrik amount is general electricity
+ * alone: Kira Lebih Tepat, or Mudah guided (D-84). An old Mudah direct amount is the whole bill, so charging appliances
+ * as well would count it twice (D-71, Doc 03 §9).
  */
 export function appliancesCounted(entries: readonly OperatingCostEntry[]): boolean {
-  return entries.some((e) => e.category === 'elektrik' && e.active && e.mode === 'detailed');
+  return entries.some((e) => e.category === 'elektrik' && e.active && (e.mode === 'detailed' || (e.mode === 'simple' && e.guided !== undefined)));
 }
