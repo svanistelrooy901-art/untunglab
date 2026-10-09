@@ -9,9 +9,9 @@ database_name = "untunglab-license"
 database_id = "dc555b55-abfe-415f-a730-b5645c72d5d0"
 
 [vars]
-PRICE_SEN = "100"                          # RM49.00 in sen (D-80). Change here to change the price; no app update needed.  # SANDBOX TEST ONLY. Production: 4900
+PRICE_SEN = "4900"  # RM49 normal price
 EARLY_BIRD_PRICE_SEN = "3900"               # RM39.00 for the first EARLY_BIRD_SLOTS paid orders (D-80). Set SLOTS to "0" to turn off.
-EARLY_BIRD_SLOTS = "0"  # SANDBOX TEST ONLY. Production: "15"
+EARLY_BIRD_SLOTS = "15"
 TOYYIB_BASE_URL = "https://toyyibpay.com"   # production (sandbox is https://dev.toyyibpay.com). Testing live with RM1 (D-81)
 TOYYIB_CATEGORY = "5gqeosjy"
 PUBLIC_BASE_URL = "https://beli.untunglab.space" # this Worker's public address (custom domain)
