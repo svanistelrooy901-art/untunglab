@@ -9,6 +9,7 @@ const S = process.argv[2] ?? '.';
 const url = process.env.APP_URL ?? 'http://localhost:4173/';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }).catch(() => chromium.launch());
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: 'ms-MY' });
+await ctx.addInitScript(() => localStorage.setItem('ul-app-lang', 'ms')); // skip the first-open language prompt
 const page = await ctx.newPage();
 const errors = [];
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
@@ -75,15 +76,15 @@ await page.getByRole('status').getByText(/dikemas kini/).waitFor();
 // --- reminder before any backup ---
 await page.goto(url + '#/');
 await page.getByTestId('peringatan-sandaran').waitFor();
-ok('reminder shown when data exists and nothing was backed up', /belum simpan sandaran/i.test(await page.getByTestId('peringatan-sandaran').innerText()));
+ok('reminder shown when data exists and nothing was backed up', /belum simpan backup/i.test(await page.getByTestId('peringatan-sandaran').innerText()));
 
 // --- export ---
 await page.goto(url + '#/sandaran');
-const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Simpan sandaran' }).click()]);
+const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Simpan backup' }).click()]);
 const file = `${S}/${dl.suggestedFilename()}`;
 await dl.saveAs(file);
 ok('download named untunglab-sandaran-YYYY-MM-DD.json', /^untunglab-sandaran-\d{4}-\d{2}-\d{2}\.json$/.test(dl.suggestedFilename()));
-await page.getByRole('status').getByText(/Sandaran disimpan/).waitFor();
+await page.getByRole('status').getByText(/Backup disimpan/).waitFor();
 await page.screenshot({ path: `${S}/p9-01-sandaran.png`, fullPage: true });
 await page.goto(url + '#/');
 await page.getByText('Nasi Lemak').first().waitFor();
@@ -99,7 +100,7 @@ writeFileSync(`${S}/tampered.json`, JSON.stringify(tampered));
 writeFileSync(`${S}/truncated.json`, good.slice(0, good.length - 50));
 writeFileSync(`${S}/other.json`, '{"hello":"world"}');
 await page.goto(url + '#/sandaran');
-for (const [f, msg] of [['tampered.json', /berubah atau rosak/], ['truncated.json', /rosak atau tidak lengkap/], ['other.json', /bukan fail sandaran UntungLab/]]) {
+for (const [f, msg] of [['tampered.json', /berubah atau rosak/], ['truncated.json', /rosak atau tidak lengkap/], ['other.json', /bukan fail backup UntungLab/]]) {
   await page.getByTestId('fail-sandaran').setInputFiles(`${S}/${f}`);
   await page.getByRole('alert').getByText(msg).waitFor();
   ok(`${f} refused with a clear reason`, (await page.getByTestId('pratonton').count()) === 0);
@@ -130,11 +131,12 @@ ok('history restored (2 records for Ayam)', true);
 
 // --- brand-new device, offline ---
 const fresh = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ms-MY' });
+await fresh.addInitScript(() => localStorage.setItem('ul-app-lang', 'ms')); // skip the first-open language prompt
 const p2 = await fresh.newPage();
 const errors2 = [];
 p2.on('pageerror', (e) => errors2.push(String(e)));
 await p2.goto(url + '#/sandaran');
-await p2.getByText('Belum pernah simpan sandaran').waitFor();
+await p2.getByText('Belum pernah simpan backup').waitFor();
 await p2.waitForTimeout(1500); // let the service worker cache the app
 await fresh.setOffline(true);
 await p2.getByTestId('fail-sandaran').setInputFiles(file);

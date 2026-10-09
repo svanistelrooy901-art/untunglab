@@ -142,7 +142,7 @@ function IngredientForm({ ingredient, onDone }: { ingredient: Ingredient | null;
         autoCapitalize="none"
       />
       <datalist id="unit-options">
-        {['kg', 'g', 'l', 'ml', 'biji', 'pek', 'kotak', 'botol', 'tin', 'ikat', 'keping'].map((u) => (
+        {t('form.unitOptions').split(',').map((u) => (
           <option key={u} value={u} />
         ))}
       </datalist>

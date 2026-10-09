@@ -7,6 +7,7 @@ const S = process.argv[2] ?? 'docs/qa/phase-14';
 const url = 'http://localhost:4181/';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const ctx = await browser.newContext({ viewport: { width: 360, height: 640 }, deviceScaleFactor: 2, locale: 'ms-MY' });
+await ctx.addInitScript(() => localStorage.setItem('ul-app-lang', 'ms')); // skip the first-open language prompt
 const page = await ctx.newPage();
 page.on('pageerror', (e) => console.log('PAGEERR', String(e)));
 const box = (n) => page.getByRole('textbox', { name: n, exact: true });

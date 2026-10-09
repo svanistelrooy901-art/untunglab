@@ -9,6 +9,7 @@ const S = process.argv[2] ?? '.';
 const url = process.env.APP_URL ?? 'http://localhost:4181/';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }).catch(() => chromium.launch());
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ms-MY' });
+await ctx.addInitScript(() => localStorage.setItem('ul-app-lang', 'ms')); // skip the first-open language prompt
 const page = await ctx.newPage();
 const errors = [];
 page.on('console', (m) => m.type() === 'error' && !/ERR_INTERNET_DISCONNECTED|Failed to load resource/.test(m.text()) && errors.push(m.text()));

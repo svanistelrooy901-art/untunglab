@@ -1,6 +1,9 @@
-import type { ComponentType } from 'react';
+import { Fragment, type ComponentType } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
+import { useLangState } from '../i18n/lang';
 import { t } from '../i18n/ms';
+import { LanguagePrompt } from './components/LanguagePrompt';
+import { TetapanPage } from './pages/Tetapan';
 import { Layout } from './components/Layout';
 import { DataProvider } from './data';
 import { LicenseProvider } from './license';
@@ -27,6 +30,7 @@ const PAGES: Record<string, ComponentType> = {
   '/sandaran': SandaranPage,
   '/lesen': LesenPage,
   '/manual': ManualPage,
+  '/tetapan': TetapanPage,
   '/laporan': LaporanPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,
@@ -36,6 +40,7 @@ const PAGES: Record<string, ComponentType> = {
 };
 
 export function App() {
+  const { lang } = useLangState();
   return (
     <DataProvider
       fallback={<p className="p-6 text-sm text-muted">{t('common.memuatkan')}</p>}
@@ -47,6 +52,9 @@ export function App() {
       )}
     >
       <LicenseProvider>
+      {/* The key remounts the screens when the language changes, so every text is re-read. */}
+      <Fragment key={lang}>
+      <LanguagePrompt />
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>
@@ -66,6 +74,7 @@ export function App() {
           </Route>
         </Routes>
       </HashRouter>
+      </Fragment>
       </LicenseProvider>
     </DataProvider>
   );

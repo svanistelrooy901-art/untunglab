@@ -4,6 +4,7 @@ const { chromium } = require('playwright');
 const S = process.argv[2] ?? '.';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }).catch(async () => chromium.launch());
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ms-MY' });
+await ctx.addInitScript(() => localStorage.setItem('ul-app-lang', 'ms')); // skip the first-open language prompt
 const page = await ctx.newPage();
 const errors = [];
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BackupError, backupToText, createBackup, readBackup, restoreBackup, type BackupIssue, type BackupSummary } from '../../db';
+import { dateLocale } from '../../i18n/lang';
 import { t, type MsKey } from '../../i18n/ms';
 import { PageHeader, Sheet, btnPrimary, btnQuiet, btnSecondary } from '../components/ui';
 import { backupFileName, lastBackupAt, markBackup, persistenceState, requestPersistence, saveBackupFile, type Persistence } from '../backupFile';
@@ -7,7 +8,7 @@ import { useData } from '../data';
 
 const dateText = (iso: string) => {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? t('sandaran.tarikhTiada') : d.toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
+  return Number.isNaN(d.getTime()) ? t('sandaran.tarikhTiada') : d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
 export function SandaranPage() {
