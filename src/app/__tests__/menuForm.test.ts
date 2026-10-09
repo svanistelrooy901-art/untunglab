@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyForm, parseMenuForm, type MenuForm } from '../menuForm';
 
 const ok: MenuForm = {
-  name: ' Kek ',
+  category: '', name: ' Kek ',
   yield: '10',
   minutes: '60',
   price: '12,50',

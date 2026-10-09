@@ -5,6 +5,7 @@ import { parseNumber } from './forms';
 
 export interface MenuForm {
   name: string;
+  category: string;
   yield: string;
   minutes: string;
   price: string;
@@ -13,7 +14,7 @@ export interface MenuForm {
   equipment: { equipmentId: string; minutes: string }[];
 }
 
-export const emptyForm = (): MenuForm => ({ name: '', yield: '', minutes: '', price: '', ingredients: [], packaging: [], equipment: [] });
+export const emptyForm = (): MenuForm => ({ name: '', category: '', yield: '', minutes: '', price: '', ingredients: [], packaging: [], equipment: [] });
 
 export type MenuFormErrors = Partial<Record<'name' | 'yield' | 'minutes' | 'price' | 'lines', string>>;
 
@@ -43,6 +44,7 @@ export function parseMenuForm(f: MenuForm, id?: string): { ok: true; value: Menu
     value: {
       ...(id ? { id } : {}),
       name: f.name.trim(),
+      ...(f.category.trim() ? { category: f.category.trim() } : {}),
       yield: yieldN,
       productionMinutesPerBatch: minutes,
       sellingPrice: price,

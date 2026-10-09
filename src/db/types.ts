@@ -181,6 +181,10 @@ export interface Menu {
   businessId: string;
   recipeId: string;
   sellingPrice: number;
+  /** Parent category shown as a group in the menu list. Absent = none. */
+  category?: string;
+  /** Set on a variation: the base menu it follows live (D-86). */
+  baseMenuId?: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;

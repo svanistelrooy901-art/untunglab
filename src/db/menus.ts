@@ -23,6 +23,9 @@ export interface MenuDraft {
   /** Menu id when editing an existing menu. */
   id?: string;
   name: string;
+  category?: string;
+  /** A variation of this base menu. Its own `ingredients`/`packaging` are extras only; yield, time and base lines are inherited. */
+  baseMenuId?: string;
   yield: number;
   productionMinutesPerBatch: number;
   /** RM per portion. 0 = not set yet: saved as a draft and reported as incomplete by the engine. */
@@ -37,6 +40,8 @@ export interface StoredMenu extends MenuDraft {
   menuId: string;
   recipeId: string;
   active: boolean;
+  /** Variations only: the stored extras (ingredients/packaging above already include the base lines). */
+  own?: { ingredients: MenuDraft['ingredients']; packaging: MenuDraft['packaging'] };
 }
 
 const invalid = (msg: string) => new RepoError('invalid_input', msg);
@@ -72,6 +77,17 @@ export async function saveMenu(ctx: Context, draft: MenuDraft): Promise<{ menuId
       for (const l of draft.packaging) if (!(await db.packaging.get(l.packagingId))) throw invalid(`Packaging ${l.packagingId} does not exist`);
       for (const l of draft.equipment) if (!(await db.equipment.get(l.equipmentId))) throw invalid(`Equipment ${l.equipmentId} does not exist`);
 
+      const category = draft.category?.trim() ? draft.category.trim() : undefined;
+      if (draft.baseMenuId) {
+        if (draft.baseMenuId === draft.id) throw invalid('A menu cannot be a variation of itself');
+        const base = await db.menus.get(draft.baseMenuId);
+        if (!base) throw invalid('Base menu does not exist');
+        if (base.baseMenuId) throw invalid('A variation cannot be the base of another variation');
+        if (draft.equipment.length > 0) throw invalid('A variation cannot add equipment');
+        // A base menu that already has variations cannot itself become a variation.
+        if (draft.id && (await db.menus.filter((m) => m.baseMenuId === draft.id).count()) > 0) throw invalid('This menu already has variations');
+      }
+
       const at = ctx.now().toISOString();
       let menu = draft.id ? await db.menus.get(draft.id) : undefined;
       if (draft.id && !menu) throw new RepoError('not_found', `Menu ${draft.id} not found`);
@@ -93,6 +109,8 @@ export async function saveMenu(ctx: Context, draft: MenuDraft): Promise<{ menuId
         businessId: business.id,
         recipeId: recipe.id,
         sellingPrice: draft.sellingPrice,
+        ...(category && !draft.baseMenuId ? { category } : {}),
+        ...(draft.baseMenuId ? { baseMenuId: draft.baseMenuId } : {}),
         active: menu?.active ?? true,
         createdAt: menu?.createdAt ?? at,
         updatedAt: at,
@@ -120,6 +138,8 @@ function stored(menu: Menu, recipe: Recipe, ing: RecipeIngredient[], pack: Recip
     recipeId: recipe.id,
     active: menu.active,
     name: recipe.name,
+    ...(menu.category ? { category: menu.category } : {}),
+    ...(menu.baseMenuId ? { baseMenuId: menu.baseMenuId } : {}),
     yield: recipe.yield,
     productionMinutesPerBatch: recipe.productionMinutesPerBatch,
     sellingPrice: menu.sellingPrice,
@@ -130,16 +150,7 @@ function stored(menu: Menu, recipe: Recipe, ing: RecipeIngredient[], pack: Recip
 }
 
 export async function getMenu(ctx: Context, menuId: string): Promise<StoredMenu | null> {
-  const { db } = ctx;
-  const menu = await db.menus.get(menuId);
-  const recipe = menu ? await db.recipes.get(menu.recipeId) : undefined;
-  if (!menu || !recipe) return null;
-  const [ing, pack, eq] = await Promise.all([
-    db.recipeIngredients.where('recipeId').equals(recipe.id).toArray(),
-    db.recipePackaging.where('recipeId').equals(recipe.id).toArray(),
-    db.recipeEquipmentUsage.where('recipeId').equals(recipe.id).toArray(),
-  ]);
-  return stored(menu, recipe, ing, pack, eq);
+  return (await loadMenuRows(ctx)).find((m) => m.id === menuId) ?? null;
 }
 
 export async function listMenus(ctx: Context): Promise<StoredMenu[]> {
@@ -170,7 +181,61 @@ async function loadMenuRows(ctx: Context): Promise<StoredMenu[]> {
     const recipe = recipeById.get(menu.recipeId);
     if (recipe) out.push(stored(menu, recipe, gi.get(recipe.id) ?? [], gp.get(recipe.id) ?? [], ge.get(recipe.id) ?? []));
   }
-  return out;
+  const byId = new Map(out.map((m) => [m.id, m]));
+  return out.map((m) => {
+    const base = m.baseMenuId ? byId.get(m.baseMenuId) : undefined;
+    return base && !base.baseMenuId ? withBase(m, base) : m;
+  });
+}
+
+/**
+ * A variation as the costing sees it: the base's yield, time and lines plus its own extras. Pure, so the editor's live
+ * preview and the stored menus resolve the same way (D-86).
+ */
+export function withBase(variation: StoredMenu, base: StoredMenu): StoredMenu {
+  return {
+    ...variation,
+    ...(base.category ? { category: base.category } : {}),
+    yield: base.yield,
+    productionMinutesPerBatch: base.productionMinutesPerBatch,
+    ingredients: [...base.ingredients, ...variation.ingredients],
+    packaging: [...base.packaging, ...variation.packaging],
+    equipment: base.equipment,
+    own: { ingredients: variation.ingredients, packaging: variation.packaging },
+  };
+}
+
+/** Before a base is deleted, every variation takes a copy of the base's lines and becomes a standalone menu (D-86). */
+async function detachVariations(ctx: Context, base: Menu): Promise<void> {
+  const { db } = ctx;
+  const kids = await db.menus.filter((m) => m.baseMenuId === base.id).toArray();
+  if (kids.length === 0) return;
+  const baseRecipe = await db.recipes.get(base.recipeId);
+  const [bi, bp, be] = await Promise.all([
+    db.recipeIngredients.where('recipeId').equals(base.recipeId).toArray(),
+    db.recipePackaging.where('recipeId').equals(base.recipeId).toArray(),
+    db.recipeEquipmentUsage.where('recipeId').equals(base.recipeId).toArray(),
+  ]);
+  const at = ctx.now().toISOString();
+  for (const kid of kids) {
+    const recipe = await db.recipes.get(kid.recipeId);
+    if (!recipe || !baseRecipe) continue;
+    const [ki, kp] = await Promise.all([
+      db.recipeIngredients.where('recipeId').equals(recipe.id).toArray(),
+      db.recipePackaging.where('recipeId').equals(recipe.id).toArray(),
+    ]);
+    await db.recipes.put({ ...recipe, yield: baseRecipe.yield, productionMinutesPerBatch: baseRecipe.productionMinutesPerBatch, updatedAt: at });
+    await db.recipeIngredients.where('recipeId').equals(recipe.id).delete();
+    await db.recipePackaging.where('recipeId').equals(recipe.id).delete();
+    const ing = [...[...bi].sort(byPosition), ...[...ki].sort(byPosition)];
+    const pack = [...[...bp].sort(byPosition), ...[...kp].sort(byPosition)];
+    await db.recipeIngredients.bulkAdd(ing.map(({ ingredientId, quantity, usageUnit }, position): RecipeIngredient => ({ id: ctx.newId(), recipeId: recipe.id, position, ingredientId, quantity, usageUnit })));
+    await db.recipePackaging.bulkAdd(pack.map(({ packagingId, quantityUsed, usageSemantics }, position): RecipePackaging => ({ id: ctx.newId(), recipeId: recipe.id, position, packagingId, quantityUsed, usageSemantics })));
+    await db.recipeEquipmentUsage.bulkAdd([...be].sort(byPosition).map(({ equipmentId, durationMinutes }, position): RecipeEquipmentUsage => ({ id: ctx.newId(), recipeId: recipe.id, position, equipmentId, durationMinutes })));
+    const { baseMenuId: _drop, ...rest } = kid;
+    void _drop;
+    await db.menus.put({ ...rest, ...(base.category ? { category: base.category } : {}), updatedAt: at });
+  }
 }
 
 export async function deleteMenu(ctx: Context, menuId: string): Promise<void> {
@@ -178,6 +243,7 @@ export async function deleteMenu(ctx: Context, menuId: string): Promise<void> {
   await db.transaction('rw', [db.menus, db.recipes, db.recipeIngredients, db.recipePackaging, db.recipeEquipmentUsage], async () => {
     const menu = await db.menus.get(menuId);
     if (!menu) return;
+    await detachVariations(ctx, menu);
     await db.recipeIngredients.where('recipeId').equals(menu.recipeId).delete();
     await db.recipePackaging.where('recipeId').equals(menu.recipeId).delete();
     await db.recipeEquipmentUsage.where('recipeId').equals(menu.recipeId).delete();
