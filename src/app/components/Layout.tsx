@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { t } from '../../i18n/ms';
 import { ROUTES } from '../routes';
+import { applyAppUpdate, useUpdateWaiting } from '../appUpdate';
 import { Icon } from './Icon';
 
 const linkBase = 'flex items-center gap-3 rounded-xl px-3 min-h-11 text-sm font-medium transition-colors';
@@ -18,6 +19,7 @@ export function Layout() {
   const primary = ROUTES.filter((r) => r.primary);
   // The Dashboard has two columns on a wide screen, so it gets a wider page than the form screens.
   const wide = useLocation().pathname === '/';
+  const updateWaiting = useUpdateWaiting();
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -28,6 +30,13 @@ export function Layout() {
         </p>
         <img src="./logo.png" alt={t('app.name')} width={496} height={88} className="h-8 w-auto md:h-9" />
       </header>
+
+      {updateWaiting && (
+        <div role="status" className="flex flex-wrap items-center justify-center gap-3 bg-brand-ink-2 px-4 py-2 text-sm text-brand-mint" data-testid="kemas-kini">
+          <span>{t('app.kemasKini')}</span>
+          <button type="button" onClick={applyAppUpdate} className="min-h-11 rounded-xl bg-brand-mint px-4 font-semibold text-brand-ink">{t('app.kemasKiniBtn')}</button>
+        </div>
+      )}
 
       <div className="flex-1 md:grid md:grid-cols-[240px_1fr]">
         {/* Desktop: left navigation + content workspace (Doc 04 §3) */}

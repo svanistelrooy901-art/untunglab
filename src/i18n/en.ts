@@ -10,6 +10,8 @@ export const en: Widen<typeof ms> = {
   app: {
     name: 'UntungLab',
     tagline: 'Know the real cost of your menu.',
+    kemasKini: 'A new version of UntungLab is ready. Save your work first, then reload.',
+    kemasKiniBtn: 'Reload',
     slogan: 'Count it right, profit with confidence',
   },
   nav: {

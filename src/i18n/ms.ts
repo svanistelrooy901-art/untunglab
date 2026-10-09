@@ -10,6 +10,8 @@ export const ms = {
   app: {
     name: 'UntungLab',
     tagline: 'Tahu kos sebenar menu anda.',
+    kemasKini: 'Versi baharu UntungLab sudah sedia. Simpan kerja anda dahulu, kemudian muat semula.',
+    kemasKiniBtn: 'Muat semula',
     slogan: 'Kira dengan bijak, untung dengan yakin',
   },
   nav: {
