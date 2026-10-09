@@ -44,6 +44,8 @@ function safeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+/** New orders allowed per address per window. Genuine buyers need one or two. */
+const ORDER_LIMIT = 8;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE = /^\+?[0-9][0-9\s-]{7,14}$/;
 
@@ -60,8 +62,14 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       cors['access-control-allow-headers'] = 'content-type, authorization';
       cors.vary = 'origin';
     }
-    const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...cors } });
-    const html = (body: string) => new Response(body, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
+    const secure = {
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'DENY',
+      'referrer-policy': 'strict-origin-when-cross-origin',
+      'content-security-policy': "frame-ancestors 'none'; base-uri 'none'; object-src 'none'",
+    };
+    const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...secure, ...cors } });
+    const html = (body: string) => new Response(body, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', ...secure } });
 
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
@@ -118,6 +126,10 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
   }
 
   async function createOrder(req: Request, json: Json): Promise<Response> {
+    // Each attempt counts, so one address cannot flood ToyyibPay with bills or fill the orders table.
+    const limitKey = `order:${clientKey(req)}`;
+    if (await rateLimited(limitKey, ORDER_LIMIT)) return json(429, { error: 'rate_limited' });
+    await store.recordFailure(limitKey, deps.now().toISOString());
     const body = await readJson(req);
     const name = str(body.name, 100);
     const email = str(body.email, 120);
@@ -167,7 +179,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       (t) => (t.orderId === '' || t.orderId === order.id) && t.status === '1' && t.amountSen === order.amountSen,
     );
     if (!confirmed) {
-      console.log('payment not confirmed for order', order.id, JSON.stringify(transactions));
+      console.log('payment not confirmed for order', order.id, `${transactions.length} transaction(s) on the bill`);
       return false;
     }
     let issued: { code: string; first: boolean } | null = null;
@@ -225,9 +237,9 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
 
   // ---------- devices ----------
 
-  async function rateLimited(key: string): Promise<boolean> {
+  async function rateLimited(key: string, limit = config.failureLimit): Promise<boolean> {
     const since = new Date(deps.now().getTime() - config.failureWindowMinutes * 60_000).toISOString();
-    return (await store.countFailures(key, since)) >= config.failureLimit;
+    return (await store.countFailures(key, since)) >= limit;
   }
 
   async function activate(req: Request, json: Json): Promise<Response> {
@@ -281,7 +293,12 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
 
   async function admin(req: Request, path: string, json: Json): Promise<Response> {
     const auth = req.headers.get('authorization') ?? '';
-    if (!config.adminToken || !safeEqual(auth, `Bearer ${config.adminToken}`)) return json(401, { error: 'unauthorized' });
+    const adminKey = `admin:${clientKey(req)}`;
+    if (await rateLimited(adminKey)) return json(429, { error: 'rate_limited' });
+    if (!config.adminToken || !safeEqual(auth, `Bearer ${config.adminToken}`)) {
+      await store.recordFailure(adminKey, deps.now().toISOString());
+      return json(401, { error: 'unauthorized' });
+    }
     if (req.method !== 'POST') return json(404, { error: 'not_found' });
     const body = await readJson(req);
     const code = normaliseCode(typeof body.code === 'string' ? body.code : '');

@@ -357,3 +357,33 @@ describe('pages', () => {
     expect(res.headers.get('content-type')).toContain('text/html');
   });
 });
+
+describe('abuse limits and headers', () => {
+  it('one address cannot create unlimited orders, another is unaffected, and the window expires', async () => {
+    const w = await makeWorld();
+    const ip = { 'cf-connecting-ip': '7.7.7.7' };
+    const buyer = { name: 'Aminah', email: 'aminah@example.com', phone: '0123456789' };
+    for (let i = 0; i < 8; i++) expect((await w.call('POST', '/api/order', buyer, ip)).status).toBe(200);
+    expect((await w.call('POST', '/api/order', buyer, ip)).status).toBe(429);
+    expect(w.bills).toHaveLength(8);
+    expect((await w.call('POST', '/api/order', buyer, { 'cf-connecting-ip': '6.6.6.6' })).status).toBe(200);
+    w.advance(61);
+    expect((await w.call('POST', '/api/order', buyer, ip)).status).toBe(200);
+  });
+  it('guessing the admin token is stopped, even with the right token afterwards', async () => {
+    const w = await makeWorld();
+    const ip = { 'cf-connecting-ip': '5.5.5.5' };
+    for (let i = 0; i < 10; i++) expect((await w.call('POST', '/api/admin/lookup', { email: 'x@y.com' }, { ...ip, authorization: 'Bearer guess' + i })).status).toBe(401);
+    expect((await w.call('POST', '/api/admin/lookup', { email: 'x@y.com' }, { ...ip, authorization: 'Bearer admin-token' })).status).toBe(429);
+    expect((await w.call('POST', '/api/admin/lookup', { email: 'x@y.com' }, { 'cf-connecting-ip': '4.4.4.4', authorization: 'Bearer admin-token' })).status).toBe(200);
+  });
+  it('pages and API replies cannot be framed or sniffed', async () => {
+    const w = await makeWorld();
+    for (const path of ['/beli', '/terima', '/nothing']) {
+      const r = await w.call('GET', path);
+      expect(r.headers.get('x-frame-options')).toBe('DENY');
+      expect(r.headers.get('x-content-type-options')).toBe('nosniff');
+      expect(r.headers.get('content-security-policy')).toContain("frame-ancestors 'none'");
+    }
+  });
+});
