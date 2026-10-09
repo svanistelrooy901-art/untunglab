@@ -6,16 +6,17 @@ describe('status classification (Doc 03 §13, Doc 02 §14)', () => {
     expect(classifyStatus(-0.44, -3.7)).toBe('loss');
   });
 
-  it('margin below 40% is Low', () => {
-    expect(classifyStatus(4.8, 32)).toBe('low');
+  it('margin below 25% is Low', () => {
+    expect(classifyStatus(2, 24.9)).toBe('low');
     expect(classifyStatus(0, 0)).toBe('low');
   });
 
-  it('margin 40% to below 60% is Watch, 60% and above is Healthy', () => {
-    expect(classifyStatus(6, 40)).toBe('watch');
-    expect(classifyStatus(8, 59.9)).toBe('watch');
-    expect(classifyStatus(9, 60)).toBe('healthy');
-    expect(classifyStatus(12, 80)).toBe('healthy');
+  it('margin 25% to below 40% is Watch, 40% and above is Healthy', () => {
+    expect(classifyStatus(4.8, 32)).toBe('watch');
+    expect(classifyStatus(5, 25)).toBe('watch');
+    expect(classifyStatus(8, 39.9)).toBe('watch');
+    expect(classifyStatus(9, 40)).toBe('healthy');
+    expect(classifyStatus(19.86, 56.7)).toBe('healthy');
   });
 
   it('Loss always overrides the margin band', () => {
@@ -24,7 +25,8 @@ describe('status classification (Doc 03 §13, Doc 02 §14)', () => {
 
   it('does not call float noise a loss', () => {
     expect(classifyStatus(-1e-13, 0)).toBe('low');
-    expect(classifyStatus(6, 39.9999999999)).toBe('watch');
+    expect(classifyStatus(6, 24.9999999999)).toBe('watch');
+    expect(classifyStatus(6, 25)).toBe('watch');
   });
 
   it('thresholds are configurable but Loss precedence stays', () => {
@@ -38,6 +40,6 @@ describe('status classification (Doc 03 §13, Doc 02 §14)', () => {
   });
 
   it('ships the documented defaults', () => {
-    expect(DEFAULT_THRESHOLDS).toEqual({ lowBelow: 40, watchBelow: 60 });
+    expect(DEFAULT_THRESHOLDS).toEqual({ lowBelow: 25, watchBelow: 40 });
   });
 });

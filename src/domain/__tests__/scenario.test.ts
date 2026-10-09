@@ -31,7 +31,7 @@ describe('scenario calculation (Doc 03 §12, Doc 06 §6)', () => {
     expect(s.perPortion.ingredients).toBeCloseTo(4.12, 10);
     expect(s.profit).toBeCloseTo(4.68, 10);
     expect(s.marginPct).toBeCloseTo(31.2, 8);
-    expect(s.status).toBe('low');
+    expect(s.status).toBe('watch');
   });
 
   it.each([

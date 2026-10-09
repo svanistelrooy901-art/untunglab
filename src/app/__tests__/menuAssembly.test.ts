@@ -48,7 +48,7 @@ describe('menus costed from stored rows', () => {
     expect(r.status).toBe('loss');
   });
 
-  it('M02 Chicken Sandwich: cost 10.20, profit 4.80, margin 32%, low', async () => {
+  it('M02 Chicken Sandwich: cost 10.20, profit 4.80, margin 32%, watch', async () => {
     const t = await world();
     const ayam = await createIngredient(t.ctx, { name: 'Ayam', purchasePrice: 15, packageQuantity: 1, packageUnit: 'kg' });
     const lain = await createIngredient(t.ctx, { name: 'Bahan lain', purchasePrice: 28, packageQuantity: 1, packageUnit: 'kg' });
@@ -64,7 +64,7 @@ describe('menus costed from stored rows', () => {
     expect(r.fullCost).toBeCloseTo(10.2, 9);
     expect(r.profit).toBeCloseTo(4.8, 9);
     expect(r.marginPct).toBeCloseTo(32, 9);
-    expect(r.status).toBe('low');
+    expect(r.status).toBe('watch');
   });
 
   it('M03/M04: a later price change is picked up live by every menu, because no cost is stored', async () => {

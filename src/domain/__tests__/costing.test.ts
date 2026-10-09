@@ -79,14 +79,14 @@ describe('full-menu regression (Doc 06 §3)', () => {
     expect(formatPct(r.marginPct)).toBe(`${MINUS}3.7%`);
   });
 
-  it('M02: Chicken Sandwich cost 10.20, profit 4.80, margin 32%, Margin Rendah', () => {
+  it('M02: Chicken Sandwich cost 10.20, profit 4.80, margin 32%, Perlu Perhatian', () => {
     const r = complete(computeMenuCost(chickenSandwich(), business()));
     expect(r.perPortion.ingredients).toBeCloseTo(4, 10);
     expect(r.perPortion.sharedOperating).toBeCloseTo(3, 10);
     expect(r.fullCost).toBeCloseTo(10.2, 10);
     expect(r.profit).toBeCloseTo(4.8, 10);
     expect(r.marginPct).toBeCloseTo(32, 8);
-    expect(r.status).toBe('low');
+    expect(r.status).toBe('watch');
     expect(formatPct(r.marginPct)).toBe('32.0%');
   });
 

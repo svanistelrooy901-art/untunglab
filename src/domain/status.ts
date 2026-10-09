@@ -1,6 +1,6 @@
 import type { StatusCode, StatusThresholds } from './types';
 
-export const DEFAULT_THRESHOLDS: StatusThresholds = { lowBelow: 40, watchBelow: 60 };
+export const DEFAULT_THRESHOLDS: StatusThresholds = { lowBelow: 25, watchBelow: 40 };
 
 /** Tolerance so binary floating-point noise is not read as a loss or a band change. */
 const EPSILON = 1e-9;
