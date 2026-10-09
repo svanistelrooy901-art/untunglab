@@ -265,6 +265,37 @@ describe('admin', () => {
     const found = await w.json(await w.admin('/api/admin/lookup', { email: 'aminah@example.com' }));
     expect(found.results[0]).toMatchObject({ code, status: 'active', devices: [{ label: 'iPhone' }] });
   });
+  it('restore turns a revoked code active again', async () => {
+    const w = await makeWorld();
+    const { code } = await w.buy();
+    await w.admin('/api/admin/revoke', { code });
+    expect((await w.call('POST', '/api/activate', { code, deviceId: 'dev-1', deviceLabel: 'a' })).status).not.toBe(200);
+    expect((await w.admin('/api/admin/restore', { code })).status).toBe(200);
+    expect((await w.call('POST', '/api/activate', { code, deviceId: 'dev-1', deviceLabel: 'a' })).status).toBe(200);
+  });
+  it('stats needs the token and reports counts without leaking phone numbers', async () => {
+    const w = await makeWorld();
+    await w.buy();
+    expect((await w.call('POST', '/api/admin/stats', {})).status).toBe(401);
+    const res = await w.admin('/api/admin/stats', {});
+    const st = await w.json(res);
+    expect(st).toMatchObject({ orders: 1, paid: 1, pending: 0, revenueSen: 5900, activeLicenses: 1, revokedLicenses: 0, devices: 0 });
+    expect(st.recent[0]).toMatchObject({ email: 'aminah@example.com', licenseStatus: 'active' });
+    expect(JSON.stringify(st)).not.toContain('0123456789');
+    expect(st.earlyBirdLeft === null || typeof st.earlyBirdLeft === 'number').toBe(true);
+  });
+  it('the admin page is served, unlisted, with no token or secret inside, and cannot be framed', async () => {
+    const w = await makeWorld();
+    const res = await w.call('GET', '/admin');
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('noindex');
+    expect(html).not.toContain('admin-token');
+    expect(html).not.toContain('sekret');
+    expect(html).not.toContain('localStorage');
+    expect(res.headers.get('content-security-policy')).toContain("frame-ancestors 'none'");
+    expect(res.headers.get('content-security-policy')).toContain("connect-src 'self'");
+  });
   it('is disabled when no admin token is configured', async () => {
     const w = await makeWorld({ adminToken: '' });
     expect((await w.call('POST', '/api/admin/lookup', { email: 'x' }, { authorization: 'Bearer ' })).status).toBe(401);

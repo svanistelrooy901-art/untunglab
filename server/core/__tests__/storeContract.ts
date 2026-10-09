@@ -96,5 +96,27 @@ export function describeStore(name: string, make: () => Promise<Store>) {
       expect(await s.countFailures('1.1.1.1', '2026-09-29T00:00:00.000Z')).toBe(2);
       expect(await s.countFailures('3.3.3.3', '2026-09-29T00:00:00.000Z')).toBe(0);
     });
+
+    it('summarises orders, revenue, licences and devices for the admin dashboard', async () => {
+      const s = await make();
+      await s.createOrder(order({ id: 'o1', email: 'a@x.com', createdAt: '2026-09-30T00:00:00.000Z' }));
+      await s.createOrder(order({ id: 'o2', email: 'b@x.com', amountSen: 3900, createdAt: '2026-09-30T00:10:00.000Z' }));
+      await s.createOrder(order({ id: 'o3', email: 'c@x.com', createdAt: '2026-09-30T00:20:00.000Z' }));
+      await s.markOrderPaid('o1', 'UL-AAAA-AAAA-AAAA', '2026-09-30T01:00:00.000Z');
+      await s.markOrderPaid('o2', 'UL-BBBB-BBBB-BBBB', '2026-09-30T02:00:00.000Z');
+      await s.setLicenseStatus('UL-BBBB-BBBB-BBBB', 'revoked');
+      await s.addDevice('UL-AAAA-AAAA-AAAA', { deviceId: 'd1', label: 'iPhone', activatedAt: '2026-09-30T03:00:00.000Z' });
+      await s.addDevice('UL-AAAA-AAAA-AAAA', { deviceId: 'd2', label: 'Laptop', activatedAt: '2026-09-30T03:00:00.000Z' });
+      const st = await s.stats(2);
+      expect(st).toMatchObject({ orders: 3, paid: 2, pending: 1, revenueSen: 9800, activeLicenses: 1, revokedLicenses: 1, devices: 2 });
+      expect(st.recent.map((r) => r.id)).toEqual(['o3', 'o2']);
+      expect(st.recent[1]).toMatchObject({ email: 'b@x.com', status: 'paid', licenseStatus: 'revoked', amountSen: 3900 });
+      expect(st.recent[0]).toMatchObject({ licenseStatus: null });
+    });
+
+    it('stats on an empty store are all zero', async () => {
+      const s = await make();
+      expect(await s.stats(10)).toEqual({ orders: 0, paid: 0, pending: 0, revenueSen: 0, activeLicenses: 0, revokedLicenses: 0, devices: 0, recent: [] });
+    });
   });
 }

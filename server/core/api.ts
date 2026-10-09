@@ -1,6 +1,7 @@
 import { generateCode, normaliseCode } from '../../src/license/code';
 import { signLicense, type LicensePayload } from '../../src/license/token';
 import { md5 } from './md5';
+import { ADMIN_CSP, renderAdminPage } from './adminPage';
 import { renderBuyPage, renderReturnPage } from './pages';
 import type { Mailer, Order, Store, ToyyibClient } from './ports';
 
@@ -69,7 +70,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       'content-security-policy': "frame-ancestors 'none'; base-uri 'none'; object-src 'none'",
     };
     const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...secure, ...cors } });
-    const html = (body: string) => new Response(body, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', ...secure } });
+    const html = (body: string, csp?: string) => new Response(body, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', ...secure, ...(csp ? { 'content-security-policy': csp } : {}) } });
 
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
@@ -78,6 +79,8 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       if (req.method === 'GET' && path === '/') return Response.redirect(`${config.publicBaseUrl}/beli`, 302);
       if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice()), config.appUrl));
       if (req.method === 'GET' && path === '/terima') return html(renderReturnPage(config.appUrl));
+
+      if (req.method === 'GET' && path === '/admin') return html(renderAdminPage(), ADMIN_CSP);
 
       if (req.method === 'POST' && path === '/api/order') return await createOrder(req, json);
       const orderMatch = /^\/api\/order\/([0-9a-f]{32})$/.exec(path);
@@ -307,6 +310,15 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       case '/api/admin/revoke': {
         if (!code || !(await store.setLicenseStatus(code, 'revoked'))) return json(404, { error: 'invalid_code' });
         return json(200, { ok: true });
+      }
+      case '/api/admin/restore': {
+        if (!code || !(await store.setLicenseStatus(code, 'active'))) return json(404, { error: 'invalid_code' });
+        return json(200, { ok: true });
+      }
+      case '/api/admin/stats': {
+        const st = await store.stats(25);
+        const slots = config.earlyBirdSlots ?? 0;
+        return json(200, { ...st, earlyBirdLeft: slots > 0 && config.earlyBirdPriceSen !== undefined ? Math.max(0, slots - st.paid) : null });
       }
       case '/api/admin/reset-devices': {
         if (!code || !(await store.getLicense(code))) return json(404, { error: 'invalid_code' });

@@ -46,6 +46,10 @@ Prasyarat: Node 20+, `npm i -g wrangler`, `wrangler login`.
 
 ## Operasi harian (admin)
 
+**Cara paling mudah: papan pemuka admin.** Buka `https://beli.untunglab.space/admin`, masukkan `ADMIN_TOKEN` sekali. Ada ringkasan (pesanan, pengguna yang dah bayar, jumlah RM, lesen aktif/dibatalkan, peranti), carian emel/kod, dan butang Batalkan, Pulihkan, Hantar semula emel, Reset peranti. Token hanya dalam memori halaman (tutup tab = hilang). Halaman tak disenaraikan (noindex) dan tak mengandungi rahsia; data hanya keluar bila token betul.
+
+Cara curl (sama sahaja di belakang tabir):
+
 Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-...."}`:
 
 | Tujuan | Endpoint |
@@ -54,6 +58,8 @@ Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-.
 | Hantar semula emel kod | `/api/admin/resend` |
 | Kosongkan peranti (pelanggan tukar telefon dan tak boleh lepaskan sendiri) | `/api/admin/reset-devices` |
 | Batalkan kod (refund/penyalahgunaan) | `/api/admin/revoke` |
+| Pulihkan kod yang tersalah batal | `/api/admin/restore` |
+| Ringkasan + 25 pesanan terkini (tanpa no. telefon) | `/api/admin/stats` |
 
 Contoh: `curl -X POST $BASE/api/admin/revoke -H "Authorization: Bearer $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"code":"UL-ABCD-EFGH-JKMN"}'`
 

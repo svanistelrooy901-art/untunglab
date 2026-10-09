@@ -27,6 +27,18 @@ export interface DeviceRecord {
   activatedAt: string;
 }
 
+export interface Stats {
+  orders: number;
+  paid: number;
+  pending: number;
+  revenueSen: number;
+  activeLicenses: number;
+  revokedLicenses: number;
+  devices: number;
+  /** Newest first. No phone numbers. */
+  recent: { id: string; name: string; email: string; amountSen: number; status: Order['status']; createdAt: string; paidAt: string | null; licenseStatus: LicenseRecord['status'] | null }[];
+}
+
 export interface Store {
   createOrder(order: Order): Promise<void>;
   getOrder(id: string): Promise<Order | null>;
@@ -47,6 +59,8 @@ export interface Store {
   countFailures(key: string, since: string): Promise<number>;
   /** Orders that are paid; decides whether early-bird places remain. */
   countPaidOrders(): Promise<number>;
+  /** Totals for the admin dashboard plus the `recent` newest orders. */
+  stats(recent: number): Promise<Stats>;
 }
 
 export interface Transaction {

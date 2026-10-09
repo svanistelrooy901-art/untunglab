@@ -1,4 +1,4 @@
-import type { DeviceRecord, LicenseRecord, Order, Store } from './ports';
+import type { DeviceRecord, LicenseRecord, Order, Stats, Store } from './ports';
 
 /** In-memory store for tests. JavaScript runs each method to completion, so markOrderPaid is atomic here. */
 export class MemoryStore implements Store {
@@ -63,6 +63,28 @@ export class MemoryStore implements Store {
   }
   async countPaidOrders() {
     return [...this.orders.values()].filter((o) => o.status === 'paid').length;
+  }
+  async stats(recent: number): Promise<Stats> {
+    const orders = [...this.orders.values()];
+    const paid = orders.filter((o) => o.status === 'paid');
+    const lic = [...this.licenses.values()];
+    return {
+      orders: orders.length,
+      paid: paid.length,
+      pending: orders.length - paid.length,
+      revenueSen: paid.reduce((n, o) => n + o.amountSen, 0),
+      activeLicenses: lic.filter((l) => l.status === 'active').length,
+      revokedLicenses: lic.filter((l) => l.status === 'revoked').length,
+      devices: [...this.devices.values()].reduce((n, d) => n + d.length, 0),
+      recent: orders
+        .map((o, i) => ({ o, i }))
+        .sort((a, b) => (a.o.createdAt < b.o.createdAt ? 1 : a.o.createdAt > b.o.createdAt ? -1 : b.i - a.i))
+        .slice(0, recent)
+        .map(({ o }) => ({
+          id: o.id, name: o.name, email: o.email, amountSen: o.amountSen, status: o.status, createdAt: o.createdAt, paidAt: o.paidAt,
+          licenseStatus: o.licenseCode ? (this.licenses.get(o.licenseCode)?.status ?? null) : null,
+        })),
+    };
   }
   async countFailures(key: string, since: string) {
     return (this.failures.get(key) ?? []).filter((t) => t >= since).length;
