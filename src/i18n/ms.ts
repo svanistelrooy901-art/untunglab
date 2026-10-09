@@ -21,6 +21,7 @@ export const ms = {
     laporan: 'Laporan',
     sandaran: 'Sandaran',
     lesen: 'Lesen',
+    manual: 'Manual',
     lagi: 'Lagi',
     utama: 'Navigasi utama',
   },
@@ -435,6 +436,12 @@ export const ms = {
     semakanTiada: 'Rekod ini ialah rekod asal atau tidak dijumpai, jadi tiada perubahan untuk disemak.',
     simulasiBaharu: 'Cuba simulasi baharu',
     unitBerbeza: 'Unit berbeza, peratusan tak dapat dibandingkan',
+  },
+  manual: {
+    intro: 'Panduan lengkap UntungLab dalam satu fail PDF: cara tetapkan kos operasi, tambah bahan dan menu, baca margin, sampai sandaran data.',
+    muatTurun: 'Muat turun Manual (PDF)',
+    buka: 'Buka Manual',
+    nota: 'Fail PDF sekitar 6 MB. Simpan dalam telefon supaya boleh dibaca tanpa internet.',
   },
   sandaran: {
     title: 'Sandaran',

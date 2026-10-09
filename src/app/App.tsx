@@ -4,6 +4,7 @@ import { t } from '../i18n/ms';
 import { Layout } from './components/Layout';
 import { DataProvider } from './data';
 import { LicenseProvider } from './license';
+import { ManualPage } from './pages/Manual';
 import { LesenPage } from './pages/Lesen';
 import { LaporanPage } from './pages/Laporan';
 import { BahanPage } from './pages/Bahan';
@@ -25,6 +26,7 @@ const PAGES: Record<string, ComponentType> = {
   '/kesan-harga': KesanHargaPage,
   '/sandaran': SandaranPage,
   '/lesen': LesenPage,
+  '/manual': ManualPage,
   '/laporan': LaporanPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,

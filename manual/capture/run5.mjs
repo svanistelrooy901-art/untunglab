@@ -1,0 +1,15 @@
+import { page, browser, box, snap, url } from './cap1.mjs';
+await page.goto(url + '#/bahan'); await page.waitForTimeout(400);
+await page.getByRole('button', { name: 'Tambah bahan' }).first().click(); await page.waitForTimeout(400);
+await box('Nama').fill('Telur'); await box('Harga beli (RM)').fill('15'); await box('Kuantiti dalam pek').fill('30');
+await page.getByRole('combobox', { name: 'Unit pek' }).fill('biji');
+await page.getByText('Pemetaan pek (pilihan)').first().click(); await page.waitForTimeout(400);
+const d = page.locator('dialog[open]');
+await d.evaluate((e) => e.scrollTo(0, 99999)).catch(() => {});
+await snap('09b-bahan-pemetaan');
+await page.getByRole('button', { name: 'Batal' }).last().click(); await page.waitForTimeout(300);
+await page.goto(url + '#/peralatan'); await page.waitForTimeout(400);
+await page.getByRole('button', { name: 'Tambah peralatan' }).first().click(); await page.waitForTimeout(400);
+await snap('13-peralatan-pilih', [[d.locator('input').first()], [d.getByRole('button', { name: /^Oven/ })], [d.getByRole('button', { name: /Peralatan sendiri/ })]]);
+await page.getByRole('button', { name: 'Batal' }).last().click().catch(() => {}); 
+await browser.close();

@@ -58,6 +58,12 @@ const PATHS = {
       <path d="M12 12h9M18 12v3M15 12v2" />
     </>
   ),
+  manual: (
+    <>
+      <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z" />
+      <path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" />
+    </>
+  ),
   lagi: (
     <>
       <circle cx="5" cy="12" r="1.5" fill="currentColor" />

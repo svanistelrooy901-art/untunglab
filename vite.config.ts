@@ -33,6 +33,8 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: 'index.html',
+        // The manual is 5-6 MB, so it is cached on first open rather than precached for everyone.
+        runtimeCaching: [{ urlPattern: /\.pdf$/, handler: 'CacheFirst', options: { cacheName: 'manual', expiration: { maxEntries: 2 }, rangeRequests: true } }],
       },
     }),
   ],

@@ -21,5 +21,6 @@ export const ROUTES: NavRoute[] = [
   { path: '/kos-operasi', label: 'nav.kosOperasi', icon: 'kosOperasi', primary: false },
   { path: '/laporan', label: 'nav.laporan', icon: 'laporan', primary: false },
   { path: '/sandaran', label: 'nav.sandaran', icon: 'sandaran', primary: false },
+  { path: '/manual', label: 'nav.manual', icon: 'manual', primary: false },
   { path: '/lesen', label: 'nav.lesen', icon: 'lesen', primary: false },
 ];
