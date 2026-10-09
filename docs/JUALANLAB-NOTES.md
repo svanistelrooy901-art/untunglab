@@ -8,6 +8,11 @@ Ini nota, bukan keputusan. Semua perkara bertanda **[Mamu tentukan]** belum dipu
 - Lesen: kod `UL-XXXX-XXXX-XXXX`, token ECDSA yang disahkan di peranti, 2 peranti, pelayan Cloudflare Worker + D1 di `beli.untunglab.space`.
 - Pengguna sasaran: peniaga makanan rumah Malaysia. BM dahulu, English pilihan.
 
+## Keputusan Mamu (2026-10-09): JualanLab perlu internet
+JualanLab ialah POS dan jual beli berlaku dalam talian, jadi **internet tidak boleh dielakkan** untuk JualanLab. Pengguna yang mahu menghubungkan JualanLab dengan UntungLab mesti faham konsep ini: UntungLab kekal luar talian dan tanpa akaun, JualanLab perlu internet.
+Kesan: prinsip "tiada akaun, data dalam peranti" tidak lagi wajib untuk JualanLab, jadi penyegerakan awan menjadi pilihan yang munasabah. UntungLab sendiri tidak berubah dan masih berfungsi penuh tanpa JualanLab.
+Perlu direka: apa yang berlaku bila internet putus semasa jualan (baris gilir luar talian atau sekadar berhenti), dan satu paparan jelas "pautan ini perlukan internet" di sisi UntungLab.
+
 ## Cara menghubungkan dua app (pilihan untuk dibincang) [Mamu tentukan]
 1. **Origin yang sama** (contoh `untunglab.space/jualan`): IndexedDB dikongsi, jadi POS boleh baca menu dan harga UntungLab terus. Paling mudah, tetapi dua app dalam satu pakej dan satu skema data.
 2. **Origin berlainan + fail pindah** (eksport/import JSON seperti Backup): kekal berasingan, tiada risiko merosakkan data satu sama lain, tetapi pengguna perlu pindah data secara manual.
