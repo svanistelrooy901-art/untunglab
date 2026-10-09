@@ -296,3 +296,6 @@ document.getElementById('f').addEventListener('submit',async(ev)=>{
 });
 </script>`;
 }
+
+/** The install mockups, reused by the user manual (manual/build.mjs). */
+export const INSTALL_MOCKS = { iosA: iosA(), iosB: iosB(), andA: andA(), andB: andB(), deskA: deskA(), deskB: deskB() };
