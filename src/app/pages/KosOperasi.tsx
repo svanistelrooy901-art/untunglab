@@ -113,7 +113,7 @@ function CategoryRow({ line, row, onOpen }: { line: OverviewLine; row: Operating
   return (
     <button type="button" onClick={onOpen} className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-2 text-left">
       <span className="min-w-0">
-        <span className="flex items-center gap-2 text-[15px] font-medium">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] font-medium">
           {t(`ops.cat.${line.category}`)}
           {line.entered && <Badge>{line.mode === 'detailed' ? t('ops.modTepat') : t('ops.modMudah')}</Badge>}
         </span>

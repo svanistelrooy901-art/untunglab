@@ -51,7 +51,7 @@ files['xl/worksheets/sheet1.xml'] = strToU8(sheet);
 const filled = '/tmp/claude-0/shots/filled.xlsx';
 writeFileSync(filled, zipSync(files));
 
-await page.getByLabel('Pilih fail').setInputFiles(filled);
+await page.locator('input[type=file]').setInputFiles(filled);
 await page.getByTestId('import-pratonton').waitFor();
 const pv = await page.getByTestId('import-pratonton').innerText();
 ok('preview: 2 new, 1 price update, 1 problem', /Bahan baharu\s*2/.test(pv) && /Kemas kini harga\s*1/.test(pv) && /Baris bermasalah\s*1/.test(pv));
@@ -67,7 +67,7 @@ ok('Gula price updated to RM4.00', await page.getByText(/RM4\.00 \/ 1 kg/).isVis
 ok('only one Gula (no duplicate)', (await page.getByText('Gula', { exact: true }).count()) === 1);
 
 await page.getByRole('button', { name: 'Import Excel' }).click();
-await page.getByLabel('Pilih fail').setInputFiles({ name: 'rosak.xlsx', mimeType: 'application/octet-stream', buffer: Buffer.from('PKnot a zip') });
+await page.locator('input[type=file]').setInputFiles({ name: 'rosak.xlsx', mimeType: 'application/octet-stream', buffer: Buffer.from('PKnot a zip') });
 await page.getByText(/bukan templat Excel/).waitFor();
 ok('a broken file is refused with a message', true);
 

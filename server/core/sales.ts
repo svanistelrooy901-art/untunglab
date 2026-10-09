@@ -248,7 +248,7 @@ export function salesBody(o: SalesOpts): string {
   <ul class="list">
    <li>${L('Akses seumur hidup, bayaran sekali sahaja', 'Lifetime access, one payment only')}</li>
    <li>${L('Boleh digunakan pada 2 peranti', 'Use it on 2 devices')}</li>
-   <li>${L('Semua fungsi: kos operasi, hasil, cadangan harga, dashboard', 'All features: running costs, results, price suggestion, dashboard')}</li>
+   <li>${L('Semua fungsi: kos operasi, pekerja, variasi menu, import Excel, cadangan harga, dashboard', 'All features: running costs, workers, menu variations, Excel import, price suggestion, dashboard')}</li>
    <li>${L('Kod lesen dihantar ke emel anda selepas bayaran', 'Licence code sent to your email after payment')}</li>
    <li>${L('Bayaran balik dalam 7 hari jika tidak sesuai', '7-day refund if it is not for you')}</li>
   </ul>
@@ -268,14 +268,14 @@ export function salesBody(o: SalesOpts): string {
 
 <section><div class="wrap" style="max-width:46rem">
  <h2>${L('Soalan lazim', 'FAQ')}</h2>
- ${faq('Adakah saya boleh cuba dahulu?', 'Can I try it first?', 'Boleh. Versi percuma membuka semua fungsi, dengan had bilangan: 2 menu, 10 bahan dan 2 pembungkusan. Beli bila anda sudah yakin.', 'Yes. The free version unlocks every feature, with count limits: 2 menu items, 10 ingredients and 2 packaging items. Buy when you are confident.')}
+ ${faq('Adakah saya boleh cuba dahulu?', 'Can I try it first?', 'Boleh. Versi percuma boleh digunakan sepenuhnya, dengan had bilangan: 2 menu, 10 bahan, 2 pembungkusan dan 3 kos lain. Variasi menu dan import bahan daripada Excel ada dalam versi penuh. Beli bila anda sudah yakin.', 'Yes. The free version is fully usable, with count limits: 2 menu items, 10 ingredients, 2 packaging items and 3 other costs. Menu variations and Excel import of ingredients are in the full version. Buy when you are confident.')}
  ${faq('Apa maksud akses seumur hidup?', 'What does lifetime access mean?', 'Anda bayar sekali dan tiada yuran bulanan. Akses seumur hidup bermaksud selagi produk UntungLab beroperasi.', 'You pay once and there is no monthly fee. Lifetime access means for as long as the UntungLab product is operating.')}
  ${faq('Berapa peranti boleh digunakan?', 'How many devices can I use?', 'Satu kod lesen boleh digunakan pada 2 peranti, contohnya telefon dan tablet anda.', 'One licence code works on 2 devices, for example your phone and your tablet.')}
  ${faq('Bagaimana kalau saya tukar telefon?', 'What if I change phones?', 'Data disimpan di telefon anda. Buat sandaran dalam UntungLab sebelum menukar telefon, kemudian pulihkan di telefon baharu dan masukkan kod lesen yang sama.', 'Your data is stored on your phone. Make a backup inside UntungLab before changing phones, then restore it on the new phone and enter the same licence code.')}
  ${faq('Perlukah internet?', 'Do I need internet?', 'Hanya untuk membeli dan mengaktifkan kod lesen sekali. Selepas itu UntungLab boleh digunakan tanpa internet.', 'Only to buy and to activate the licence code once. After that UntungLab works without internet.')}
  ${faq('Bagaimana dengan bayaran balik?', 'What about refunds?', 'Dalam 7 hari selepas pembelian, balas emel kod lesen anda dan kami akan uruskan bayaran balik.', 'Within 7 days of purchase, reply to your licence code email and we will handle the refund.')}
  ${faq('Adakah data saya dihantar kepada anda?', 'Is my data sent to you?', 'Tidak. Resipi, bahan dan harga anda kekal pada peranti anda. Hanya nama, emel dan telefon digunakan untuk menghantar kod lesen dan sokongan pembelian.', 'No. Your recipes, ingredients and prices stay on your device. Only your name, email and phone are used to send the licence code and support the purchase.')}
- ${faq('Adakah app ini ada dalam Bahasa Inggeris?', 'Is the app available in English?', 'Buat masa ini app dalam Bahasa Melayu sahaja.', 'For now the app is in Bahasa Melayu only.')}
+ ${faq('Adakah app ini ada dalam Bahasa Inggeris?', 'Is the app available in English?', 'Ada. App dan manual boleh ditukar antara Bahasa Melayu dan English di Tetapan. Emel kod lesen dalam Bahasa Melayu.', 'Yes. The app and its manual switch between Bahasa Melayu and English in Settings. The licence code email is in Bahasa Melayu.')}
  <div style="text-align:center;margin-top:34px"><a class="btn" href="#beli">${L('Beli', 'Buy')} ${price}</a></div>
 </div></section>
 

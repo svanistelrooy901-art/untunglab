@@ -8,3 +8,4 @@ dev-dist
 coverage
 .DS_Store
 dist-e2e
+manual/manual-*.html

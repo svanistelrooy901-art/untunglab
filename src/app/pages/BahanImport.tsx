@@ -36,6 +36,7 @@ function ImportBody({ onDone }: { onDone: () => void }) {
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [fileName, setFileName] = useState('');
   const units = t('form.unitOptions').split(',');
 
   async function downloadTemplate() {
@@ -78,10 +79,22 @@ function ImportBody({ onDone }: { onDone: () => void }) {
       <p>{t('bahan.importLangkah1')}</p>
       <button type="button" className={`${btnSecondary} mt-2`} onClick={() => void downloadTemplate()}>{t('bahan.importTemplat')}</button>
       <p className="mt-4">{t('bahan.importLangkah2')}</p>
-      <label className="mt-2 block">
-        <span className="sr-only">{t('bahan.importFail')}</span>
-        <input type="file" accept=".xlsx,.csv,text/csv" aria-label={t('bahan.importFail')} className="block w-full min-h-11 text-sm" onChange={(e) => void pick(e.target.files?.[0])} />
-      </label>
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <label className={`${btnSecondary} relative cursor-pointer focus-within:ring-2 focus-within:ring-primary`}>
+          {t('bahan.importFail')}
+          <input
+            type="file"
+            accept=".xlsx,.csv,text/csv"
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              setFileName(f?.name ?? '');
+              void pick(f);
+            }}
+          />
+        </label>
+        {fileName && <span className="min-w-0 truncate text-muted" data-testid="import-nama-fail">{fileName}</span>}
+      </div>
       {error && <p role="alert" className="mt-3 font-medium text-loss">{t('bahan.importRosak')}</p>}
       {result && <p role="status" className="mt-3 rounded-xl bg-primary-soft p-3 font-semibold text-primary">✓ {result}</p>}
       {plan && <Preview plan={plan} busy={busy} onConfirm={() => void confirm()} />}
