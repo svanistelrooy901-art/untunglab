@@ -13,6 +13,9 @@ JualanLab ialah POS dan jual beli berlaku dalam talian, jadi **internet tidak bo
 Kesan: prinsip "tiada akaun, data dalam peranti" tidak lagi wajib untuk JualanLab, jadi penyegerakan awan menjadi pilihan yang munasabah. UntungLab sendiri tidak berubah dan masih berfungsi penuh tanpa JualanLab.
 Perlu direka: apa yang berlaku bila internet putus semasa jualan (baris gilir luar talian atau sekadar berhenti), dan satu paparan jelas "pautan ini perlukan internet" di sisi UntungLab.
 
+## Keputusan Mamu (2026-10-09): pautan satu hala dan ringkas
+Dua app berasingan, repo berasingan. UntungLab **hanya menghantar harga dan margin** ke JualanLab. Itu sahaja. Tiada pautan dua hala, tiada penyegerakan data lain. Jangan jadikan pautan ini rumit.
+
 ## Cara menghubungkan dua app (pilihan untuk dibincang) [Mamu tentukan]
 1. **Origin yang sama** (contoh `untunglab.space/jualan`): IndexedDB dikongsi, jadi POS boleh baca menu dan harga UntungLab terus. Paling mudah, tetapi dua app dalam satu pakej dan satu skema data.
 2. **Origin berlainan + fail pindah** (eksport/import JSON seperti Backup): kekal berasingan, tiada risiko merosakkan data satu sama lain, tetapi pengguna perlu pindah data secara manual.
