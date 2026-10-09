@@ -499,7 +499,7 @@ function MenuEditor({ data, existing, variationOf }: { data: CostingData; existi
           <p>{t('menu.padamSah')}</p>
           {variations.length > 0 && <p className="mt-1">{t('menu.padamAsasNota')}</p>}
           <div className="mt-2 flex gap-3">
-            <button type="button" className={btnPrimary} onClick={async () => { await deleteMenu(ctx, existing.id); navigate('/menu'); }}>{t('menu.padamYa')}</button>
+            <button type="button" className={btnPrimary} disabled={busy} onClick={async () => { setBusy(true); try { await deleteMenu(ctx, existing.id); navigate('/menu'); } catch { setSaveError(true); setBusy(false); } }}>{t('menu.padamYa')}</button>
             <button type="button" className={btnSecondary} onClick={() => setConfirmDelete(false)}>{t('common.batal')}</button>
           </div>
         </div>

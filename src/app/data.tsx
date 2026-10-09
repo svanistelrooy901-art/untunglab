@@ -54,13 +54,40 @@ export function useData(): Context {
   return ctx;
 }
 
-/** Re-runs the query whenever the underlying tables change. `undefined` until the first result. */
+/**
+ * Re-runs the query whenever the underlying tables change. `undefined` until the first result.
+ * If a run fails (some phone browsers abort a read that overlaps a big write), the last good value stays on screen and
+ * the query is subscribed again shortly, instead of dropping the page back to "Loading" for good.
+ */
 export function useLive<T>(query: (ctx: Context) => Promise<T>, deps: readonly unknown[] = []): T | undefined {
   const ctx = useData();
   const [value, setValue] = useState<T>();
   useEffect(() => {
-    const sub = liveQuery(() => query(ctx)).subscribe({ next: setValue, error: () => setValue(undefined) });
-    return () => sub.unsubscribe();
+    let stopped = false;
+    let sub: { unsubscribe(): void } | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let failures = 0;
+    const run = () => {
+      sub = liveQuery(() => query(ctx)).subscribe({
+        next: (v) => {
+          failures = 0;
+          setValue(v);
+        },
+        error: (err) => {
+          console.warn('UntungLab: live query failed, retrying', err);
+          sub?.unsubscribe();
+          if (stopped) return;
+          failures += 1;
+          timer = setTimeout(run, Math.min(250 * 2 ** failures, 4000));
+        },
+      });
+    };
+    run();
+    return () => {
+      stopped = true;
+      if (timer) clearTimeout(timer);
+      sub?.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx, ...deps]);
   return value;
