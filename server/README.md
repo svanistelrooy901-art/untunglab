@@ -63,7 +63,7 @@ Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-.
 
 Contoh: `curl -X POST $BASE/api/admin/revoke -H "Authorization: Bearer $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"code":"UL-ABCD-EFGH-JKMN"}'`
 
-**Dasar refund (D-63)**: 7 hari, manual. Refund melalui ToyyibPay, kemudian `revoke`. Batal menghalang aktivasi baharu;
+**Dasar refund (D-63)**: 7 hari, manual. Refund dibuat sendiri (bank transfer / DuitNow ke pembeli), kemudian `revoke` di /admin. Batal menghalang aktivasi baharu;
 peranti yang sudah diaktifkan terus berfungsi luar talian (tiada cara untuk menarik balik token dari peranti tanpa internet, dan itu dipilih dengan sengaja).
 
 ## Keselamatan
