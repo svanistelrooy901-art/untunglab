@@ -6,3 +6,4 @@ export * from './settings';
 export * from './menus';
 export * from './backup';
 export * from './license';
+export * from './ingredientImport';

@@ -6,6 +6,7 @@ import { Badge, EmptyState, Field, InfoTip, Loading, PageHeader, Sheet, btnPrima
 import { LimitNote } from '../components/LimitNote';
 import { useData, useLive } from '../data';
 import { useLimit } from '../license';
+import { ImportExcel } from './BahanImport';
 import { parseMappings, unitCostLabel, validateIngredientForm, type MappingRow } from '../forms';
 
 export function BahanPage() {
@@ -26,6 +27,7 @@ export function BahanPage() {
         }
       />
       <LimitNote state={limit} />
+      <div className="mt-3"><ImportExcel /></div>
       {!items ? (
         <Loading />
       ) : items.length === 0 && !showArchived ? (

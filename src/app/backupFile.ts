@@ -27,8 +27,8 @@ export function backupFileName(now: Date): string {
  * Touch devices get the share sheet (so "Save to Files" works in an installed iPhone app); everything else
  * gets a normal download. Returns false if the user dismissed the share sheet.
  */
-export async function saveBackupFile(name: string, text: string, mime = 'application/json'): Promise<boolean> {
-  const file = new File([text], name, { type: mime });
+export async function saveBackupFile(name: string, data: string | Uint8Array<ArrayBuffer>, mime = 'application/json'): Promise<boolean> {
+  const file = new File([data], name, { type: mime });
   const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
   if (touch && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
     try {
