@@ -441,6 +441,7 @@ export const ms = {
     intro: 'Panduan lengkap UntungLab dalam satu fail PDF: cara tetapkan kos operasi, tambah bahan dan menu, baca margin, sampai sandaran data.',
     muatTurun: 'Muat turun Manual (PDF)',
     buka: 'Buka Manual',
+    hubungi: 'Ada soalan atau masalah? Hubungi kami di admin@digitalsambal.space',
     nota: 'Fail PDF sekitar 6 MB. Simpan dalam telefon supaya boleh dibaca tanpa internet.',
   },
   sandaran: {

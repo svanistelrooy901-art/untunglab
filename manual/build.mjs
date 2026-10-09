@@ -442,6 +442,7 @@ body.push(
 </table>
 <p><b>Cadangan harga 30%:</b> kos langsung (tanpa kos operasi) ialah RM0.91 + RM1.45 + RM1.50 + RM0.04 = RM3.90. Harga yang perlu = RM3.90 ÷ (1 − 0.30 − 0.142) = <b>RM6.98</b>. Pada harga itu, kos operasi turut naik kerana ia ikut harga jual, dan margin sebenar tepat 30%.</p>
 <p class="end">Terima kasih kerana menggunakan UntungLab. Kira dengan bijak, untung dengan yakin.</p>
+<p class="end">Ada soalan atau masalah? Hubungi kami di <b>admin@digitalsambal.space</b></p>
 `,
   ),
 );

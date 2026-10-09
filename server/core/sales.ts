@@ -279,7 +279,7 @@ export function salesBody(o: SalesOpts): string {
  <div style="text-align:center;margin-top:34px"><a class="btn" href="#beli">${L('Beli', 'Buy')} ${price}</a></div>
 </div></section>
 
-<footer><div class="wrap">${L('UntungLab oleh Digital Sambal. Kira dengan betul, untung dengan yakin.', 'UntungLab by Digital Sambal. Count it right, profit with confidence.')}</div></footer>
+<footer><div class="wrap">${L('UntungLab oleh Digital Sambal. Kira dengan betul, untung dengan yakin.', 'UntungLab by Digital Sambal. Count it right, profit with confidence.')}<br>${L('Hubungi kami', 'Contact us')}: <a href="mailto:admin@digitalsambal.space">admin@digitalsambal.space</a></div></footer>
 
 <script>
 ${LANG_TOGGLE_SCRIPT}

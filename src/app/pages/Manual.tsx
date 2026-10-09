@@ -15,6 +15,7 @@ export function ManualPage() {
           <a href={MANUAL_URL} target="_blank" rel="noopener" className={btnSecondary}>{t('manual.buka')}</a>
         </div>
         <p className="mt-3 text-xs text-muted">{t('manual.nota')}</p>
+        <p className="mt-3 text-sm"><a href="mailto:admin@digitalsambal.space" className="font-medium text-primary underline">{t('manual.hubungi')}</a></p>
       </div>
     </section>
   );
