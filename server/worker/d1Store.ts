@@ -1,4 +1,4 @@
-import type { DeviceRecord, ExportRow, Insights, LicenseRecord, Order, OrderMeta, Stats, Store } from '../core/ports';
+import type { DeviceRecord, ExportRow, Insights, LicenseRecord, Order, OrderMeta, Ping, Stats, Store, Usage } from '../core/ports';
 import type { D1Database } from './d1';
 
 interface OrderRow {
@@ -186,5 +186,45 @@ export class D1Store implements Store {
       orderId: x.id, name: x.name, email: x.email, phone: x.phone, amountSen: x.amount_sen, status: x.status, createdAt: x.created_at, paidAt: x.paid_at,
       code: x.license_code, licenseStatus: x.license_status, devices: x.devices, source: x.source, note: x.note,
     }));
+  }
+
+  async countHit(at: string, kind: 'view' | 'start') {
+    const day = new Date(new Date(at).getTime() + 8 * 3600_000).toISOString().slice(0, 10);
+    await this.db.prepare('INSERT INTO hits (day, kind, n) VALUES (?,?,1) ON CONFLICT(day, kind) DO UPDATE SET n = n + 1').bind(day, kind).run();
+  }
+
+  async recordPing(p: Ping) {
+    await this.db
+      .prepare(
+        'INSERT INTO installs (id, first_seen, last_seen, version, lang, platform) VALUES (?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET last_seen = excluded.last_seen, version = excluded.version, lang = excluded.lang, platform = excluded.platform',
+      )
+      .bind(p.id, p.at, p.at, p.version, p.lang, p.platform)
+      .run();
+  }
+
+  async usage(sinceDay: string, nowIso: string): Promise<Usage> {
+    const hits = await this.db
+      .prepare("SELECT day, SUM(CASE WHEN kind = 'view' THEN n ELSE 0 END) AS view, SUM(CASE WHEN kind = 'start' THEN n ELSE 0 END) AS start FROM hits WHERE day >= ? GROUP BY day ORDER BY day")
+      .bind(sinceDay)
+      .all<{ day: string; view: number; start: number }>();
+    const fresh = await this.db
+      .prepare("SELECT substr(datetime(first_seen, '+8 hours'), 1, 10) AS day, COUNT(*) AS n FROM installs WHERE substr(datetime(first_seen, '+8 hours'), 1, 10) >= ? GROUP BY day ORDER BY day")
+      .bind(sinceDay)
+      .all<{ day: string; n: number }>();
+    const total = await this.db.prepare('SELECT COUNT(*) AS n FROM installs').first<{ n: number }>();
+    const weekAgo = new Date(new Date(nowIso).getTime() - 7 * 86_400_000).toISOString();
+    const active = await this.db.prepare('SELECT COUNT(*) AS n FROM installs WHERE last_seen >= ?').bind(weekAgo).first<{ n: number }>();
+    const byLang = await this.db.prepare('SELECT lang AS key, COUNT(*) AS n FROM installs GROUP BY lang ORDER BY n DESC, key').all<{ key: string; n: number }>();
+    const byPlatform = await this.db.prepare('SELECT platform AS key, COUNT(*) AS n FROM installs GROUP BY platform ORDER BY n DESC, key').all<{ key: string; n: number }>();
+    return {
+      hits: (hits.results ?? []).map((h) => ({ day: h.day, view: h.view, start: h.start })),
+      installs: {
+        total: total?.n ?? 0,
+        newByDay: (fresh.results ?? []).map((f) => ({ day: f.day, n: f.n })),
+        activeWeek: active?.n ?? 0,
+        byLang: byLang.results ?? [],
+        byPlatform: byPlatform.results ?? [],
+      },
+    };
   }
 }

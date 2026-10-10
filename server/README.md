@@ -52,6 +52,8 @@ Pautan iklan boleh ditanda `https://beli.untunglab.space/beli?src=fb` (huruf kec
 
 Sebelum deploy versi dengan jadual baharu (`order_meta`, `admin_log`), jalankan `schema.sql` pada D1 (selamat diulang; hanya menambah): `wrangler d1 execute untunglab-license --remote --file=schema.sql`.
 
+Kiraan penggunaan (D-94): butang "Cuba percuma" di halaman jualan menuju ke `/mula` (kira satu klik, lalu terus ke app). `/beli` mengira lawatan (robot dan pratonton pautan dilangkau). App menghantar `POST /api/ping` paling kerap seminggu sekali: ID rawak, versi, bahasa, jenis peranti. Tiada cookie, emel, IP atau data perniagaan disimpan. Pengguna boleh matikan di Tetapan.
+
 Cara curl (sama sahaja di belakang tabir):
 
 Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-...."}`:
@@ -64,6 +66,7 @@ Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-.
 | Batalkan kod (refund/penyalahgunaan) | `/api/admin/revoke` |
 | Pulihkan kod yang tersalah batal | `/api/admin/restore` |
 | Jualan 30 hari, sumber pembeli, belum aktif, emel belum hantar | `/api/admin/insights` |
+| Lawatan, tekan Cuba percuma, pemasangan baharu, aktif 7 hari | `/api/admin/usage` |
 | Nota pada pesanan (`{orderId, note}`) | `/api/admin/note` |
 | Log 50 tindakan admin terkini | `/api/admin/log` |
 | CSV semua pembeli (ada emel & telefon; jaga elok) | `/api/admin/export` |

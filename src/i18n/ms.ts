@@ -539,6 +539,9 @@ export const ms = {
     bahasaIsi: 'Pilih bahasa utama aplikasi. Istilah teknikal seperti Backup kekal dalam English.',
     ms: 'Bahasa Melayu',
     en: 'English',
+    kiraanTajuk: 'Kiraan penggunaan tanpa nama',
+    kiraanIsi: 'Membantu kami tahu berapa orang menggunakan UntungLab. Tiada data resipi, harga atau perniagaan dihantar atau disimpan.',
+    kiraanSuis: 'Benarkan kiraan penggunaan tanpa nama',
   },
   bahasa: {
     tajuk: 'Pilih bahasa / Choose your language',

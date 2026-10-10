@@ -179,6 +179,36 @@ export function describeStore(name: string, make: () => Promise<Store>) {
       expect(rows[1]).toMatchObject({ orderId: 'o2', status: 'pending', code: null, licenseStatus: null, devices: 0, source: null, note: null });
     });
 
+    it('counts page hits per Malaysian day', async () => {
+      const s = await make();
+      // 2026-09-30T17:00Z is already 2026-10-01 in Malaysia.
+      await s.countHit('2026-09-30T17:00:00.000Z', 'view');
+      await s.countHit('2026-10-01T02:00:00.000Z', 'view');
+      await s.countHit('2026-10-01T03:00:00.000Z', 'start');
+      await s.countHit('2026-10-02T03:00:00.000Z', 'view');
+      const u = await s.usage('2026-10-01', '2026-10-03T00:00:00.000Z');
+      expect(u.hits).toEqual([
+        { day: '2026-10-01', view: 2, start: 1 },
+        { day: '2026-10-02', view: 1, start: 0 },
+      ]);
+    });
+
+    it('records each install once, keeps the latest sighting, and counts new and active installs', async () => {
+      const s = await make();
+      const a = 'a'.repeat(16);
+      const b = 'b'.repeat(16);
+      await s.recordPing({ id: a, at: '2026-09-30T17:00:00.000Z', version: '1.0', lang: 'ms', platform: 'android' });
+      await s.recordPing({ id: a, at: '2026-10-05T02:00:00.000Z', version: '1.1', lang: 'en', platform: 'android' });
+      await s.recordPing({ id: b, at: '2026-10-05T03:00:00.000Z', version: '1.1', lang: 'en', platform: 'ios' });
+      await s.recordPing({ id: 'c'.repeat(16), at: '2026-09-01T03:00:00.000Z', version: '1.0', lang: 'ms', platform: 'other' });
+      const u = await s.usage('2026-10-01', '2026-10-06T00:00:00.000Z');
+      expect(u.installs.total).toBe(3);
+      expect(u.installs.newByDay).toEqual([{ day: '2026-10-01', n: 1 }, { day: '2026-10-05', n: 1 }]);
+      expect(u.installs.activeWeek).toBe(2);
+      expect(u.installs.byLang).toEqual([{ key: 'en', n: 2 }, { key: 'ms', n: 1 }]);
+      expect(u.installs.byPlatform).toEqual([{ key: 'android', n: 1 }, { key: 'ios', n: 1 }, { key: 'other', n: 1 }]);
+    });
+
     it('stats on an empty store are all zero', async () => {
       const s = await make();
       expect(await s.stats(10)).toEqual({ orders: 0, paid: 0, complimentary: 0, pending: 0, revenueSen: 0, activeLicenses: 0, revokedLicenses: 0, devices: 0, recent: [] });

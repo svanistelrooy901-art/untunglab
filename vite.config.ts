@@ -20,6 +20,8 @@ function cfBeacon(token: string | undefined): Plugin {
 }
 
 export default defineConfig(({ mode }) => ({
+  // A short build id for the anonymous usage count (commit on GitHub Actions, otherwise the package version).
+  define: { __APP_BUILD__: JSON.stringify((process.env.GITHUB_SHA ?? '').slice(0, 7) || process.env.npm_package_version || 'dev') },
   // Relative base + HashRouter: works from any static host or sub-path, and offline.
   base: './',
   plugins: [

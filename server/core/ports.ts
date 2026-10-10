@@ -64,6 +64,28 @@ export interface ExportRow {
   devices: number; source: string | null; note: string | null;
 }
 
+export interface Usage {
+  /** Malaysian days with any hit, oldest first. */
+  hits: { day: string; view: number; start: number }[];
+  installs: {
+    total: number;
+    newByDay: { day: string; n: number }[];
+    /** Installs seen in the 7 days up to `now`. */
+    activeWeek: number;
+    byLang: { key: string; n: number }[];
+    byPlatform: { key: string; n: number }[];
+  };
+}
+
+export interface Ping {
+  /** Random id made by the app on the device. It is not tied to a person. */
+  id: string;
+  at: string;
+  version: string;
+  lang: string;
+  platform: string;
+}
+
 export interface Store {
   createOrder(order: Order): Promise<void>;
   getOrder(id: string): Promise<Order | null>;
@@ -93,6 +115,11 @@ export interface Store {
   /** Newest first. */
   listAdminLog(limit: number): Promise<{ at: string; action: string; target: string }[]>;
   insights(sinceDay: string): Promise<Insights>;
+  /** One more visit to the sales page ('view') or press of the free-trial button ('start'), on the Malaysian day of `at`. */
+  countHit(at: string, kind: 'view' | 'start'): Promise<void>;
+  /** First sighting creates the install; later ones refresh last-seen, version, language and platform. */
+  recordPing(ping: Ping): Promise<void>;
+  usage(sinceDay: string, nowIso: string): Promise<Usage>;
   exportRows(): Promise<ExportRow[]>;
 }
 

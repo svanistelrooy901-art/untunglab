@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { LICENSE_API_URL } from '../../license/config';
+import { setUsagePingOff, usagePingOff } from '../usagePing';
 import { setLang, useLangState, type Lang } from '../../i18n/lang';
 import { t } from '../../i18n/ms';
 import { PageHeader } from '../components/ui';
@@ -33,6 +36,38 @@ export function LanguageChoice({ onPick }: { onPick?: () => void }) {
   );
 }
 
+function UsageCountChoice() {
+  const [on, setOn] = useState(() => {
+    try {
+      return !usagePingOff(localStorage);
+    } catch {
+      return true;
+    }
+  });
+  return (
+    <div className="mt-4 rounded-2xl border border-border bg-surface p-5">
+      <h2 className="text-base font-semibold">{t('tetapan.kiraanTajuk')}</h2>
+      <p className="mt-1 mb-4 text-sm text-muted">{t('tetapan.kiraanIsi')}</p>
+      <label className="flex min-h-11 items-center gap-3 text-sm">
+        <input
+          type="checkbox"
+          checked={on}
+          onChange={(e) => {
+            setOn(e.target.checked);
+            try {
+              setUsagePingOff(localStorage, !e.target.checked);
+            } catch {
+              /* blocked storage: the choice holds for this visit only */
+            }
+          }}
+          className="size-5"
+        />
+        {t('tetapan.kiraanSuis')}
+      </label>
+    </div>
+  );
+}
+
 export function TetapanPage() {
   return (
     <section>
@@ -42,6 +77,7 @@ export function TetapanPage() {
         <p className="mt-1 mb-4 text-sm text-muted">{t('tetapan.bahasaIsi')}</p>
         <LanguageChoice />
       </div>
+      {LICENSE_API_URL ? <UsageCountChoice /> : null}
     </section>
   );
 }

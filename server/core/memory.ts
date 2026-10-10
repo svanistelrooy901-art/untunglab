@@ -1,4 +1,4 @@
-import type { DeviceRecord, ExportRow, Insights, LicenseRecord, Order, OrderMeta, Stats, Store } from './ports';
+import type { DeviceRecord, ExportRow, Insights, LicenseRecord, Order, OrderMeta, Ping, Stats, Store, Usage } from './ports';
 
 /** In-memory store for tests. JavaScript runs each method to completion, so markOrderPaid is atomic here. */
 export class MemoryStore implements Store {
@@ -7,6 +7,8 @@ export class MemoryStore implements Store {
   private devices = new Map<string, DeviceRecord[]>();
   private failures = new Map<string, string[]>();
   private meta = new Map<string, OrderMeta>();
+  private hits = new Map<string, { view: number; start: number }>();
+  private installs = new Map<string, { firstSeen: string; lastSeen: string; lang: string; platform: string }>();
   private log: { at: string; action: string; target: string }[] = [];
 
   licenseCount(): number {
@@ -153,5 +155,37 @@ export class MemoryStore implements Store {
           devices: o.licenseCode ? (this.devices.get(o.licenseCode) ?? []).length : 0, source: m?.source ?? null, note: m?.note ?? null,
         };
       });
+  }
+
+  async countHit(at: string, kind: 'view' | 'start') {
+    const day = new Date(new Date(at).getTime() + 8 * 3600_000).toISOString().slice(0, 10);
+    const h = this.hits.get(day) ?? { view: 0, start: 0 };
+    h[kind]++;
+    this.hits.set(day, h);
+  }
+  async recordPing(p: Ping) {
+    const cur = this.installs.get(p.id);
+    this.installs.set(p.id, { firstSeen: cur?.firstSeen ?? p.at, lastSeen: p.at, lang: p.lang, platform: p.platform });
+  }
+  async usage(sinceDay: string, nowIso: string): Promise<Usage> {
+    const myDay = (iso: string) => new Date(new Date(iso).getTime() + 8 * 3600_000).toISOString().slice(0, 10);
+    const tally = (pick: (i: { lang: string; platform: string }) => string) => {
+      const m = new Map<string, number>();
+      for (const i of this.installs.values()) m.set(pick(i), (m.get(pick(i)) ?? 0) + 1);
+      return [...m.entries()].map(([key, n]) => ({ key, n })).sort((a, b) => b.n - a.n || (a.key < b.key ? -1 : 1));
+    };
+    const weekAgo = new Date(new Date(nowIso).getTime() - 7 * 86_400_000).toISOString();
+    const fresh = new Map<string, number>();
+    for (const i of this.installs.values()) if (myDay(i.firstSeen) >= sinceDay) fresh.set(myDay(i.firstSeen), (fresh.get(myDay(i.firstSeen)) ?? 0) + 1);
+    return {
+      hits: [...this.hits.entries()].filter(([d]) => d >= sinceDay).sort(([a], [b]) => (a < b ? -1 : 1)).map(([day, h]) => ({ day, ...h })),
+      installs: {
+        total: this.installs.size,
+        newByDay: [...fresh.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).map(([day, n]) => ({ day, n })),
+        activeWeek: [...this.installs.values()].filter((i) => i.lastSeen >= weekAgo).length,
+        byLang: tally((i) => i.lang),
+        byPlatform: tally((i) => i.platform),
+      },
+    };
   }
 }

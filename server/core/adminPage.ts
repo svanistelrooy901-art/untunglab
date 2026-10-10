@@ -76,6 +76,11 @@ ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bot
     <input id="iemail" type="email" placeholder="Emel" aria-label="Emel">
     <div class="row"><button id="issue">Jana kod</button></div>
     <div class="msg" id="issueMsg"></div><div class="mono" id="issueCode"></div></div>
+  <div class="card"><h2>Pengguna percuma</h2><div class="stats" id="ustats"></div>
+    <div class="bars" id="ubars" role="img" aria-label="Pemasangan baharu setiap hari, 30 hari terakhir"></div><div class="axis"><span id="uFrom"></span><span id="uMax"></span><span id="uTo"></span></div>
+    <p class="muted" id="uconv"></p>
+    <p class="muted" id="ulang"></p>
+    <p class="muted">Lawatan dan klik dikira di server tanpa cookie. Pemasangan dikira daripada satu ID rawak dalam app; tiada emel, IP atau data perniagaan disimpan. Robot dan pratonton pautan tak dikira.</p></div>
   <div class="card"><h2>Jualan 30 hari</h2><div class="bars" id="bars" role="img" aria-label="Pesanan berbayar setiap hari, 30 hari terakhir"></div><div class="axis"><span id="axFrom"></span><span id="axMax"></span><span id="axTo"></span></div><p class="muted" id="conv"></p><p class="muted">Hari dikira ikut waktu Malaysia. Pesanan RM0 tak dikira.</p></div>
   <div class="card"><h2>Pelawat (Cloudflare)</h2>
     <p class="muted hide" id="trOff">Belum disambung. Bila secret CF_ANALYTICS_TOKEN diisi di Worker, bahagian ini akan tunjuk berapa orang lawat halaman jualan dan buka app.</p>
@@ -171,10 +176,23 @@ function renderTraffic(t){
   rows('trCty',t.countries,[function(r){return r.label||'?'},function(r){return r.visits}],'Tiada data.');
 }
 function loadTraffic(){return api('/api/admin/traffic').then(renderTraffic).catch(function(e){$('trOn').className='hide';$('trErr').textContent=e.message})}
+function renderUsage(u){
+  var box=$('ustats');box.textContent='';
+  [['Lawatan halaman beli (30 hari)',u.totals.view],['Tekan "Cuba percuma" (30 hari)',u.totals.start],['Pemasangan baharu (30 hari)',u.totals.installs30],['Jumlah pemasangan',u.installs.total],['Aktif 7 hari',u.installs.activeWeek]].forEach(function(i){var d=el('div','stat');d.appendChild(el('b','',String(i[1])));d.appendChild(el('span','',i[0]));box.appendChild(d)});
+  var bars=$('ubars');bars.textContent='';var max=0;u.daily.forEach(function(d){if(d.installs>max)max=d.installs});
+  u.daily.forEach(function(d){var b=el('div','bar'+(d.installs?'':' zero'));b.style.height=(d.installs&&max?Math.max(4,Math.round(d.installs/max*100)):2)+'%';b.title=day(d.day)+': '+d.installs+' pemasangan baharu, '+d.start+' tekan Cuba percuma, '+d.view+' lawatan';bars.appendChild(b)});
+  $('uFrom').textContent=day(u.daily[0].day);$('uTo').textContent=day(u.daily[u.daily.length-1].day);$('uMax').textContent='tertinggi '+max+'/hari';
+  var t=u.totals,parts=[];
+  if(t.view)parts.push(Math.round(t.start/t.view*100)+'% lawatan menekan Cuba percuma');
+  if(t.start)parts.push('pemasangan baharu ialah '+Math.round(t.installs30/t.start*100)+'% daripada tekanan (kasar; ada yang buka app terus, tanpa halaman ini)');
+  $('uconv').textContent=parts.join('. ')||'Belum ada data.';
+  function tally(a){return a.map(function(x){return x.key+' '+x.n}).join(', ')||'-'}
+  $('ulang').textContent='Bahasa: '+tally(u.installs.byLang)+'. Peranti: '+tally(u.installs.byPlatform)+'.';
+}
 function renderLog(l){var u=$('log');u.textContent='';
   l.entries.forEach(function(e){u.appendChild(el('li','',e.at.slice(0,16).replace('T',' ')+' UTC · '+e.action+' · '+e.target))});
   if(!l.entries.length)u.appendChild(el('li','muted','Belum ada.'))}
-function load(){return api('/api/admin/stats').then(function(s){renderStats(s);return Promise.all([api('/api/admin/insights'),api('/api/admin/log')]).then(function(r){renderInsights(r[0],s);renderLog(r[1]);loadTraffic()})})}
+function load(){return api('/api/admin/stats').then(function(s){renderStats(s);return Promise.all([api('/api/admin/insights'),api('/api/admin/log'),api('/api/admin/usage')]).then(function(r){renderInsights(r[0],s);renderLog(r[1]);renderUsage(r[2]);loadTraffic()})})}
 function card(r){
   var c=el('div','card');
   if(r.status==='unpaid'){c.appendChild(el('div','',r.email));c.appendChild(el('div','muted','Belum bayar (order '+r.orderId+')'));return c}

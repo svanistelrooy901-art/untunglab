@@ -165,8 +165,8 @@ export function salesBody(o: SalesOpts): string {
   const price = rm(priceSen);
   const img = (f: string, alt: string) => (base ? `<img src="${base}sales/${f}" alt="${alt}" loading="lazy" width="540" height="1169">` : '');
   const logo = base ? `<img src="${base}logo-penuh.png" alt="UntungLab">` : '<b style="color:#75F8E8">UntungLab</b>';
-  const tryLink = base ? `<a class="btn ghost" href="${base}">${L('Cuba percuma dahulu', 'Try it free first')}</a>` : '';
-  const tryLinkSolid = base ? `<a class="btn" href="${base}">${L('Cuba percuma dahulu', 'Try it free first')}</a>` : '';
+  const tryLink = base ? `<a class="btn ghost" href="/mula">${L('Cuba percuma dahulu', 'Try it free first')}</a>` : '';
+  const tryLinkSolid = base ? `<a class="btn" href="/mula">${L('Cuba percuma dahulu', 'Try it free first')}</a>` : '';
   const priceBlock =
     earlyLeft !== null
       ? `<span class="badge">${L(`Harga Early Bird: ${earlyLeft} pembeli pertama yang tinggal`, `Early Bird price: ${earlyLeft} spots left for the first buyers`)}</span><div class="price">${price}<s>${rm(normalSen)}</s></div><p style="color:#A9C4C5;margin:8px 0 0">${L(`Bayar sekali, guna selamanya. Selepas ${earlyLeft} tempat ini habis, harga menjadi ${rm(normalSen)}.`, `Pay once, use it for good. After these ${earlyLeft} spots are gone, the price becomes ${rm(normalSen)}.`)}</p>`
@@ -212,7 +212,7 @@ export function salesBody(o: SalesOpts): string {
 
 <section class="dark"><div class="wrap">
  <h2>${L('Dibina supaya <em>mudah dan selamat</em>.', 'Built to be <em>simple and safe</em>.')}</h2>
- <p class="sub">${L('Tiada langganan bulanan. Tiada data anda dihantar ke mana-mana.', 'No monthly subscription. None of your data is sent anywhere.')}</p>
+ <p class="sub">${L('Tiada langganan bulanan. Tiada data resipi, harga atau perniagaan dihantar atau disimpan.', 'No monthly subscription. No recipe, price or business data is sent or stored.')}</p>
  <div class="tiles">
   <div class="tile"><b>${L('Tanpa akaun', 'No account')}</b><span>${L('Buka dan guna. Tiada pendaftaran atau kata laluan.', 'Open and use it. No sign-up or password.')}</span></div>
   <div class="tile"><b>${L('Data di telefon anda', 'Data on your phone')}</b><span>${L('Resipi dan harga anda kekal pada peranti anda. Ada fungsi sandaran bila anda tukar telefon.', 'Your recipes and prices stay on your device. There is a backup function for when you change phones.')}</span></div>
@@ -274,7 +274,7 @@ export function salesBody(o: SalesOpts): string {
  ${faq('Bagaimana kalau saya tukar telefon?', 'What if I change phones?', 'Data disimpan di telefon anda. Buat sandaran dalam UntungLab sebelum menukar telefon, kemudian pulihkan di telefon baharu dan masukkan kod lesen yang sama.', 'Your data is stored on your phone. Make a backup inside UntungLab before changing phones, then restore it on the new phone and enter the same licence code.')}
  ${faq('Perlukah internet?', 'Do I need internet?', 'Hanya untuk membeli dan mengaktifkan kod lesen sekali. Selepas itu UntungLab boleh digunakan tanpa internet.', 'Only to buy and to activate the licence code once. After that UntungLab works without internet.')}
  ${faq('Bagaimana dengan bayaran balik?', 'What about refunds?', 'Dalam 7 hari selepas pembelian, balas emel kod lesen anda dan kami akan uruskan bayaran balik.', 'Within 7 days of purchase, reply to your licence code email and we will handle the refund.')}
- ${faq('Adakah data saya dihantar kepada anda?', 'Is my data sent to you?', 'Tidak. Resipi, bahan dan harga anda kekal pada peranti anda. Hanya nama, emel dan telefon digunakan untuk menghantar kod lesen dan sokongan pembelian.', 'No. Your recipes, ingredients and prices stay on your device. Only your name, email and phone are used to send the licence code and support the purchase.')}
+ ${faq('Adakah data saya dihantar kepada anda?', 'Is my data sent to you?', 'Tidak. Resipi, bahan dan harga anda kekal pada peranti anda. Tiada data resipi, harga atau perniagaan dihantar atau disimpan. Hanya nama, emel dan telefon digunakan untuk menghantar kod lesen dan sokongan pembelian.', 'No. Your recipes, ingredients and prices stay on your device. No recipe, price or business data is sent or stored. Only your name, email and phone are used to send the licence code and support the purchase.')}
  ${faq('Adakah app ini ada dalam Bahasa Inggeris?', 'Is the app available in English?', 'Ada. App dan manual boleh ditukar antara Bahasa Melayu dan English di Tetapan. Emel kod lesen dalam Bahasa Melayu.', 'Yes. The app and its manual switch between Bahasa Melayu and English in Settings. The licence code email is in Bahasa Melayu.')}
  <div style="text-align:center;margin-top:34px"><a class="btn" href="#beli">${L('Beli', 'Buy')} ${price}</a></div>
 </div></section>

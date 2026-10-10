@@ -375,6 +375,69 @@ describe('admin', () => {
   });
 });
 
+describe('usage counting (no cookies, no personal data)', () => {
+  const ping = (w: Awaited<ReturnType<typeof makeWorld>>, over: Record<string, unknown> = {}, headers: Record<string, string> = {}) =>
+    w.call('POST', '/api/ping', { id: 'a1b2c3d4e5f60718', version: '0.1.0', lang: 'ms', platform: 'android', ...over }, headers);
+
+  it('the free-trial button goes through /mula, which counts the click and sends the person to the app', async () => {
+    const w = await makeWorld({ appUrl: 'https://app.example.com/' });
+    expect(await (await w.call('GET', '/beli')).text()).toContain('href="/mula"');
+    const res = await w.call('GET', '/mula');
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toBe('https://app.example.com/');
+    expect(res.headers.get('set-cookie')).toBeNull();
+    const u = await w.json(await w.admin('/api/admin/usage', {}));
+    expect(u.totals).toMatchObject({ start: 1, view: 1 });
+  });
+  it('without an app address /mula falls back to the sales page', async () => {
+    const w = await makeWorld();
+    const res = await w.call('GET', '/mula');
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toBe('https://api.example.com/beli');
+  });
+  it('crawlers and link previews are not counted as visits', async () => {
+    const w = await makeWorld();
+    await w.call('GET', '/beli', undefined, { 'user-agent': 'WhatsApp/2.23 A' });
+    await w.call('GET', '/beli', undefined, { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' });
+    await w.call('GET', '/beli', undefined, { 'user-agent': 'Mozilla/5.0 (Linux; Android 14) Chrome/120' });
+    const u = await w.json(await w.admin('/api/admin/usage', {}));
+    expect(u.totals.view).toBe(1);
+  });
+  it('ping records an install once and refreshes it later; bad input is refused', async () => {
+    const w = await makeWorld();
+    expect((await ping(w)).status).toBe(200);
+    w.advance(60 * 24 * 3);
+    expect((await ping(w, { version: '0.2.0', lang: 'en' })).status).toBe(200);
+    expect((await ping(w, { id: 'B'.repeat(16), platform: 'ios' })).status).toBe(200);
+    for (const bad of [{ id: 'short' }, { id: '<script>alert(1)</script>' }, { lang: 'fr' }, { platform: 'toaster' }, { version: 'x'.repeat(40) }]) {
+      expect((await ping(w, bad)).status).toBe(400);
+    }
+    const u = await w.json(await w.admin('/api/admin/usage', {}));
+    expect(u.installs).toMatchObject({ total: 2, activeWeek: 2 });
+    expect(u.installs.byLang).toEqual([{ key: 'ms', n: 1 }, { key: 'en', n: 1 }].sort((x, y) => (x.n === y.n ? (x.key < y.key ? -1 : 1) : y.n - x.n)));
+  });
+  it('ping answers the app origin in CORS and is rate limited per address', async () => {
+    const w = await makeWorld();
+    const res = await ping(w, {}, { origin: 'https://app.example.com' });
+    expect(res.headers.get('access-control-allow-origin')).toBe('https://app.example.com');
+    const ip = { 'cf-connecting-ip': '9.9.9.9' };
+    let last = 200;
+    for (let i = 0; i < 70; i++) last = (await ping(w, {}, ip)).status;
+    expect(last).toBe(429);
+    expect((await ping(w, {}, { 'cf-connecting-ip': '8.8.8.8' })).status).toBe(200);
+  });
+  it('usage needs the admin token and fills 30 days with zeros', async () => {
+    const w = await makeWorld();
+    expect((await w.call('POST', '/api/admin/usage', {})).status).toBe(401);
+    await ping(w);
+    const u = await w.json(await w.admin('/api/admin/usage', {}));
+    expect(u.daily).toHaveLength(30);
+    expect(u.daily[29]).toEqual({ day: '2026-09-30', view: 0, start: 0, installs: 1 });
+    expect(u.daily[0]).toEqual({ day: '2026-09-01', view: 0, start: 0, installs: 0 });
+    expect(JSON.stringify(u)).not.toContain('a1b2c3d4e5f60718');
+  });
+});
+
 describe('browser access', () => {
   it('answers the app origin (and only it) in CORS, including preflight', async () => {
     const w = await makeWorld();

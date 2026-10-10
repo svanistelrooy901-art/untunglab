@@ -48,3 +48,20 @@ CREATE TABLE IF NOT EXISTS admin_log (
   action TEXT NOT NULL,
   target TEXT NOT NULL
 );
+
+-- Added with usage counting (D-94). Additive. No emails, no IPs, no cookies: counters per day, and one random id per install.
+CREATE TABLE IF NOT EXISTS hits (
+  day  TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('view','start')),
+  n    INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, kind)
+);
+
+CREATE TABLE IF NOT EXISTS installs (
+  id         TEXT PRIMARY KEY,
+  first_seen TEXT NOT NULL,
+  last_seen  TEXT NOT NULL,
+  version    TEXT NOT NULL,
+  lang       TEXT NOT NULL,
+  platform   TEXT NOT NULL
+);

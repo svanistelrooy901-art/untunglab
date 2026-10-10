@@ -539,6 +539,9 @@ export const en: Widen<typeof ms> = {
     bahasaIsi: 'Choose the main language of the app.',
     ms: 'Bahasa Melayu',
     en: 'English',
+    kiraanTajuk: 'Anonymous usage count',
+    kiraanIsi: 'Helps us know how many people use UntungLab. No recipe, price or business data is sent or stored.',
+    kiraanSuis: 'Allow the anonymous usage count',
   },
   bahasa: {
     tajuk: 'Pilih bahasa / Choose your language',

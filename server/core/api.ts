@@ -52,6 +52,9 @@ function safeEqual(a: string, b: string): boolean {
 
 /** New orders allowed per address per window. Genuine buyers need one or two. */
 const ORDER_LIMIT = 8;
+const PING_LIMIT = 60;
+/** Crawlers and link-preview fetchers are not people. */
+const BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|curl|wget|headless|monitor/i;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE = /^\+?[0-9][0-9\s-]{7,14}$/;
 
@@ -83,7 +86,14 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     try {
       const path = url.pathname.replace(/\/+$/, '') || '/';
       if (req.method === 'GET' && path === '/') return Response.redirect(`${config.publicBaseUrl}/beli`, 302);
-      if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice()), config.appUrl, config.cfBeaconToken));
+      if (req.method === 'GET' && path === '/mula') {
+        await countVisit(req, 'start');
+        return Response.redirect(config.appUrl || `${config.publicBaseUrl}/beli`, 302);
+      }
+      if (req.method === 'GET' && path === '/beli') {
+        await countVisit(req, 'view');
+        return html(renderBuyPage(...(await currentPrice()), config.appUrl, config.cfBeaconToken));
+      }
       if (req.method === 'GET' && path === '/terima') return html(renderReturnPage(config.appUrl));
 
       if (req.method === 'GET' && path === '/admin') return html(renderAdminPage(), ADMIN_CSP);
@@ -93,6 +103,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       if (req.method === 'GET' && orderMatch) return await orderStatus(orderMatch[1]!, json);
       if (req.method === 'POST' && path === '/api/toyyibpay/callback') return await callback(req);
       if (req.method === 'POST' && path === '/api/activate') return await activate(req, json);
+      if (req.method === 'POST' && path === '/api/ping') return await ping(req, json);
       if (req.method === 'POST' && path === '/api/release') return await release(req, json);
       if (path.startsWith('/api/admin/')) return await admin(req, path, json, csv);
       return json(404, { error: 'not_found' });
@@ -419,6 +430,19 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
         }
         return csv(lines.join('\r\n') + '\r\n');
       }
+      case '/api/admin/usage': {
+        const my = (offsetDays: number) => new Date(deps.now().getTime() + 8 * 3600_000 - offsetDays * 86_400_000).toISOString().slice(0, 10);
+        const got = await store.usage(my(29), deps.now().toISOString());
+        const hits = new Map(got.hits.map((h) => [h.day, h]));
+        const fresh = new Map(got.installs.newByDay.map((f) => [f.day, f.n]));
+        const daily: { day: string; view: number; start: number; installs: number }[] = [];
+        for (let k = 29; k >= 0; k--) {
+          const day = my(k);
+          daily.push({ day, view: hits.get(day)?.view ?? 0, start: hits.get(day)?.start ?? 0, installs: fresh.get(day) ?? 0 });
+        }
+        const sum = (f: (d: (typeof daily)[number]) => number) => daily.reduce((n, d) => n + f(d), 0);
+        return json(200, { daily, totals: { view: sum((d) => d.view), start: sum((d) => d.start), installs30: sum((d) => d.installs) }, installs: got.installs });
+      }
       case '/api/admin/stats': {
         const st = await store.stats(25);
         const slots = config.earlyBirdSlots ?? 0;
@@ -457,6 +481,33 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       default:
         return json(404, { error: 'not_found' });
     }
+  }
+
+  // ---------- usage counting (D-94): counters and one random id per install; no cookies, emails or addresses stored ----------
+
+  async function countVisit(req: Request, kind: 'view' | 'start') {
+    if (BOT.test(req.headers.get('user-agent') ?? '')) return;
+    try {
+      await store.countHit(deps.now().toISOString(), kind);
+    } catch (e) {
+      console.error('hit count failed', e); // never stop the page for a counter
+    }
+  }
+
+  async function ping(req: Request, json: Json): Promise<Response> {
+    const limitKey = `ping:${clientKey(req)}`;
+    if (await rateLimited(limitKey, PING_LIMIT)) return json(429, { error: 'rate_limited' });
+    await store.recordFailure(limitKey, deps.now().toISOString());
+    const body = await readJson(req);
+    const id = typeof body.id === 'string' ? body.id : '';
+    const version = typeof body.version === 'string' ? body.version : '';
+    const lang = typeof body.lang === 'string' ? body.lang : '';
+    const platform = typeof body.platform === 'string' ? body.platform : '';
+    if (!/^[A-Za-z0-9]{16,40}$/.test(id) || !/^[0-9A-Za-z.\-]{1,20}$/.test(version) || !['ms', 'en'].includes(lang) || !['android', 'ios', 'desktop', 'other'].includes(platform)) {
+      return json(400, { error: 'invalid_input' });
+    }
+    await store.recordPing({ id, at: deps.now().toISOString(), version, lang, platform });
+    return json(200, { ok: true });
   }
 
   async function audit(action: string, target: string) {
