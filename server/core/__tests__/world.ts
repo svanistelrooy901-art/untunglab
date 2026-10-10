@@ -3,8 +3,9 @@ import { createHandler, type Config } from '../api';
 import { md5 } from '../md5';
 import { MemoryStore } from '../memory';
 import type { Mailer, ToyyibClient, Transaction } from '../ports';
+import type { TrafficSource } from '../traffic';
 
-export async function makeWorld(over: Partial<Config> = {}) {
+export async function makeWorld(over: Partial<Config> = {}, extra: { traffic?: TrafficSource } = {}) {
   const keys = await generateKeyPair();
   const store = new MemoryStore();
   let clock = new Date('2026-09-30T08:00:00.000Z');
@@ -54,6 +55,7 @@ export async function makeWorld(over: Partial<Config> = {}) {
       return b;
     },
     config,
+    traffic: extra.traffic,
   });
   const call = (method: string, path: string, body?: unknown, headers: Record<string, string> = {}) =>
     handler(new Request(`https://api.example.com${path}`, { method, headers: { 'content-type': 'application/json', ...headers }, body: body === undefined ? undefined : JSON.stringify(body) }));

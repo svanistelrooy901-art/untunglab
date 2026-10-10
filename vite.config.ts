@@ -1,13 +1,29 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+/**
+ * Cloudflare Web Analytics beacon (D-93), only when VITE_CF_BEACON_TOKEN is set at build time. `spa:false` counts app opens
+ * only: no screen changes, no data typed in the app. Offline the script simply fails to load; the app does not depend on it.
+ */
+function cfBeacon(token: string | undefined): Plugin {
+  const ok = !!token && /^[A-Za-z0-9]{16,64}$/.test(token);
+  return {
+    name: 'untunglab-cf-beacon',
+    transformIndexHtml: () =>
+      ok
+        ? [{ tag: 'script', attrs: { type: 'module', src: 'https://static.cloudflareinsights.com/beacon.min.js', 'data-cf-beacon': JSON.stringify({ token, spa: false }) }, injectTo: 'head' }]
+        : [],
+  };
+}
+
+export default defineConfig(({ mode }) => ({
   // Relative base + HashRouter: works from any static host or sub-path, and offline.
   base: './',
   plugins: [
+    cfBeacon(process.env.VITE_CF_BEACON_TOKEN ?? loadEnv(mode, process.cwd(), 'VITE_').VITE_CF_BEACON_TOKEN),
     react(),
     tailwindcss(),
     VitePWA({
@@ -43,4 +59,4 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'server/**/*.test.ts'],
     setupFiles: ['./src/test-setup.ts'],
   },
-});
+}));

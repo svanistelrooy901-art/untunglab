@@ -77,6 +77,18 @@ ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bot
     <div class="row"><button id="issue">Jana kod</button></div>
     <div class="msg" id="issueMsg"></div><div class="mono" id="issueCode"></div></div>
   <div class="card"><h2>Jualan 30 hari</h2><div class="bars" id="bars" role="img" aria-label="Pesanan berbayar setiap hari, 30 hari terakhir"></div><div class="axis"><span id="axFrom"></span><span id="axMax"></span><span id="axTo"></span></div><p class="muted" id="conv"></p><p class="muted">Hari dikira ikut waktu Malaysia. Pesanan RM0 tak dikira.</p></div>
+  <div class="card"><h2>Pelawat (Cloudflare)</h2>
+    <p class="muted hide" id="trOff">Belum disambung. Bila CF_ACCOUNT_ID dan CF_ANALYTICS_TOKEN diisi di Worker, bahagian ini akan tunjuk berapa orang lawat halaman jualan dan buka app.</p>
+    <div class="msg err" id="trErr"></div>
+    <div class="hide" id="trOn">
+      <div class="stats" id="trStats"></div>
+      <div class="bars" id="trBars" role="img" aria-label="Lawatan setiap hari, 30 hari terakhir"></div><div class="axis"><span id="trFrom"></span><span id="trMax"></span><span id="trTo"></span></div>
+      <p class="muted" id="trFunnel"></p>
+      <h2 style="margin-top:14px">Dari mana pelawat datang</h2><table><thead><tr><th>Sumber</th><th>Lawatan</th></tr></thead><tbody id="trRef"></tbody></table>
+      <h2 style="margin-top:14px">Halaman</h2><table><thead><tr><th>Halaman</th><th>Lawatan</th><th>Dibuka</th></tr></thead><tbody id="trPages"></tbody></table>
+      <div class="row" style="margin-top:14px"><div><h2>Peranti</h2><table><tbody id="trDev"></tbody></table></div><div><h2>Negara</h2><table><tbody id="trCty"></tbody></table></div></div>
+      <p class="muted">30 hari, waktu Malaysia. Pelayar dengan ad-blocker dan app yang dibuka tanpa internet tak dikira, jadi nombor sebenar lebih tinggi sedikit. App hanya dikira bila dibuka; skrin dan data dalam app tak dihantar.</p>
+    </div></div>
   <div class="card"><h2>Dari mana pembeli datang</h2><p class="muted">Letak <span class="mono">?src=fb</span> pada pautan beli, contohnya <span class="mono">https://beli.untunglab.space/beli?src=fb</span>. Guna huruf kecil, nombor, - atau _ (maks 20).</p><table><thead><tr><th>Sumber</th><th>Klik beli</th><th>Bayar</th></tr></thead><tbody id="sources"></tbody></table></div>
   <div class="card"><h2>Dibeli tapi belum diaktifkan</h2><p class="muted">Mungkin tersekat. Hantar semula emel atau tanya mereka.</p><ul class="plain" id="unact"></ul></div>
   <div class="card"><h2>Emel kod belum direkod hantar</h2><p class="muted">Tekan Hantar semula; kalau masih gagal, salin kod dan beri sendiri.</p><ul class="plain" id="mailp"></ul></div>
@@ -110,6 +122,7 @@ function renderStats(s){
 }
 function day(d){var m=['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];return Number(d.slice(8))+' '+m[Number(d.slice(5,7))-1]}
 function renderInsights(i,s){
+  lastInsights=i;
   var bars=$('bars');bars.textContent='';var max=0;
   i.daily.forEach(function(d){if(d.paid>max)max=d.paid});
   i.daily.forEach(function(d){var b=el('div','bar'+(d.paid?'':' zero'));b.style.height=(d.paid&&max?Math.max(4,Math.round(d.paid/max*100)):2)+'%';b.title=day(d.day)+': '+d.paid+' bayar, RM'+rm(d.revenueSen)+', '+d.created+' klik beli';bars.appendChild(b)});
@@ -125,10 +138,43 @@ function renderInsights(i,s){
   list('unact',i.unactivated,true,'Semua pembeli dah aktifkan.');
   list('mailp',i.emailPending,false,'Tiada masalah emel.');
 }
+var lastInsights=null;
+function pageLabel(p){var h=p.host||'',path=p.path||'/';
+  if(h.indexOf('beli.')===0)return path==='/beli'?'Halaman jualan':path==='/terima'?'Selepas bayar':h+path;
+  return 'App UntungLab'+(path&&path!=='/'&&path!=='/index.html'?' '+path:'')}
+function rows(id,list,cols,empty){var t=$(id);t.textContent='';
+  list.forEach(function(r){var tr=el('tr');cols.forEach(function(c){tr.appendChild(el('td','',String(c(r))))});t.appendChild(tr)});
+  if(!list.length){var er=el('tr'),ec=el('td','muted',empty);ec.colSpan=cols.length;er.appendChild(ec);t.appendChild(er)}}
+function renderTraffic(t){
+  $('trErr').textContent='';
+  if(!t.configured){$('trOff').className='muted';$('trOn').className='hide';return}
+  $('trOff').className='muted hide';
+  if(t.error){$('trOn').className='hide';$('trErr').textContent='Tak dapat baca data Cloudflare: '+t.error;return}
+  $('trOn').className='';
+  var tot=0,views=0,max=0;t.daily.forEach(function(d){tot+=d.visits;views+=d.views;if(d.visits>max)max=d.visits});
+  var merged={},order=[];t.pages.forEach(function(p){var k=pageLabel(p);if(!merged[k]){merged[k]={label:k,visits:0,views:0};order.push(k)}merged[k].visits+=p.visits;merged[k].views+=p.views});
+  var pages=order.map(function(k){return merged[k]});
+  var buy=merged['Halaman jualan']?merged['Halaman jualan'].visits:0,app=0;pages.forEach(function(p){if(p.label.indexOf('App')===0)app+=p.views});
+  var today=t.daily[t.daily.length-1];
+  var box=$('trStats');box.textContent='';
+  [['Lawatan (30 hari)',tot],['Hari ini',today?today.visits:0],['Lawat halaman jualan',buy],['App dibuka (online)',app],['Halaman dibuka',views]].forEach(function(i){var d=el('div','stat');d.appendChild(el('b','',String(i[1])));d.appendChild(el('span','',i[0]));box.appendChild(d)});
+  var bars=$('trBars');bars.textContent='';
+  t.daily.forEach(function(d){var b=el('div','bar'+(d.visits?'':' zero'));b.style.height=(d.visits&&max?Math.max(4,Math.round(d.visits/max*100)):2)+'%';b.title=day(d.day)+': '+d.visits+' lawatan, '+d.views+' halaman';bars.appendChild(b)});
+  $('trFrom').textContent=day(t.daily[0].day);$('trTo').textContent=day(t.daily[t.daily.length-1].day);$('trMax').textContent='tertinggi '+max+'/hari';
+  var f=$('trFunnel');
+  if(lastInsights){var cr=0,pd=0;lastInsights.daily.forEach(function(d){cr+=d.created;pd+=d.paid});
+    f.textContent='Corong 30 hari: '+buy+' lawat halaman jualan → '+cr+' klik beli → '+pd+' bayar'+(buy?' ('+(Math.round(pd/buy*1000)/10)+'% daripada pelawat).':'.')}else f.textContent='';
+  var dev={desktop:'Komputer',mobile:'Telefon',tablet:'Tablet'};
+  rows('trRef',t.referrers,[function(r){return r.label||'(terus / tiada rujukan)'},function(r){return r.visits}],'Tiada data lagi.');
+  rows('trPages',pages,[function(r){return r.label},function(r){return r.visits},function(r){return r.views}],'Tiada data lagi.');
+  rows('trDev',t.devices,[function(r){return dev[r.label]||r.label||'?'},function(r){return r.visits}],'Tiada data.');
+  rows('trCty',t.countries,[function(r){return r.label||'?'},function(r){return r.visits}],'Tiada data.');
+}
+function loadTraffic(){return api('/api/admin/traffic').then(renderTraffic).catch(function(e){$('trOn').className='hide';$('trErr').textContent=e.message})}
 function renderLog(l){var u=$('log');u.textContent='';
   l.entries.forEach(function(e){u.appendChild(el('li','',e.at.slice(0,16).replace('T',' ')+' UTC · '+e.action+' · '+e.target))});
   if(!l.entries.length)u.appendChild(el('li','muted','Belum ada.'))}
-function load(){return api('/api/admin/stats').then(function(s){renderStats(s);return Promise.all([api('/api/admin/insights'),api('/api/admin/log')]).then(function(r){renderInsights(r[0],s);renderLog(r[1])})})}
+function load(){return api('/api/admin/stats').then(function(s){renderStats(s);return Promise.all([api('/api/admin/insights'),api('/api/admin/log')]).then(function(r){renderInsights(r[0],s);renderLog(r[1]);loadTraffic()})})}
 function card(r){
   var c=el('div','card');
   if(r.status==='unpaid'){c.appendChild(el('div','',r.email));c.appendChild(el('div','muted','Belum bayar (order '+r.orderId+')'));return c}

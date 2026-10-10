@@ -4,6 +4,7 @@ import { md5 } from './md5';
 import { ADMIN_CSP, renderAdminPage } from './adminPage';
 import { renderBuyPage, renderReturnPage } from './pages';
 import type { Mailer, Order, Store, ToyyibClient } from './ports';
+import type { TrafficSource } from './traffic';
 
 export interface Config {
   /** Normal price in sen. */
@@ -25,6 +26,8 @@ export interface Config {
   maxDevices: number;
   failureLimit: number;
   failureWindowMinutes: number;
+  /** Public site token of the Cloudflare Web Analytics beacon for the sales page (D-93). Empty = no beacon. */
+  cfBeaconToken?: string;
 }
 
 export interface Deps {
@@ -34,6 +37,8 @@ export interface Deps {
   now: () => Date;
   randomBytes: (n: number) => Uint8Array;
   config: Config;
+  /** Visitor numbers for /admin (D-93). Absent = not connected yet. */
+  traffic?: TrafficSource;
 }
 
 const hex = (bytes: Uint8Array) => [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -78,7 +83,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     try {
       const path = url.pathname.replace(/\/+$/, '') || '/';
       if (req.method === 'GET' && path === '/') return Response.redirect(`${config.publicBaseUrl}/beli`, 302);
-      if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice()), config.appUrl));
+      if (req.method === 'GET' && path === '/beli') return html(renderBuyPage(...(await currentPrice()), config.appUrl, config.cfBeaconToken));
       if (req.method === 'GET' && path === '/terima') return html(renderReturnPage(config.appUrl));
 
       if (req.method === 'GET' && path === '/admin') return html(renderAdminPage(), ADMIN_CSP);
@@ -368,6 +373,38 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
           daily.push(byDay.get(day) ?? { day, created: 0, paid: 0, revenueSen: 0 });
         }
         return json(200, { ...got, daily });
+      }
+      case '/api/admin/traffic': {
+        // Cloudflare Web Analytics for 30 Malaysian days (D-93). A Cloudflare failure is reported, never a 500, so the rest of /admin still works.
+        if (!deps.traffic) return json(200, { configured: false });
+        const DAY = 86_400_000;
+        const MY = 8 * 3600_000;
+        const nowMs = deps.now().getTime();
+        const todayStartMy = Math.floor((nowMs + MY) / DAY) * DAY; // midnight today, Malaysian clock, as if it were UTC
+        const fromMs = todayStartMy - 29 * DAY - MY; // real UTC instant of midnight 29 days ago in Malaysia
+        let raw;
+        try {
+          raw = await deps.traffic.report(new Date(fromMs).toISOString(), new Date(nowMs).toISOString());
+        } catch (e) {
+          console.error('traffic', e);
+          return json(200, { configured: true, error: e instanceof Error ? e.message : 'Cloudflare tidak menjawab.' });
+        }
+        const byDay = new Map<string, { visits: number; views: number }>();
+        for (const h of raw.hourly) {
+          const t = Date.parse(h.hour);
+          if (!Number.isFinite(t)) continue;
+          const day = new Date(t + MY).toISOString().slice(0, 10);
+          const cur = byDay.get(day) ?? { visits: 0, views: 0 };
+          cur.visits += h.visits;
+          cur.views += h.views;
+          byDay.set(day, cur);
+        }
+        const daily = [];
+        for (let k = 29; k >= 0; k--) {
+          const day = new Date(todayStartMy - k * DAY).toISOString().slice(0, 10);
+          daily.push({ day, ...(byDay.get(day) ?? { visits: 0, views: 0 }) });
+        }
+        return json(200, { configured: true, daily, pages: raw.pages, referrers: raw.referrers, devices: raw.devices, countries: raw.countries });
       }
       case '/api/admin/export': {
         await audit('export', 'csv');

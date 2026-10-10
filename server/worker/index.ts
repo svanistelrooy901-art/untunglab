@@ -3,6 +3,7 @@ import { createBrevoMailer } from '../core/brevo';
 import { createToyyibClient } from '../core/toyyibpay';
 import type { D1Database } from './d1';
 import { D1Store } from './d1Store';
+import { createCloudflareTraffic } from '../core/traffic';
 
 /** Bindings and settings; see wrangler.toml and README.md. Secrets are set with `wrangler secret put`, never committed. */
 export interface Env {
@@ -18,11 +19,17 @@ export interface Env {
   APP_URL: string;
   BREVO_SENDER_EMAIL: string;
   BREVO_SENDER_NAME: string;
+  /** Web Analytics (D-93): public beacon token, account id, optional site tag. Empty = off. */
+  CF_BEACON_TOKEN?: string;
+  CF_ACCOUNT_ID?: string;
+  CF_SITE_TAG?: string;
   // secrets
   TOYYIB_SECRET: string;
   LICENSE_PRIVATE_KEY: string;
   ADMIN_TOKEN: string;
   BREVO_API_KEY: string;
+  /** API token with Account > Account Analytics > Read (D-93). Optional. */
+  CF_ANALYTICS_TOKEN?: string;
 }
 
 export default {
@@ -47,6 +54,15 @@ export default {
         senderName: env.BREVO_SENDER_NAME,
         appUrl: env.APP_URL,
       }),
+      traffic:
+        env.CF_ACCOUNT_ID && env.CF_ANALYTICS_TOKEN
+          ? createCloudflareTraffic({
+              accountId: env.CF_ACCOUNT_ID.trim(),
+              apiToken: env.CF_ANALYTICS_TOKEN.trim(),
+              siteTag: env.CF_SITE_TAG?.trim() || undefined,
+              hosts: hostsOf(env.APP_URL, env.PUBLIC_BASE_URL),
+            })
+          : undefined,
       now: () => new Date(),
       randomBytes: (n) => crypto.getRandomValues(new Uint8Array(n)),
       config: {
@@ -63,8 +79,24 @@ export default {
         maxDevices: 2,
         failureLimit: 10,
         failureWindowMinutes: 60,
+        cfBeaconToken: env.CF_BEACON_TOKEN?.trim() || undefined,
       },
     });
     return handler(request);
   },
 };
+
+/** The app's and the sales page's host names, used to pick our pages when no site tag is set. */
+function hostsOf(...urls: string[]): string[] {
+  const out = new Set<string>();
+  for (const u of urls) {
+    try {
+      const h = new URL(u).hostname;
+      out.add(h);
+      if (!h.startsWith('www.')) out.add(`www.${h}`);
+    } catch {
+      // ignore a malformed setting
+    }
+  }
+  return [...out];
+}

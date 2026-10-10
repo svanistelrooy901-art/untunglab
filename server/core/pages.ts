@@ -1,4 +1,5 @@
 import { INSTALL_CSS, LANG_CSS, LANG_HEAD_SCRIPT, salesBody } from './sales';
+import { beaconTag } from './traffic';
 const rm = (sen: number) => `RM${sen % 100 === 0 ? sen / 100 : (sen / 100).toFixed(2)}`;
 
 const shell = (title: string, body: string) => `<!doctype html>
@@ -88,7 +89,7 @@ footer a{color:#75F8E8}
 }
 `;
 
-export function renderBuyPage(priceSen: number, earlyLeft: number | null = null, normalSen: number = priceSen, appUrl: string = ''): string {
+export function renderBuyPage(priceSen: number, earlyLeft: number | null = null, normalSen: number = priceSen, appUrl: string = '', beaconToken = ''): string {
   const base = appUrl ? (appUrl.endsWith('/') ? appUrl : appUrl + '/') : '';
   const body = salesBody({ priceSen, earlyLeft, normalSen, base, rm });
   return `<!doctype html>
@@ -96,7 +97,7 @@ export function renderBuyPage(priceSen: number, earlyLeft: number | null = null,
 <title>UntungLab: tahu untung sebenar setiap menu</title>
 <meta name="description" content="UntungLab mengira kos sebenar menu anda termasuk kos operasi, menunjukkan untung sebenar dan mencadangkan harga jualan. Bayar sekali, guna selamanya.">
 <meta name="theme-color" content="#011416">
-${LANG_HEAD_SCRIPT}
+${LANG_HEAD_SCRIPT}${beaconTag(beaconToken)}
 <style>${SALES_CSS}${LANG_CSS}${INSTALL_CSS}</style></head><body>${body}</body></html>`;
 }
 
