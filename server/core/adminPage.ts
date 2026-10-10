@@ -11,24 +11,50 @@ export function renderAdminPage(): string {
 <html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>UntungLab Admin</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#F7F8FA;color:#111827;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-main{max-width:46rem;margin:0 auto;padding:20px 16px 60px}h1{font-size:1.4rem;margin:0 0 12px}h2{font-size:1.05rem;margin:0 0 8px}
-.card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;margin-top:14px}
-input{width:100%;min-height:44px;border:1px solid #9CA3AF;border-radius:12px;padding:0 12px;font-size:1rem}
-button{min-height:44px;border:0;border-radius:12px;background:#0F766E;color:#fff;font-weight:600;font-size:.95rem;padding:0 14px;cursor:pointer}
-button.alt{background:#fff;color:#0F766E;border:1px solid #0F766E}button.bad{background:#B91C1C}button[disabled]{opacity:.5}
+:root{--bg:#020F12;--ink:#E6FBF8;--mut:#8FB3B5;--line:rgba(117,248,234,.16);--glass:rgba(8,32,36,.72);--teal:#0AA89A;--mint:#75F8E8;--blue:#2F7BFF;--vio:#7A5CFF;--bad:#FF5C7A;--grad:linear-gradient(90deg,#0AA89A,#2F7BFF 70%,#7A5CFF)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background-color:#020F12;background-image:radial-gradient(60rem 30rem at 10% -10%,rgba(10,168,154,.28),transparent 60%),radial-gradient(50rem 30rem at 100% 0,rgba(122,92,255,.22),transparent 55%);background-repeat:no-repeat;background-attachment:fixed;color-scheme:dark;min-height:100vh;-webkit-font-smoothing:antialiased}
+main{max-width:46rem;margin:0 auto;padding:22px 16px 70px}
+h1{font-size:1.5rem;letter-spacing:-.02em;margin:0 0 4px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1::after{content:"";display:block;height:2px;width:56px;margin-top:8px;background:var(--grad);border-radius:2px;box-shadow:0 0 14px var(--blue)}
+h2{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);margin:0 0 10px;font-weight:700}
+p{color:var(--mut)}
+.card{background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px;box-shadow:0 10px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04)}
+.card .card{background:rgba(255,255,255,.03);box-shadow:none}
+input,textarea{width:100%;min-height:44px;color:var(--ink);background:rgba(2,15,18,.7);border:1px solid rgba(117,248,234,.28);border-radius:12px;padding:0 12px;font-size:1rem}
+input:focus,textarea:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 3px rgba(117,248,234,.18)}
+input::placeholder,textarea::placeholder{color:#5F8A8C}
+textarea{min-height:60px;padding:8px 12px;font:inherit;margin-top:8px}
+button{min-height:44px;border:0;border-radius:12px;background:var(--grad);color:#fff;font-weight:700;font-size:.95rem;padding:0 14px;cursor:pointer;box-shadow:0 6px 22px rgba(47,123,255,.3);transition:transform .12s,box-shadow .12s}
+button:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(47,123,255,.45)}button:active{transform:none}
+button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+button.alt{background:transparent;color:var(--mint);border:1px solid rgba(117,248,234,.5);box-shadow:none}
+button.alt:hover{background:rgba(117,248,234,.08)}
+button.bad{background:linear-gradient(90deg,#C81E4A,#FF5C7A);box-shadow:0 6px 22px rgba(255,92,122,.28)}
+button[disabled]{opacity:.5;cursor:default;transform:none}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.row>*{flex:1 1 9rem}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:8px}
-.stat{background:#F0FDFA;border:1px solid #99F6E4;border-radius:12px;padding:10px}.stat b{display:block;font-size:1.4rem}.stat span{font-size:.8rem;color:#475569}
-.msg{margin-top:8px;font-weight:600}.err{color:#B91C1C}.ok{color:#0F766E}
-.mono{font:600 1rem ui-monospace,Menlo,monospace;word-break:break-all}.muted{color:#64748B;font-size:.85rem}.muted .mono{font-size:.8rem;font-weight:600}
-table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{text-align:left;padding:6px 4px;border-bottom:1px solid #E5E7EB;vertical-align:top;word-break:break-word}
-.pill{white-space:nowrap;display:inline-block;border-radius:999px;padding:1px 8px;font-size:.75rem;font-weight:700;background:#E5E7EB}.pill.active,.pill.paid{background:#CCFBF1;color:#115E59}.pill.revoked{background:#FEE2E2;color:#991B1B}
+.stat{position:relative;background:rgba(117,248,234,.05);border:1px solid var(--line);border-radius:14px;padding:10px 12px;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad)}
+.stat b{display:block;font-size:1.55rem;line-height:1.2;font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(117,248,234,.35)}
+.stat span{font-size:.75rem;color:var(--mut)}
+.msg{margin-top:8px;font-weight:600}.err{color:var(--bad)}.ok{color:var(--mint)}
+.mono{font:600 1rem ui-monospace,Menlo,Consolas,monospace;word-break:break-all;color:var(--mint);letter-spacing:.03em}
+.muted{color:var(--mut);font-size:.85rem}.muted .mono{font-size:.8rem;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+td,th{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top;word-break:break-word}
+th{color:var(--mut);font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.pill{white-space:nowrap;display:inline-block;border-radius:999px;padding:1px 9px;font-size:.72rem;font-weight:700;background:rgba(255,255,255,.1);color:var(--mut);border:1px solid var(--line)}
+.pill.active,.pill.paid{background:rgba(10,168,154,.18);color:var(--mint);border-color:rgba(117,248,234,.4)}
+.pill.revoked{background:rgba(255,92,122,.16);color:#FF9DB0;border-color:rgba(255,92,122,.4)}
+.bars{display:flex;align-items:flex-end;gap:3px;height:96px;margin-top:8px;padding-bottom:1px;border-bottom:1px solid var(--line)}
+.bar{flex:1 1 0;min-height:2px;background:linear-gradient(180deg,var(--mint),var(--blue) 60%,var(--vio));border-radius:3px 3px 0 0;box-shadow:0 0 12px rgba(47,123,255,.45);transform-origin:bottom;animation:rise .5s ease-out both}
+.bar.zero{background:rgba(143,179,181,.35);box-shadow:none}
+@keyframes rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.axis{display:flex;justify-content:space-between;font-size:.72rem;color:var(--mut);margin-top:4px}
+ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem;word-break:break-word}
 .hide{display:none}
-.bars{display:flex;align-items:flex-end;gap:2px;height:90px;margin-top:8px}.bar{flex:1 1 0;min-height:2px;background:#0F766E;border-radius:2px 2px 0 0}.bar.zero{background:#CBD5E1}
-.axis{display:flex;justify-content:space-between;font-size:.75rem;color:#64748B;margin-top:2px}
-ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:8px 0;border-bottom:1px solid #E5E7EB;font-size:.9rem;word-break:break-word}
-textarea{width:100%;min-height:60px;border:1px solid #9CA3AF;border-radius:12px;padding:8px 12px;font:inherit;margin-top:8px}
+@media (prefers-reduced-motion:reduce){.bar{animation:none}button{transition:none}}
 </style></head><body><main>
 <h1>UntungLab Admin</h1>
 <div class="card" id="login">
