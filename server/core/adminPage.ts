@@ -54,6 +54,7 @@ th{color:var(--mut);font-weight:600;font-size:.72rem;letter-spacing:.08em;text-t
 .axis{display:flex;justify-content:space-between;font-size:.72rem;color:var(--mut);margin-top:4px}
 ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem;word-break:break-word}
 .hide{display:none}
+#trOn{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}#trOn summary{cursor:pointer;color:var(--mint);font-weight:700;font-size:.85rem;letter-spacing:.04em;padding:6px 0}#trOn[open] summary{margin-bottom:8px}
 @media (prefers-reduced-motion:reduce){.bar{animation:none}button{transition:none}}
 </style></head><body><main>
 <h1>UntungLab Admin</h1>
@@ -76,16 +77,13 @@ ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bot
     <input id="iemail" type="email" placeholder="Emel" aria-label="Emel">
     <div class="row"><button id="issue">Jana kod</button></div>
     <div class="msg" id="issueMsg"></div><div class="mono" id="issueCode"></div></div>
-  <div class="card"><h2>Pengguna percuma</h2><div class="stats" id="ustats"></div>
+  <div class="card"><h2>Pengguna dan pelawat</h2><div class="stats" id="ustats"></div>
     <div class="bars" id="ubars" role="img" aria-label="Pemasangan baharu setiap hari, 30 hari terakhir"></div><div class="axis"><span id="uFrom"></span><span id="uMax"></span><span id="uTo"></span></div>
     <p class="muted" id="uconv"></p>
     <p class="muted" id="ulang"></p>
-    <p class="muted">Lawatan dan klik dikira di server tanpa cookie. Pemasangan dikira daripada satu ID rawak dalam app; tiada emel, IP atau data perniagaan disimpan. Robot dan pratonton pautan tak dikira.</p></div>
-  <div class="card"><h2>Jualan 30 hari</h2><div class="bars" id="bars" role="img" aria-label="Pesanan berbayar setiap hari, 30 hari terakhir"></div><div class="axis"><span id="axFrom"></span><span id="axMax"></span><span id="axTo"></span></div><p class="muted" id="conv"></p><p class="muted">Hari dikira ikut waktu Malaysia. Pesanan RM0 tak dikira.</p></div>
-  <div class="card"><h2>Pelawat (Cloudflare)</h2>
-    <p class="muted hide" id="trOff">Belum disambung. Bila secret CF_ANALYTICS_TOKEN diisi di Worker, bahagian ini akan tunjuk berapa orang lawat halaman jualan dan buka app.</p>
+    <p class="muted hide" id="trOff">Mahu tahu asal pelawat (rujukan, negara, peranti)? Isi secret CF_ANALYTICS_TOKEN di Worker dan bahagian "Asal pelawat" akan muncul di bawah.</p>
     <div class="msg err" id="trErr"></div>
-    <div class="hide" id="trOn">
+    <details class="more hide" id="trOn"><summary>Asal pelawat dan halaman (Cloudflare)</summary>
       <div class="stats" id="trStats"></div>
       <div class="bars" id="trBars" role="img" aria-label="Lawatan setiap hari, 30 hari terakhir"></div><div class="axis"><span id="trFrom"></span><span id="trMax"></span><span id="trTo"></span></div>
       <p class="muted" id="trFunnel"></p>
@@ -93,7 +91,9 @@ ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bot
       <h2 style="margin-top:14px">Halaman</h2><table><thead><tr><th>Halaman</th><th>Lawatan</th><th>Dibuka</th></tr></thead><tbody id="trPages"></tbody></table>
       <div class="row" style="margin-top:14px"><div><h2>Peranti</h2><table><tbody id="trDev"></tbody></table></div><div><h2>Negara</h2><table><tbody id="trCty"></tbody></table></div></div>
       <p class="muted">30 hari, waktu Malaysia. Pelayar dengan ad-blocker dan app yang dibuka tanpa internet tak dikira, jadi nombor sebenar lebih tinggi sedikit. App hanya dikira bila dibuka; skrin dan data dalam app tak dihantar.</p>
-    </div></div>
+    </details>
+    <p class="muted">Lawatan dan klik dikira di server tanpa cookie. Pemasangan dikira daripada satu ID rawak dalam app; tiada emel, IP atau data perniagaan disimpan. Robot dan pratonton pautan tak dikira.</p></div>
+  <div class="card"><h2>Jualan 30 hari</h2><div class="bars" id="bars" role="img" aria-label="Pesanan berbayar setiap hari, 30 hari terakhir"></div><div class="axis"><span id="axFrom"></span><span id="axMax"></span><span id="axTo"></span></div><p class="muted" id="conv"></p><p class="muted">Hari dikira ikut waktu Malaysia. Pesanan RM0 tak dikira.</p></div>
   <div class="card"><h2>Dari mana pembeli datang</h2><p class="muted">Letak <span class="mono">?src=fb</span> pada pautan beli, contohnya <span class="mono">https://beli.untunglab.space/beli?src=fb</span>. Guna huruf kecil, nombor, - atau _ (maks 20).</p><table><thead><tr><th>Sumber</th><th>Klik beli</th><th>Bayar</th></tr></thead><tbody id="sources"></tbody></table></div>
   <div class="card"><h2>Dibeli tapi belum diaktifkan</h2><p class="muted">Mungkin tersekat. Hantar semula emel atau tanya mereka.</p><ul class="plain" id="unact"></ul></div>
   <div class="card"><h2>Emel kod belum direkod hantar</h2><p class="muted">Tekan Hantar semula; kalau masih gagal, salin kod dan beri sendiri.</p><ul class="plain" id="mailp"></ul></div>
@@ -184,7 +184,7 @@ function renderUsage(u){
   $('uFrom').textContent=day(u.daily[0].day);$('uTo').textContent=day(u.daily[u.daily.length-1].day);$('uMax').textContent='tertinggi '+max+'/hari';
   var t=u.totals,parts=[];
   if(t.view)parts.push(Math.round(t.start/t.view*100)+'% lawatan menekan Cuba percuma');
-  if(t.start)parts.push('pemasangan baharu ialah '+Math.round(t.installs30/t.start*100)+'% daripada tekanan (kasar; ada yang buka app terus, tanpa halaman ini)');
+  if(t.start)parts.push('Pemasangan baharu ialah '+Math.round(t.installs30/t.start*100)+'% daripada tekanan (kasar; ada yang buka app terus, tanpa halaman ini)');
   $('uconv').textContent=parts.join('. ')||'Belum ada data.';
   function tally(a){return a.map(function(x){return x.key+' '+x.n}).join(', ')||'-'}
   $('ulang').textContent='Bahasa: '+tally(u.installs.byLang)+'. Peranti: '+tally(u.installs.byPlatform)+'.';
