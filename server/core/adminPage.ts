@@ -78,7 +78,7 @@ ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bot
     <div class="msg" id="issueMsg"></div><div class="mono" id="issueCode"></div></div>
   <div class="card"><h2>Jualan 30 hari</h2><div class="bars" id="bars" role="img" aria-label="Pesanan berbayar setiap hari, 30 hari terakhir"></div><div class="axis"><span id="axFrom"></span><span id="axMax"></span><span id="axTo"></span></div><p class="muted" id="conv"></p><p class="muted">Hari dikira ikut waktu Malaysia. Pesanan RM0 tak dikira.</p></div>
   <div class="card"><h2>Pelawat (Cloudflare)</h2>
-    <p class="muted hide" id="trOff">Belum disambung. Bila CF_ACCOUNT_ID dan CF_ANALYTICS_TOKEN diisi di Worker, bahagian ini akan tunjuk berapa orang lawat halaman jualan dan buka app.</p>
+    <p class="muted hide" id="trOff">Belum disambung. Bila secret CF_ANALYTICS_TOKEN diisi di Worker, bahagian ini akan tunjuk berapa orang lawat halaman jualan dan buka app.</p>
     <div class="msg err" id="trErr"></div>
     <div class="hide" id="trOn">
       <div class="stats" id="trStats"></div>

@@ -20,8 +20,8 @@ APP_URL = "https://untunglab.space/"
 BREVO_SENDER_EMAIL = "untunglab@digitalsambal.space"  # must be a sender verified in Brevo
 BREVO_SENDER_NAME = "UntungLab"
 # Visitor numbers on /admin (D-93). CF_BEACON_TOKEN = the "token" in the Web Analytics JS snippet (public).
-# CF_ACCOUNT_ID = Cloudflare account id. CF_SITE_TAG is optional (without it, pages are picked by host name).
-CF_BEACON_TOKEN = ""
+# CF_ACCOUNT_ID is optional when the API token sees one account. CF_SITE_TAG is optional (without it, pages are picked by host name).
+CF_BEACON_TOKEN = "f3b479764c1d4f938bf54893b7e841dd"
 CF_ACCOUNT_ID = ""
 CF_SITE_TAG = ""
 

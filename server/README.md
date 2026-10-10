@@ -86,7 +86,7 @@ peranti yang sudah diaktifkan terus berfungsi luar talian (tiada cara untuk mena
 ## Pelawat di /admin (Cloudflare Web Analytics, D-93)
 
 1. Cloudflare → **Analytics & Logs → Web Analytics → Add a site**, hostname `untunglab.space`. Jika ditanya, **jangan** hidupkan automatic setup; salin `token` daripada JS snippet.
-2. Token itu (bukan rahsia) masuk ke `CF_BEACON_TOKEN` dalam `wrangler.toml` dan `VITE_CF_BEACON_TOKEN` dalam `.github/workflows/pages.yml`. Account ID masuk ke `CF_ACCOUNT_ID`.
+2. Token itu (bukan rahsia) masuk ke `CF_BEACON_TOKEN` dalam `wrangler.toml` dan `VITE_CF_BEACON_TOKEN` dalam `.github/workflows/pages.yml`. `CF_ACCOUNT_ID` boleh dibiarkan kosong jika token hanya nampak satu akaun (Worker cari sendiri).
 3. Cipta API token: My Profile → API Tokens → Create Token → Custom, kebenaran **Account → Account Analytics → Read** untuk akaun anda sahaja.
 4. Workers & Pages → `untunglab` → Settings → Variables and Secrets → Add → jenis **Secret**, nama `CF_ANALYTICS_TOKEN`, tampal token. (Atau `wrangler secret put CF_ANALYTICS_TOKEN`.)
 5. Deploy Worker dan app seperti biasa. Data mula masuk selepas pelawat pertama; buka /admin → kad Pelawat.

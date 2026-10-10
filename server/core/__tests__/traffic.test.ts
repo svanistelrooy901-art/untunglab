@@ -123,3 +123,27 @@ describe('Cloudflare GraphQL client', () => {
     await expect(mk(() => reply({ data: { viewer: { accounts: [] } } })).report('a', 'b')).rejects.toThrow('account not found');
   });
 });
+
+describe('account lookup when CF_ACCOUNT_ID is empty', () => {
+  const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  it('finds the single account from the token once, then reuses it', async () => {
+    const urls: string[] = [];
+    const accounts: string[] = [];
+    const src = createCloudflareTraffic({ apiToken: 't', hosts: ['x.y'], fetchFn: async (url, init) => {
+      urls.push(url);
+      if (url.endsWith('/accounts?per_page=5')) return reply({ success: true, result: [{ id: 'acc42' }] });
+      accounts.push(JSON.parse(String(init.body)).variables.account);
+      return reply({ data: { viewer: { accounts: [{}] } } });
+    } });
+    await src.report('a', 'b');
+    await src.report('a', 'b');
+    expect(accounts).toEqual(['acc42', 'acc42']);
+    expect(urls.filter((u) => u.endsWith('/accounts?per_page=5'))).toHaveLength(1);
+  });
+  it('asks for CF_ACCOUNT_ID when the token sees several accounts or none, and names a bad token', async () => {
+    const mk = (body: unknown, status = 200) => createCloudflareTraffic({ apiToken: 't', hosts: [], fetchFn: async () => reply(body, status) });
+    await expect(mk({ success: true, result: [{ id: 'a' }, { id: 'b' }] }).report('a', 'b')).rejects.toThrow('set CF_ACCOUNT_ID');
+    await expect(mk({ success: true, result: [] }).report('a', 'b')).rejects.toThrow('set CF_ACCOUNT_ID');
+    await expect(mk({ success: false, errors: [{ message: 'Invalid API Token' }] }, 403).report('a', 'b')).rejects.toThrow('Invalid API Token');
+  });
+});

@@ -51,8 +51,28 @@ interface Group {
   dimensions?: Record<string, string | null | undefined>;
 }
 
-export function createCloudflareTraffic(opts: { accountId: string; apiToken: string; siteTag?: string; hosts: string[]; fetchFn?: Fetch; endpoint?: string }): TrafficSource {
+/**
+ * `accountId` may be left empty: the account is then looked up once from the token (GET /accounts), so the owner only
+ * has to paste the API token. With more than one account the id must be set.
+ */
+export function createCloudflareTraffic(opts: { accountId?: string; apiToken: string; siteTag?: string; hosts: string[]; fetchFn?: Fetch; endpoint?: string; apiBase?: string }): TrafficSource {
   const doFetch: Fetch = opts.fetchFn ?? ((i, r) => fetch(i, r));
+  let accountId = opts.accountId?.trim() || '';
+  async function resolveAccount(): Promise<string> {
+    if (accountId) return accountId;
+    const res = await doFetch(`${opts.apiBase ?? 'https://api.cloudflare.com/client/v4'}/accounts?per_page=5`, { method: 'GET', headers: { authorization: `Bearer ${opts.apiToken}` } });
+    let body: { success?: boolean; result?: { id?: string }[]; errors?: { message?: string }[] } = {};
+    try {
+      body = (await res.json()) as typeof body;
+    } catch {
+      // handled below
+    }
+    const ids = (body.result ?? []).map((a) => a.id).filter((x): x is string => typeof x === 'string' && x.length > 0);
+    if (!res.ok || !body.success) throw new Error(`Cloudflare: ${body.errors?.map((e) => e.message).join('; ') || `HTTP ${res.status}`} (check CF_ANALYTICS_TOKEN)`);
+    if (ids.length !== 1) throw new Error(ids.length ? 'Cloudflare: token sees more than one account; set CF_ACCOUNT_ID' : 'Cloudflare: token sees no account; set CF_ACCOUNT_ID');
+    accountId = ids[0]!;
+    return accountId;
+  }
   const site = opts.siteTag ? '{siteTag:$site}' : '{requestHost_in:$hosts}';
   const where = `filter:{AND:[{datetime_geq:$from},{datetime_leq:$to},{bot:0},${site}]}`;
   const group = (alias: string, dims: string, limit: number, order: string) =>
@@ -67,7 +87,7 @@ export function createCloudflareTraffic(opts: { accountId: string; apiToken: str
 
   return {
     async report(fromIso, toIso) {
-      const variables: Record<string, unknown> = { account: opts.accountId, from: fromIso, to: toIso };
+      const variables: Record<string, unknown> = { account: await resolveAccount(), from: fromIso, to: toIso };
       if (opts.siteTag) variables.site = opts.siteTag;
       else variables.hosts = opts.hosts;
       const res = await doFetch(opts.endpoint ?? 'https://api.cloudflare.com/client/v4/graphql', {

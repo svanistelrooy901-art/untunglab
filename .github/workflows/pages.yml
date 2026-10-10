@@ -33,6 +33,7 @@ jobs:
           VITE_LICENSE_PUBLIC_KEY: '{"key_ops":["verify"],"ext":true,"kty":"EC","x":"L1AX9_0ax0DYTybzWLW4V7Y843q1cfys3Ob3kFjYX7Q","y":"5Ah9UrK9CFQ0qSJBbapgh5BGZxNF9NfrlzOHRsNBShI","crv":"P-256"}'
           VITE_LICENSE_API_URL: https://beli.untunglab.space
           VITE_BUY_URL: https://beli.untunglab.space/beli
+          VITE_CF_BEACON_TOKEN: f3b479764c1d4f938bf54893b7e841dd
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

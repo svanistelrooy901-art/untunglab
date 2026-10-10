@@ -55,9 +55,9 @@ export default {
         appUrl: env.APP_URL,
       }),
       traffic:
-        env.CF_ACCOUNT_ID && env.CF_ANALYTICS_TOKEN
+        env.CF_ANALYTICS_TOKEN
           ? createCloudflareTraffic({
-              accountId: env.CF_ACCOUNT_ID.trim(),
+              accountId: env.CF_ACCOUNT_ID?.trim() || undefined,
               apiToken: env.CF_ANALYTICS_TOKEN.trim(),
               siteTag: env.CF_SITE_TAG?.trim() || undefined,
               hosts: hostsOf(env.APP_URL, env.PUBLIC_BASE_URL),
