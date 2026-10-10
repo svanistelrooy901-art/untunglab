@@ -1,4 +1,4 @@
-import type { DeviceRecord, LicenseRecord, Order, Stats, Store } from '../core/ports';
+import type { DeviceRecord, ExportRow, Insights, LicenseRecord, Order, OrderMeta, Stats, Store } from '../core/ports';
 import type { D1Database } from './d1';
 
 interface OrderRow {
@@ -112,5 +112,79 @@ export class D1Store implements Store {
       activeLicenses: l?.active ?? 0, revokedLicenses: l?.revoked ?? 0, devices: d?.n ?? 0,
       recent: (r.results ?? []).map((x) => ({ id: x.id, name: x.name, email: x.email, amountSen: x.amount_sen, status: x.status, createdAt: x.created_at, paidAt: x.paid_at, licenseStatus: x.license_status })),
     };
+  }
+
+  async getMeta(orderId: string): Promise<OrderMeta> {
+    const r = await this.db.prepare('SELECT source, note FROM order_meta WHERE order_id = ?').bind(orderId).first<{ source: string | null; note: string | null }>();
+    return { source: r?.source ?? null, note: r?.note ?? null };
+  }
+
+  async setMeta(orderId: string, patch: { source?: string; note?: string }) {
+    const cur = await this.getMeta(orderId);
+    const source = patch.source === undefined ? cur.source : patch.source || null;
+    const note = patch.note === undefined ? cur.note : patch.note || null;
+    await this.db
+      .prepare('INSERT INTO order_meta (order_id, source, note) VALUES (?,?,?) ON CONFLICT(order_id) DO UPDATE SET source = excluded.source, note = excluded.note')
+      .bind(orderId, source, note)
+      .run();
+  }
+
+  async logAdmin(at: string, action: string, target: string) {
+    await this.db.prepare('INSERT INTO admin_log (at, action, target) VALUES (?,?,?)').bind(at, action, target).run();
+  }
+
+  async listAdminLog(limit: number) {
+    const r = await this.db.prepare('SELECT at, action, target FROM admin_log ORDER BY at DESC, id DESC LIMIT ?').bind(limit).all<{ at: string; action: string; target: string }>();
+    return r.results ?? [];
+  }
+
+  async insights(sinceDay: string): Promise<Insights> {
+    const day = (col: string) => `substr(datetime(${col}, '+8 hours'), 1, 10)`;
+    const daily = await this.db
+      .prepare(
+        `SELECT day, SUM(created) AS created, SUM(paid) AS paid, SUM(rev) AS rev FROM (
+           SELECT ${day('created_at')} AS day, 1 AS created, 0 AS paid, 0 AS rev FROM orders WHERE amount_sen > 0
+           UNION ALL
+           SELECT ${day('paid_at')} AS day, 0, 1, amount_sen FROM orders WHERE status = 'paid' AND amount_sen > 0 AND paid_at IS NOT NULL
+         ) WHERE day >= ? GROUP BY day ORDER BY day`,
+      )
+      .bind(sinceDay)
+      .all<{ day: string; created: number; paid: number; rev: number }>();
+    const sources = await this.db
+      .prepare(
+        `SELECT COALESCE(m.source, '') AS source, COUNT(*) AS orders, SUM(CASE WHEN o.status = 'paid' THEN 1 ELSE 0 END) AS paid
+           FROM orders o LEFT JOIN order_meta m ON m.order_id = o.id WHERE o.amount_sen > 0 GROUP BY COALESCE(m.source, '') ORDER BY orders DESC, source`,
+      )
+      .all<{ source: string; orders: number; paid: number }>();
+    const unactivated = await this.db
+      .prepare(
+        `SELECT o.id, o.name, o.email, o.license_code, o.paid_at FROM orders o JOIN licenses l ON l.code = o.license_code
+           WHERE o.status = 'paid' AND o.amount_sen > 0 AND l.status = 'active' AND NOT EXISTS (SELECT 1 FROM devices d WHERE d.code = o.license_code)
+           ORDER BY o.paid_at LIMIT 20`,
+      )
+      .all<{ id: string; name: string; email: string; license_code: string; paid_at: string }>();
+    const emailPending = await this.db
+      .prepare("SELECT id, name, email, license_code FROM orders WHERE status = 'paid' AND license_code IS NOT NULL AND email_sent_at IS NULL ORDER BY paid_at LIMIT 20")
+      .all<{ id: string; name: string; email: string; license_code: string }>();
+    return {
+      daily: (daily.results ?? []).map((d) => ({ day: d.day, created: d.created, paid: d.paid, revenueSen: d.rev })),
+      sources: (sources.results ?? []).map((x) => ({ source: x.source, orders: x.orders, paid: x.paid })),
+      unactivated: (unactivated.results ?? []).map((x) => ({ orderId: x.id, name: x.name, email: x.email, code: x.license_code, paidAt: x.paid_at })),
+      emailPending: (emailPending.results ?? []).map((x) => ({ orderId: x.id, name: x.name, email: x.email, code: x.license_code })),
+    };
+  }
+
+  async exportRows(): Promise<ExportRow[]> {
+    const r = await this.db
+      .prepare(
+        `SELECT o.id, o.name, o.email, o.phone, o.amount_sen, o.status, o.created_at, o.paid_at, o.license_code, l.status AS license_status,
+                (SELECT COUNT(*) FROM devices d WHERE d.code = o.license_code) AS devices, m.source, m.note
+           FROM orders o LEFT JOIN licenses l ON l.code = o.license_code LEFT JOIN order_meta m ON m.order_id = o.id ORDER BY o.created_at, o.rowid`,
+      )
+      .all<{ id: string; name: string; email: string; phone: string; amount_sen: number; status: 'pending' | 'paid'; created_at: string; paid_at: string | null; license_code: string | null; license_status: 'active' | 'revoked' | null; devices: number; source: string | null; note: string | null }>();
+    return (r.results ?? []).map((x) => ({
+      orderId: x.id, name: x.name, email: x.email, phone: x.phone, amountSen: x.amount_sen, status: x.status, createdAt: x.created_at, paidAt: x.paid_at,
+      code: x.license_code, licenseStatus: x.license_status, devices: x.devices, source: x.source, note: x.note,
+    }));
   }
 }

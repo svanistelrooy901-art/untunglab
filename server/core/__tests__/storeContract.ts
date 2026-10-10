@@ -124,6 +124,61 @@ export function describeStore(name: string, make: () => Promise<Store>) {
       expect(await s.stats(10)).toMatchObject({ orders: 2, paid: 1, complimentary: 1, pending: 0, revenueSen: 5900, activeLicenses: 2 });
     });
 
+    it('keeps a source and a note per order, and an admin action log (newest first)', async () => {
+      const s = await make();
+      await s.createOrder(order({ id: 'o1' }));
+      expect(await s.getMeta('o1')).toEqual({ source: null, note: null });
+      await s.setMeta('o1', { source: 'fb' });
+      await s.setMeta('o1', { note: 'minta refund' });
+      expect(await s.getMeta('o1')).toEqual({ source: 'fb', note: 'minta refund' });
+      await s.setMeta('o1', { note: '' });
+      expect(await s.getMeta('o1')).toEqual({ source: 'fb', note: null });
+      await s.logAdmin('2026-09-30T01:00:00.000Z', 'revoke', 'UL-AAAA-BBBB-CCCC');
+      await s.logAdmin('2026-09-30T02:00:00.000Z', 'resend', 'o1');
+      expect((await s.listAdminLog(10)).map((l) => l.action)).toEqual(['resend', 'revoke']);
+      expect(await s.listAdminLog(1)).toEqual([{ at: '2026-09-30T02:00:00.000Z', action: 'resend', target: 'o1' }]);
+    });
+
+    it('insights: sales by Malaysian day, sources, bought-but-never-activated, and emails not sent', async () => {
+      const s = await make();
+      // 2026-09-30T17:00Z is already 2026-10-01 in Malaysia (UTC+8).
+      await s.createOrder(order({ id: 'o1', email: 'a@x.com', createdAt: '2026-09-30T17:00:00.000Z' }));
+      await s.createOrder(order({ id: 'o2', email: 'b@x.com', amountSen: 3900, createdAt: '2026-10-01T02:00:00.000Z' }));
+      await s.createOrder(order({ id: 'o3', email: 'c@x.com', createdAt: '2026-10-02T02:00:00.000Z' }));
+      await s.createOrder(order({ id: 'o4', email: 'me@x.com', amountSen: 0, billCode: 'FREE', createdAt: '2026-10-02T03:00:00.000Z' }));
+      await s.setMeta('o1', { source: 'fb' });
+      await s.setMeta('o2', { source: 'fb' });
+      await s.markOrderPaid('o1', 'UL-AAAA-AAAA-AAAA', '2026-09-30T18:00:00.000Z');
+      await s.markOrderPaid('o2', 'UL-BBBB-BBBB-BBBB', '2026-10-01T03:00:00.000Z');
+      await s.markOrderPaid('o4', 'UL-DDDD-DDDD-DDDD', '2026-10-02T03:00:00.000Z');
+      await s.updateOrder('o2', { emailSentAt: '2026-10-01T03:00:05.000Z' });
+      await s.addDevice('UL-BBBB-BBBB-BBBB', { deviceId: 'd1', label: 'iPhone', activatedAt: '2026-10-01T04:00:00.000Z' });
+      const i = await s.insights('2026-10-01');
+      expect(i.daily).toEqual([
+        { day: '2026-10-01', created: 2, paid: 2, revenueSen: 9800 },
+        { day: '2026-10-02', created: 1, paid: 0, revenueSen: 0 },
+      ]);
+      expect(i.sources).toEqual([
+        { source: 'fb', orders: 2, paid: 2 },
+        { source: '', orders: 1, paid: 0 },
+      ]);
+      expect(i.unactivated).toEqual([{ orderId: 'o1', name: 'Aminah', email: 'a@x.com', code: 'UL-AAAA-AAAA-AAAA', paidAt: '2026-09-30T18:00:00.000Z' }]);
+      expect(i.emailPending.map((e) => e.orderId)).toEqual(['o1', 'o4']);
+    });
+
+    it('exports every order with its licence, devices, source and note', async () => {
+      const s = await make();
+      await s.createOrder(order({ id: 'o1', email: 'a@x.com' }));
+      await s.createOrder(order({ id: 'o2', email: 'b@x.com', createdAt: '2026-09-30T00:10:00.000Z' }));
+      await s.setMeta('o1', { source: 'wa', note: 'reseller' });
+      await s.markOrderPaid('o1', 'UL-AAAA-AAAA-AAAA', '2026-09-30T01:00:00.000Z');
+      await s.addDevice('UL-AAAA-AAAA-AAAA', { deviceId: 'd1', label: 'iPhone', activatedAt: '2026-09-30T03:00:00.000Z' });
+      const rows = await s.exportRows();
+      expect(rows).toHaveLength(2);
+      expect(rows[0]).toMatchObject({ orderId: 'o1', email: 'a@x.com', phone: '0123456789', amountSen: 5900, status: 'paid', code: 'UL-AAAA-AAAA-AAAA', licenseStatus: 'active', devices: 1, source: 'wa', note: 'reseller' });
+      expect(rows[1]).toMatchObject({ orderId: 'o2', status: 'pending', code: null, licenseStatus: null, devices: 0, source: null, note: null });
+    });
+
     it('stats on an empty store are all zero', async () => {
       const s = await make();
       expect(await s.stats(10)).toEqual({ orders: 0, paid: 0, complimentary: 0, pending: 0, revenueSen: 0, activeLicenses: 0, revokedLicenses: 0, devices: 0, recent: [] });

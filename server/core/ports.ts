@@ -42,6 +42,28 @@ export interface Stats {
   recent: { id: string; name: string; email: string; amountSen: number; status: Order['status']; createdAt: string; paidAt: string | null; licenseStatus: LicenseRecord['status'] | null }[];
 }
 
+export interface OrderMeta {
+  source: string | null;
+  note: string | null;
+}
+
+export interface Insights {
+  /** Malaysian days (UTC+8), only days with activity, oldest first. RM0 orders are left out. */
+  daily: { day: string; created: number; paid: number; revenueSen: number }[];
+  /** Where buyers came from (`?src=` on the buy link); '' is "no source". RM0 orders are left out. */
+  sources: { source: string; orders: number; paid: number }[];
+  /** Paid, licence still active, but no device ever activated (oldest first). */
+  unactivated: { orderId: string; name: string; email: string; code: string; paidAt: string }[];
+  /** Paid but the licence email was never recorded as sent (oldest first). */
+  emailPending: { orderId: string; name: string; email: string; code: string }[];
+}
+
+export interface ExportRow {
+  orderId: string; name: string; email: string; phone: string; amountSen: number; status: Order['status'];
+  createdAt: string; paidAt: string | null; code: string | null; licenseStatus: LicenseRecord['status'] | null;
+  devices: number; source: string | null; note: string | null;
+}
+
 export interface Store {
   createOrder(order: Order): Promise<void>;
   getOrder(id: string): Promise<Order | null>;
@@ -64,6 +86,14 @@ export interface Store {
   countPaidOrders(): Promise<number>;
   /** Totals for the admin dashboard plus the `recent` newest orders. */
   stats(recent: number): Promise<Stats>;
+  getMeta(orderId: string): Promise<OrderMeta>;
+  /** Only the fields given change; an empty string clears. */
+  setMeta(orderId: string, patch: { source?: string; note?: string }): Promise<void>;
+  logAdmin(at: string, action: string, target: string): Promise<void>;
+  /** Newest first. */
+  listAdminLog(limit: number): Promise<{ at: string; action: string; target: string }[]>;
+  insights(sinceDay: string): Promise<Insights>;
+  exportRows(): Promise<ExportRow[]>;
 }
 
 export interface Transaction {

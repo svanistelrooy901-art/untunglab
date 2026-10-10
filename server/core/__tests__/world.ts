@@ -79,7 +79,7 @@ export async function makeWorld(over: Partial<Config> = {}) {
     return { orderId: o.orderId as string, code: status.code as string };
   };
   return {
-    keys, store, bills, state, sent, config, call, json, order, callback, callbackBody, confirmPaid, buy,
+    handlerRaw: handler, buyerInfo: buyer, keys, store, bills, state, sent, config, call, json, order, callback, callbackBody, confirmPaid, buy,
     setMailFails: (v: boolean) => (mailFails = v),
     failBill: (message: string | null) => (billFailure = message),
     advance: (minutes: number) => (clock = new Date(clock.getTime() + minutes * 60_000)),

@@ -1,4 +1,4 @@
-import type { DeviceRecord, LicenseRecord, Order, Stats, Store } from './ports';
+import type { DeviceRecord, ExportRow, Insights, LicenseRecord, Order, OrderMeta, Stats, Store } from './ports';
 
 /** In-memory store for tests. JavaScript runs each method to completion, so markOrderPaid is atomic here. */
 export class MemoryStore implements Store {
@@ -6,6 +6,8 @@ export class MemoryStore implements Store {
   private licenses = new Map<string, LicenseRecord>();
   private devices = new Map<string, DeviceRecord[]>();
   private failures = new Map<string, string[]>();
+  private meta = new Map<string, OrderMeta>();
+  private log: { at: string; action: string; target: string }[] = [];
 
   licenseCount(): number {
     return this.licenses.size;
@@ -90,5 +92,66 @@ export class MemoryStore implements Store {
   }
   async countFailures(key: string, since: string) {
     return (this.failures.get(key) ?? []).filter((t) => t >= since).length;
+  }
+
+  async getMeta(orderId: string): Promise<OrderMeta> {
+    return { ...(this.meta.get(orderId) ?? { source: null, note: null }) };
+  }
+  async setMeta(orderId: string, patch: { source?: string; note?: string }) {
+    const cur = this.meta.get(orderId) ?? { source: null, note: null };
+    this.meta.set(orderId, {
+      source: patch.source === undefined ? cur.source : patch.source || null,
+      note: patch.note === undefined ? cur.note : patch.note || null,
+    });
+  }
+  async logAdmin(at: string, action: string, target: string) {
+    this.log.push({ at, action, target });
+  }
+  async listAdminLog(limit: number) {
+    return this.log.map((l, i) => ({ l, i })).sort((a, b) => (a.l.at < b.l.at ? 1 : a.l.at > b.l.at ? -1 : b.i - a.i)).slice(0, limit).map(({ l }) => ({ ...l }));
+  }
+  async insights(sinceDay: string): Promise<Insights> {
+    const myDay = (iso: string) => new Date(new Date(iso).getTime() + 8 * 3600_000).toISOString().slice(0, 10);
+    const priced = [...this.orders.values()].filter((o) => o.amountSen > 0);
+    const days = new Map<string, { created: number; paid: number; revenueSen: number }>();
+    const bucket = (day: string) => days.get(day) ?? days.set(day, { created: 0, paid: 0, revenueSen: 0 }).get(day)!;
+    for (const o of priced) {
+      if (myDay(o.createdAt) >= sinceDay) bucket(myDay(o.createdAt)).created++;
+      if (o.status === 'paid' && o.paidAt && myDay(o.paidAt) >= sinceDay) {
+        const b = bucket(myDay(o.paidAt));
+        b.paid++;
+        b.revenueSen += o.amountSen;
+      }
+    }
+    const src = new Map<string, { orders: number; paid: number }>();
+    for (const o of priced) {
+      const key = this.meta.get(o.id)?.source ?? '';
+      const b = src.get(key) ?? src.set(key, { orders: 0, paid: 0 }).get(key)!;
+      b.orders++;
+      if (o.status === 'paid') b.paid++;
+    }
+    const paidOrders = [...this.orders.values()].filter((o) => o.status === 'paid' && o.licenseCode).sort((a, b) => (a.paidAt! < b.paidAt! ? -1 : 1));
+    return {
+      daily: [...days.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).map(([day, v]) => ({ day, ...v })),
+      sources: [...src.entries()].map(([source, v]) => ({ source, ...v })).sort((a, b) => b.orders - a.orders),
+      unactivated: paidOrders
+        .filter((o) => o.amountSen > 0 && this.licenses.get(o.licenseCode!)?.status === 'active' && (this.devices.get(o.licenseCode!) ?? []).length === 0)
+        .slice(0, 20)
+        .map((o) => ({ orderId: o.id, name: o.name, email: o.email, code: o.licenseCode!, paidAt: o.paidAt! })),
+      emailPending: paidOrders.filter((o) => !o.emailSentAt).slice(0, 20).map((o) => ({ orderId: o.id, name: o.name, email: o.email, code: o.licenseCode! })),
+    };
+  }
+  async exportRows(): Promise<ExportRow[]> {
+    return [...this.orders.values()]
+      .map((o, i) => ({ o, i }))
+      .sort((a, b) => (a.o.createdAt < b.o.createdAt ? -1 : a.o.createdAt > b.o.createdAt ? 1 : a.i - b.i))
+      .map(({ o }) => {
+        const m = this.meta.get(o.id);
+        return {
+          orderId: o.id, name: o.name, email: o.email, phone: o.phone, amountSen: o.amountSen, status: o.status, createdAt: o.createdAt, paidAt: o.paidAt,
+          code: o.licenseCode, licenseStatus: o.licenseCode ? (this.licenses.get(o.licenseCode)?.status ?? null) : null,
+          devices: o.licenseCode ? (this.devices.get(o.licenseCode) ?? []).length : 0, source: m?.source ?? null, note: m?.note ?? null,
+        };
+      });
   }
 }

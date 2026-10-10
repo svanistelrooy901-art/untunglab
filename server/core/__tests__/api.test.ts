@@ -319,6 +319,56 @@ describe('admin', () => {
     expect(body.code).toMatch(/^UL-/);
     expect(body.emailed).toBe(false);
   });
+  it('insights: 30 Malaysian days with zeros filled, sources, bought-but-not-activated and email problems', async () => {
+    const w = await makeWorld();
+    expect((await w.call('POST', '/api/admin/insights', {})).status).toBe(401);
+    const o = (await w.json(await w.call('POST', '/api/order', { ...w.buyerInfo, src: 'FB' }))) as { orderId: string };
+    w.confirmPaid(o.orderId);
+    await w.callback(w.callbackBody(o));
+    w.setMailFails(true);
+    const o2 = (await w.json(await w.call('POST', '/api/order', { ...w.buyerInfo, email: 'b@example.com', src: '<script>' }))) as { orderId: string };
+    w.confirmPaid(o2.orderId);
+    await w.callback(w.callbackBody(o2));
+    const i = await w.json(await w.admin('/api/admin/insights', {}));
+    expect(i.daily).toHaveLength(30);
+    expect(i.daily[29]).toEqual({ day: '2026-09-30', created: 2, paid: 2, revenueSen: 11800 });
+    expect(i.daily[0]).toEqual({ day: '2026-09-01', created: 0, paid: 0, revenueSen: 0 });
+    expect(i.sources).toEqual([{ source: 'fb', orders: 1, paid: 1 }, { source: '', orders: 1, paid: 1 }]);
+    expect(i.unactivated).toHaveLength(2);
+    expect(i.emailPending).toHaveLength(1);
+    expect(i.emailPending[0]).toMatchObject({ email: 'b@example.com' });
+    expect(JSON.stringify(i)).not.toContain('0123456789');
+  });
+  it('notes are saved on an order and shown in lookup; actions are logged', async () => {
+    const w = await makeWorld();
+    const { code, orderId } = await w.buy();
+    expect((await w.call('POST', '/api/admin/note', { orderId, note: 'x' })).status).toBe(401);
+    expect((await w.admin('/api/admin/note', { orderId: 'nope', note: 'x' })).status).toBe(404);
+    expect((await w.admin('/api/admin/note', { orderId, note: 'minta refund 8 Okt' })).status).toBe(200);
+    const found = await w.json(await w.admin('/api/admin/lookup', { code }));
+    expect(found.results[0]).toMatchObject({ note: 'minta refund 8 Okt' });
+    await w.admin('/api/admin/revoke', { code });
+    await w.admin('/api/admin/restore', { code });
+    await w.admin('/api/admin/reset-devices', { code });
+    await w.admin('/api/admin/resend', { orderId });
+    const log = (await w.json(await w.admin('/api/admin/log', {}))).entries as { action: string; target: string }[];
+    expect(log.map((l) => l.action)).toEqual(['resend', 'reset-devices', 'restore', 'revoke', 'note']);
+    expect(log[3]).toMatchObject({ target: code });
+  });
+  it('export gives a CSV of every buyer and neutralises spreadsheet formulas', async () => {
+    const w = await makeWorld();
+    await w.call('POST', '/api/order', { name: '=HYPERLINK("http://evil")', email: 'x@example.com', phone: '0123456789', src: 'wa' });
+    expect((await w.call('POST', '/api/admin/export', {})).status).toBe(401);
+    const res = await w.admin('/api/admin/export', {});
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/csv');
+    const csv = await res.text();
+    const [head, row] = csv.trim().split('\r\n');
+    expect(head).toBe('order_id,created_at,paid_at,name,email,phone,amount_rm,status,code,licence,devices,source,note');
+    expect(row).toContain("'=HYPERLINK");
+    expect(row).toContain('x@example.com');
+    expect(row).toContain(',wa,');
+  });
   it('is disabled when no admin token is configured', async () => {
     const w = await makeWorld({ adminToken: '' });
     expect((await w.call('POST', '/api/admin/lookup', { email: 'x' }, { authorization: 'Bearer ' })).status).toBe(401);

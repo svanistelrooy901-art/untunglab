@@ -70,6 +70,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       'content-security-policy': "frame-ancestors 'none'; base-uri 'none'; object-src 'none'",
     };
     const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...secure, ...cors } });
+    const csv = (body: string) => new Response(body, { status: 200, headers: { 'content-type': 'text/csv; charset=utf-8', 'cache-control': 'no-store', ...secure, ...cors } });
     const html = (body: string, csp?: string) => new Response(body, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', ...secure, ...(csp ? { 'content-security-policy': csp } : {}) } });
 
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
@@ -88,7 +89,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       if (req.method === 'POST' && path === '/api/toyyibpay/callback') return await callback(req);
       if (req.method === 'POST' && path === '/api/activate') return await activate(req, json);
       if (req.method === 'POST' && path === '/api/release') return await release(req, json);
-      if (path.startsWith('/api/admin/')) return await admin(req, path, json);
+      if (path.startsWith('/api/admin/')) return await admin(req, path, json, csv);
       return json(404, { error: 'not_found' });
     } catch (e) {
       console.error('unhandled', e);
@@ -163,6 +164,8 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       licenseCode: null, emailSentAt: null, createdAt: deps.now().toISOString(), paidAt: null,
     };
     await store.createOrder(order);
+    const src = typeof body.src === 'string' ? body.src.trim().toLowerCase() : '';
+    if (/^[a-z0-9_-]{1,20}$/.test(src)) await store.setMeta(orderId, { source: src });
     return json(200, { orderId, payUrl: bill.payUrl });
   }
 
@@ -294,7 +297,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
 
   // ---------- admin ----------
 
-  async function admin(req: Request, path: string, json: Json): Promise<Response> {
+  async function admin(req: Request, path: string, json: Json, csv: (body: string) => Response): Promise<Response> {
     const auth = req.headers.get('authorization') ?? '';
     const adminKey = `admin:${clientKey(req)}`;
     if (await rateLimited(adminKey)) return json(429, { error: 'rate_limited' });
@@ -309,10 +312,12 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
     switch (path) {
       case '/api/admin/revoke': {
         if (!code || !(await store.setLicenseStatus(code, 'revoked'))) return json(404, { error: 'invalid_code' });
+        await audit('revoke', code);
         return json(200, { ok: true });
       }
       case '/api/admin/restore': {
         if (!code || !(await store.setLicenseStatus(code, 'active'))) return json(404, { error: 'invalid_code' });
+        await audit('restore', code);
         return json(200, { ok: true });
       }
       case '/api/admin/issue': {
@@ -339,7 +344,43 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
         } catch (e) {
           console.error('email failed for free licence; the code is shown to the admin', e);
         }
+        await audit('issue', issued!.code);
         return json(200, { code: issued!.code, orderId: order.id, emailed });
+      }
+      case '/api/admin/note': {
+        const order = await store.getOrder(str(body.orderId, 40));
+        if (!order) return json(404, { error: 'not_found' });
+        await store.setMeta(order.id, { note: str(body.note, 300) });
+        await audit('note', order.id);
+        return json(200, { ok: true });
+      }
+      case '/api/admin/log':
+        return json(200, { entries: await store.listAdminLog(50) });
+      case '/api/admin/insights': {
+        // 30 Malaysian days ending today, zeros filled so a quiet day shows as a gap, not as a missing bar.
+        const my = (offsetDays: number) => new Date(deps.now().getTime() + 8 * 3600_000 - offsetDays * 86_400_000).toISOString().slice(0, 10);
+        const sinceDay = my(29);
+        const got = await store.insights(sinceDay);
+        const byDay = new Map(got.daily.map((d) => [d.day, d]));
+        const daily = [];
+        for (let k = 29; k >= 0; k--) {
+          const day = my(k);
+          daily.push(byDay.get(day) ?? { day, created: 0, paid: 0, revenueSen: 0 });
+        }
+        return json(200, { ...got, daily });
+      }
+      case '/api/admin/export': {
+        await audit('export', 'csv');
+        const cell = (v: string | number | null) => {
+          let t = v === null ? '' : String(v);
+          if (/^[=+\-@\t\r]/.test(t)) t = `'${t}`; // a spreadsheet would run this as a formula
+          return /[",\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+        };
+        const lines = ['order_id,created_at,paid_at,name,email,phone,amount_rm,status,code,licence,devices,source,note'];
+        for (const r of await store.exportRows()) {
+          lines.push([r.orderId, r.createdAt, r.paidAt, r.name, r.email, r.phone, (r.amountSen / 100).toFixed(2), r.status, r.code, r.licenseStatus, r.devices, r.source, r.note].map(cell).join(','));
+        }
+        return csv(lines.join('\r\n') + '\r\n');
       }
       case '/api/admin/stats': {
         const st = await store.stats(25);
@@ -349,6 +390,7 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
       case '/api/admin/reset-devices': {
         if (!code || !(await store.getLicense(code))) return json(404, { error: 'invalid_code' });
         await store.clearDevices(code);
+        await audit('reset-devices', code);
         return json(200, { ok: true });
       }
       case '/api/admin/lookup': {
@@ -357,12 +399,13 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
         const results = [];
         for (const o of orders) {
           if (!o.licenseCode) {
-            results.push({ orderId: o.id, email: o.email, status: 'unpaid' });
+            results.push({ orderId: o.id, email: o.email, status: 'unpaid', note: (await store.getMeta(o.id)).note });
             continue;
           }
           const license = await store.getLicense(o.licenseCode);
           const devices = await store.listDevices(o.licenseCode);
-          results.push({ orderId: o.id, email: o.email, name: o.name, code: o.licenseCode, status: license?.status ?? 'unknown', devices: devices.map((d) => ({ label: d.label, activatedAt: d.activatedAt })) });
+          const meta = await store.getMeta(o.id);
+          results.push({ orderId: o.id, email: o.email, name: o.name, code: o.licenseCode, status: license?.status ?? 'unknown', note: meta.note, source: meta.source, devices: devices.map((d) => ({ label: d.label, activatedAt: d.activatedAt })) });
         }
         return json(200, { results });
       }
@@ -371,10 +414,19 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
         if (!order?.licenseCode) return json(404, { error: 'not_found' });
         await mailer.sendCode(order.email, order.name, order.licenseCode);
         await store.updateOrder(order.id, { emailSentAt: deps.now().toISOString() });
+        await audit('resend', order.id);
         return json(200, { ok: true });
       }
       default:
         return json(404, { error: 'not_found' });
+    }
+  }
+
+  async function audit(action: string, target: string) {
+    try {
+      await store.logAdmin(deps.now().toISOString(), action, target);
+    } catch (e) {
+      console.error('admin log failed', e); // the action itself already succeeded
     }
   }
 

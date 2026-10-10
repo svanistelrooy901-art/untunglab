@@ -48,6 +48,10 @@ Prasyarat: Node 20+, `npm i -g wrangler`, `wrangler login`.
 
 **Cara paling mudah: papan pemuka admin.** Buka `https://beli.untunglab.space/admin`, masukkan `ADMIN_TOKEN` sekali. Ada ringkasan (pesanan, pengguna yang dah bayar, jumlah RM, lesen aktif/dibatalkan, peranti), carian emel/kod, dan butang Batalkan, Pulihkan, Hantar semula emel, Reset peranti. Token hanya dalam memori halaman (tutup tab = hilang). Halaman tak disenaraikan (noindex) dan tak mengandungi rahsia; data hanya keluar bila token betul.
 
+Pautan iklan boleh ditanda `https://beli.untunglab.space/beli?src=fb` (huruf kecil/nombor/-/_, maks 20); jadual "Dari mana pembeli datang" mengira klik beli dan bayaran ikut sumber.
+
+Sebelum deploy versi dengan jadual baharu (`order_meta`, `admin_log`), jalankan `schema.sql` pada D1 (selamat diulang; hanya menambah): `wrangler d1 execute untunglab-license --remote --file=schema.sql`.
+
 Cara curl (sama sahaja di belakang tabir):
 
 Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-...."}`:
@@ -59,6 +63,10 @@ Semua guna `Authorization: Bearer <ADMIN_TOKEN>` dan `POST`, JSON `{"code":"UL-.
 | Kosongkan peranti (pelanggan tukar telefon dan tak boleh lepaskan sendiri) | `/api/admin/reset-devices` |
 | Batalkan kod (refund/penyalahgunaan) | `/api/admin/revoke` |
 | Pulihkan kod yang tersalah batal | `/api/admin/restore` |
+| Jualan 30 hari, sumber pembeli, belum aktif, emel belum hantar | `/api/admin/insights` |
+| Nota pada pesanan (`{orderId, note}`) | `/api/admin/note` |
+| Log 50 tindakan admin terkini | `/api/admin/log` |
+| CSV semua pembeli (ada emel & telefon; jaga elok) | `/api/admin/export` |
 | Jana kod percuma (RM0) untuk akaun sendiri/tester, body `{"name":..,"email":..}` | `/api/admin/issue` |
 | Ringkasan + 25 pesanan terkini (tanpa no. telefon) | `/api/admin/stats` |
 

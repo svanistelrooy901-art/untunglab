@@ -287,7 +287,7 @@ document.getElementById('f').addEventListener('submit',async(ev)=>{
  ev.preventDefault();const b=document.getElementById('b'),m=document.getElementById('m');
  b.disabled=true;m.textContent='';
  try{
-  const r=await fetch('/api/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:document.getElementById('n').value,email:document.getElementById('e').value,phone:document.getElementById('p').value})});
+  const r=await fetch('/api/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:document.getElementById('n').value,email:document.getElementById('e').value,phone:document.getElementById('p').value,src:new URLSearchParams(location.search).get('src')||''})});
   const j=await r.json();
   if(r.ok&&j.payUrl){location.href=j.payUrl;return;}
   m.textContent=r.status===400?T('Semak semula nama, emel dan nombor telefon anda.','Please check your name, email and phone number.'):T('Pembayaran tidak dapat dimulakan sekarang. Cuba sebentar lagi.','Payment cannot be started right now. Please try again shortly.')+(j.detail?' ['+j.detail+']':'');

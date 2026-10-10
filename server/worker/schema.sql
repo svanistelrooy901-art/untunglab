@@ -34,3 +34,17 @@ CREATE TABLE IF NOT EXISTS failures (
   at  TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS failures_key_at ON failures (key, at);
+
+-- Added with the admin insights (D-92). Additive: safe to run on a live database.
+CREATE TABLE IF NOT EXISTS order_meta (
+  order_id TEXT PRIMARY KEY REFERENCES orders (id),
+  source   TEXT,
+  note     TEXT
+);
+
+CREATE TABLE IF NOT EXISTS admin_log (
+  id     INTEGER PRIMARY KEY AUTOINCREMENT,
+  at     TEXT NOT NULL,
+  action TEXT NOT NULL,
+  target TEXT NOT NULL
+);
