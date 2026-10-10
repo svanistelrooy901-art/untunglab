@@ -21,7 +21,7 @@ button.alt{background:#fff;color:#0F766E;border:1px solid #0F766E}button.bad{bac
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:8px}
 .stat{background:#F0FDFA;border:1px solid #99F6E4;border-radius:12px;padding:10px}.stat b{display:block;font-size:1.4rem}.stat span{font-size:.8rem;color:#475569}
 .msg{margin-top:8px;font-weight:600}.err{color:#B91C1C}.ok{color:#0F766E}
-.mono{font:600 1rem ui-monospace,Menlo,monospace;word-break:break-all}.muted{color:#64748B;font-size:.85rem}
+.mono{font:600 1rem ui-monospace,Menlo,monospace;word-break:break-all}.muted{color:#64748B;font-size:.85rem}.muted .mono{font-size:.8rem;font-weight:600}
 table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{text-align:left;padding:6px 4px;border-bottom:1px solid #E5E7EB;vertical-align:top;word-break:break-word}
 .pill{white-space:nowrap;display:inline-block;border-radius:999px;padding:1px 8px;font-size:.75rem;font-weight:700;background:#E5E7EB}.pill.active,.pill.paid{background:#CCFBF1;color:#115E59}.pill.revoked{background:#FEE2E2;color:#991B1B}
 .hide{display:none}
@@ -91,7 +91,7 @@ function renderInsights(i,s){
   var tot=s.paid+s.pending;$('conv').textContent=tot?('Kadar bayar: '+s.paid+' daripada '+tot+' yang klik beli ('+Math.round(s.paid/tot*100)+'%). Selebihnya belum bayar atau masih dalam proses.'):'Belum ada pesanan.';
   var sb=$('sources');sb.textContent='';
   i.sources.forEach(function(x){var tr=el('tr');tr.appendChild(el('td','',x.source||'(tiada sumber)'));tr.appendChild(el('td','',String(x.orders)));tr.appendChild(el('td','',String(x.paid)));sb.appendChild(tr)});
-  if(!i.sources.length)sb.appendChild(el('tr')).appendChild(el('td','muted','Tiada data.'));
+  if(!i.sources.length){var er=el('tr'),ec=el('td','muted','Tiada data lagi.');ec.colSpan=3;er.appendChild(ec);sb.appendChild(er)}
   function list(id,rows,withPaid,empty){var u=$(id);u.textContent='';
     rows.forEach(function(r){var li=el('li');li.appendChild(el('div','',r.name+' · '+r.email));li.appendChild(el('div','mono',r.code));if(withPaid&&r.paidAt)li.appendChild(el('div','muted','Bayar '+r.paidAt.slice(0,10)));
       var b=el('button','alt','Hantar semula emel');b.style.marginTop='6px';b.onclick=function(){b.disabled=true;api('/api/admin/resend',{orderId:r.orderId}).then(function(){b.textContent='Dihantar';return load()}).catch(function(e){b.textContent=e.message;b.disabled=false})};li.appendChild(b);u.appendChild(li)});
