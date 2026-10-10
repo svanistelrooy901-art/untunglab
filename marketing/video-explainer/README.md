@@ -1,0 +1,2 @@
+UntungLab explainer (SiniSlot style, 9:16, 74s). cap.mjs captures real app screens (dist-e2e on :4181) into /tmp/explainer/shots; copy the used PNGs to /tmp/explainer/proj/shots with fonts, logo and Kak Untung SVGs in assets/; build.py -> scene.html; render.py frames 60 74.5; audio.py -> mix/sfx; loudnorm + ffmpeg as in the sambal-motion skill.
+Numbers on screen come from the app: Brownies cost RM4.66, profit RM1.34, 30% margin RM6.80; Nasi Lemak Ayam -RM0.45; Ayam +14.4%.
