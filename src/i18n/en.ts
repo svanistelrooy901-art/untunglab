@@ -737,6 +737,9 @@ export const en: Widen<typeof ms> = {
     ralatInvalid: 'Something in this list is not right ({path}). Send it again from JualanLab.',
     ralatNota: 'You can still enter the quantities yourself below.',
   },
+  jualanlab: {
+    belumLancar: 'JualanLab has not launched yet. Expected launch: early November 2026.',
+  },
   baharu: {
     label: 'New in UntungLab',
     tajuk: 'UntungLab now connects to JualanLab',

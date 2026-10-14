@@ -737,6 +737,9 @@ export const ms = {
     ralatInvalid: 'Ada maklumat yang tidak betul dalam senarai ini ({path}). Hantar semula dari JualanLab.',
     ralatNota: 'Anda masih boleh isi kuantiti sendiri di bawah.',
   },
+  jualanlab: {
+    belumLancar: 'JualanLab belum dilancarkan. Dijangka dilancarkan awal November 2026.',
+  },
   baharu: {
     label: 'Baharu dalam UntungLab',
     tajuk: 'UntungLab kini boleh berhubung dengan JualanLab',

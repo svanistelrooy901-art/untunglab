@@ -40,6 +40,9 @@ export function WhatsNew() {
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t('baharu.label')}</p>
         <h2 id="whats-new-title" className="mt-1 text-lg font-bold">{t('baharu.tajuk')}</h2>
         <p className="mt-2 text-sm text-muted">{t('baharu.isi')}</p>
+        <p className="mt-3 rounded-xl border border-watch-line bg-watch-soft p-3 text-sm font-semibold text-watch" data-testid="jualanlab-belum-lancar">
+          {t('jualanlab.belumLancar')}
+        </p>
         <ul className="mt-4 space-y-3">
           {points.map((p, i) => (
             <li key={i} className="flex gap-3 text-sm">

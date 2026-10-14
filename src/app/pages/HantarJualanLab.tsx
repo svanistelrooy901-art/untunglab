@@ -35,6 +35,9 @@ export function HantarJualanLabPage() {
     <section>
       <PageHeader title={t('hantar.title')} />
       <p className="mt-1 text-sm text-muted">{t('hantar.intro')}</p>
+      <p className="mt-3 rounded-xl border border-watch-line bg-watch-soft p-3 text-sm font-semibold text-watch" data-testid="jualanlab-belum-lancar">
+        {t('jualanlab.belumLancar')}
+      </p>
       {built.kind === 'empty' ? (
         <EmptyState title={t('hantar.kosongTajuk')} body={t('hantar.kosongIsi')} action={<Link to="/menu/baru" className={btnPrimary}>{t('menu.tambah')}</Link>} />
       ) : built.kind === 'error' ? (
