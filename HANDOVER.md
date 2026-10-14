@@ -10,10 +10,12 @@ PWA pengiraan kos dan untung untuk perniagaan makanan rumah. Dwibahasa (BM lalai
 | `src/db` | Dexie (IndexedDB): skema, repo, sandaran/pulihkan, lesen. |
 | `src/app` | Skrin, laluan, Laporan, had percuma. |
 | `src/license` | Kod lesen, token luar talian, had percuma. |
+| `src/link` | **Salinan** `src/link/` repo JualanLab (format pautan v1). Jangan ubah di sini: ubah di JualanLab, salin semula, jalankan ujian kedua-dua app (L-12, D-96). |
+| `spec` | `LINK-FORMAT.md` dan fixture kontrak, salinan dari JualanLab. |
 | `server` | Pelayan lesen (Cloudflare Worker + D1). |
 | `docs/qa` | Bukti QA setiap fasa, jejak ujian, senarai semak telefon. |
 | `manual` | Pembina manual PDF dwibahasa (`content.mjs` ialah teks BM/EN berpasangan), `capture/all.mjs` ambil gambar skrin. |
-| `DECISIONS.md` | Semua keputusan (D-01 hingga D-89) dan sebabnya. |
+| `DECISIONS.md` | Semua keputusan (D-01 hingga D-97) dan sebabnya. |
 
 ## Peraturan yang tidak boleh dilanggar
 1. Satu enjin kos. Skrin tidak mengira formula sendiri.
@@ -44,6 +46,11 @@ Ujian mutasi: `node scripts/mutation-check.mjs` (`ONLY=regex` untuk sebahagian).
 - Refund: manual dalam 7 hari (bank transfer / DuitNow ke pembeli), kemudian Batalkan di /admin. Batal hanya menyekat aktivasi baharu; peranti yang sudah aktif terus berfungsi luar talian (D-63). Semakan berkala ditangguh (keputusan pemilik: kekal buat masa ini).
 - Pangkalan data: D1 `untunglab-license` (jadual orders, licenses, devices, failures; `server/worker/schema.sql`).
 - Batal/reset/cari kod melalui curl: `server/README.md` (bahagian admin). Deploy: `DEPLOY.md`.
+
+## JualanLab (D-96, D-97)
+- `/hantar-jualanlab` (Hantar ke JualanLab): menu aktif dihantar sebagai pautan `https://jualan.untunglab.space/terima#d=…`, kod QR (bila pautan ≤ 1,600 aksara) atau fail `untunglab-harga-YYYY-MM-DD.json`. Margin dan status hanya dari enjin; menu belum lengkap dihantar dengan margin null. Tiada pelayan, tiada akaun.
+- `/rancang-batch` (Rancang Batch): dibuka sendiri atau dari pautan JualanLab `https://untunglab.space/#/rancang-batch?d=…`. Kiraan dalam `src/domain/batchPlan.ts`. Baca sahaja: tiada jadual baharu, tiada perubahan skema.
+- Kedua-dua skrin ada butang di halaman Menu dan entri di Lagi.
 
 ## Kerja yang masih menjadi milik anda
 Pantau pesanan awal di /admin (emel kod sampai, early bird berkurang betul), maklum balas Android (masalah "Loading" telah dibaiki secara defensif, belum disahkan pada peranti pelanggan), keputusan membuka bayaran kad, dan jika perlu semakan berkala untuk lesen yang dibatalkan.

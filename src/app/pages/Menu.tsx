@@ -52,6 +52,12 @@ export function MenuListPage() {
         }
       />
       <LimitNote state={limit} />
+      {menus.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2" data-testid="menu-jualanlab">
+          <Link to="/hantar-jualanlab" className={btnSecondary}>{t('hantar.title')}</Link>
+          <Link to="/rancang-batch" className={btnSecondary}>{t('batch.title')}</Link>
+        </div>
+      )}
       {menus.length === 0 ? (
         <EmptyState
           title={t('menu.kosongTajuk')}

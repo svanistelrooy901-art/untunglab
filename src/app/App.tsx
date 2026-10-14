@@ -3,6 +3,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useLangState } from '../i18n/lang';
 import { t } from '../i18n/ms';
 import { LanguagePrompt } from './components/LanguagePrompt';
+import { WhatsNew } from './components/WhatsNew';
 import { TetapanPage } from './pages/Tetapan';
 import { Layout } from './components/Layout';
 import { DataProvider } from './data';
@@ -10,6 +11,8 @@ import { LicenseProvider } from './license';
 import { ManualPage } from './pages/Manual';
 import { LesenPage } from './pages/Lesen';
 import { LaporanPage } from './pages/Laporan';
+import { HantarJualanLabPage } from './pages/HantarJualanLab';
+import { RancangBatchPage } from './pages/RancangBatch';
 import { BahanPage } from './pages/Bahan';
 import { KosOperasiPage } from './pages/KosOperasi';
 import { MenuEditorPage, MenuListPage } from './pages/Menu';
@@ -32,6 +35,8 @@ const PAGES: Record<string, ComponentType> = {
   '/manual': ManualPage,
   '/tetapan': TetapanPage,
   '/laporan': LaporanPage,
+  '/hantar-jualanlab': HantarJualanLabPage,
+  '/rancang-batch': RancangBatchPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,
   '/bahan': BahanPage,
@@ -56,6 +61,7 @@ export function App() {
       <Fragment key={lang}>
       <LanguagePrompt />
       <HashRouter>
+        <WhatsNew />
         <Routes>
           <Route element={<Layout />}>
             {ROUTES.map((r) => {

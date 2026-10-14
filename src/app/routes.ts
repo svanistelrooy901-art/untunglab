@@ -20,6 +20,8 @@ export const ROUTES: NavRoute[] = [
   { path: '/jejak-harga', label: 'nav.jejakHarga', icon: 'jejakHarga', primary: false },
   { path: '/kos-operasi', label: 'nav.kosOperasi', icon: 'kosOperasi', primary: false },
   { path: '/laporan', label: 'nav.laporan', icon: 'laporan', primary: false },
+  { path: '/hantar-jualanlab', label: 'nav.hantarJualanLab', icon: 'hantar', primary: false },
+  { path: '/rancang-batch', label: 'nav.rancangBatch', icon: 'batch', primary: false },
   { path: '/sandaran', label: 'nav.sandaran', icon: 'sandaran', primary: false },
   { path: '/manual', label: 'nav.manual', icon: 'manual', primary: false },
   { path: '/tetapan', label: 'nav.tetapan', icon: 'tetapan', primary: false },

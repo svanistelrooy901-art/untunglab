@@ -37,6 +37,7 @@ src/db/       On-device storage (Dexie schema, repositories). No React, no formu
 src/i18n/     Bahasa Melayu copy.
 src/app/      UI shell, routes, pages.
 src/license/  Licence code, offline token check, free-plan limits.
+src/link/     Copy of JualanLab's link format v1 (spec/ holds LINK-FORMAT.md and fixtures). Keep identical.
 server/       Licence server (Cloudflare Worker + D1): payment, codes, devices.
 ```
 
