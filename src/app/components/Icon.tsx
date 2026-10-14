@@ -70,6 +70,13 @@ const PATHS = {
       <path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" />
     </>
   ),
+  hantar: <path d="M21 3L10 14M21 3l-6.5 18-4.5-7-7-4.5L21 3z" />,
+  batch: (
+    <>
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 2.5h6v3H9zM9 11h6M9 15h6M9 19h3" />
+    </>
+  ),
   lagi: (
     <>
       <circle cx="5" cy="12" r="1.5" fill="currentColor" />

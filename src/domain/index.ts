@@ -9,3 +9,4 @@ export * from './priceChange';
 export * from './scenario';
 export * from './priceHistory';
 export * from './labour';
+export * from './batchPlan';

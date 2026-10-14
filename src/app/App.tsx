@@ -10,6 +10,8 @@ import { LicenseProvider } from './license';
 import { ManualPage } from './pages/Manual';
 import { LesenPage } from './pages/Lesen';
 import { LaporanPage } from './pages/Laporan';
+import { HantarJualanLabPage } from './pages/HantarJualanLab';
+import { RancangBatchPage } from './pages/RancangBatch';
 import { BahanPage } from './pages/Bahan';
 import { KosOperasiPage } from './pages/KosOperasi';
 import { MenuEditorPage, MenuListPage } from './pages/Menu';
@@ -32,6 +34,8 @@ const PAGES: Record<string, ComponentType> = {
   '/manual': ManualPage,
   '/tetapan': TetapanPage,
   '/laporan': LaporanPage,
+  '/hantar-jualanlab': HantarJualanLabPage,
+  '/rancang-batch': RancangBatchPage,
   '/kos-operasi': KosOperasiPage,
   '/menu': MenuListPage,
   '/bahan': BahanPage,
