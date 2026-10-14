@@ -3,6 +3,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useLangState } from '../i18n/lang';
 import { t } from '../i18n/ms';
 import { LanguagePrompt } from './components/LanguagePrompt';
+import { WhatsNew } from './components/WhatsNew';
 import { TetapanPage } from './pages/Tetapan';
 import { Layout } from './components/Layout';
 import { DataProvider } from './data';
@@ -60,6 +61,7 @@ export function App() {
       <Fragment key={lang}>
       <LanguagePrompt />
       <HashRouter>
+        <WhatsNew />
         <Routes>
           <Route element={<Layout />}>
             {ROUTES.map((r) => {

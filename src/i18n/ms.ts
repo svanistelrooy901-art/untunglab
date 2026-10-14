@@ -737,6 +737,18 @@ export const ms = {
     ralatInvalid: 'Ada maklumat yang tidak betul dalam senarai ini ({path}). Hantar semula dari JualanLab.',
     ralatNota: 'Anda masih boleh isi kuantiti sendiri di bawah.',
   },
+  baharu: {
+    label: 'Baharu dalam UntungLab',
+    tajuk: 'UntungLab kini boleh berhubung dengan JualanLab',
+    isi: 'JualanLab ialah app kaunter jualan (POS) untuk peniaga makanan, adik kepada UntungLab. Kira kos di UntungLab, jual di JualanLab.',
+    p1: 'Hantar ke JualanLab: harga jual dan margin setiap menu masuk ke kaunter JualanLab dengan satu tekan. Resipi dan kos bahan kekal dalam UntungLab.',
+    p2: 'Rancang Batch: isi berapa unit hendak dibuat, UntungLab kira bilangan batch dan senarai bahan untuk dibeli.',
+    p3: 'Di JualanLab: jual di kaunter atau bazar, lihat untung hari ini, dan Tutup Hari dengan duit modal dan untung diasingkan.',
+    mana: 'Kedua-duanya ada di Menu dan di Lagi. Pengguna UntungLab dapat harga istimewa untuk JualanLab.',
+    cuba: 'Cuba Hantar ke JualanLab',
+    kenali: 'Lihat JualanLab',
+    nanti: 'Nanti',
+  },
   placeholder: {
     title: 'Sedang dibina',
     body: 'Bahagian ini akan siap dalam fasa pembangunan seterusnya.',

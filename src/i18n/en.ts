@@ -737,6 +737,18 @@ export const en: Widen<typeof ms> = {
     ralatInvalid: 'Something in this list is not right ({path}). Send it again from JualanLab.',
     ralatNota: 'You can still enter the quantities yourself below.',
   },
+  baharu: {
+    label: 'New in UntungLab',
+    tajuk: 'UntungLab now connects to JualanLab',
+    isi: 'JualanLab is a sales counter (POS) app for food sellers, UntungLab\'s sister app. Work out your costs in UntungLab, sell in JualanLab.',
+    p1: 'Send to JualanLab: each menu\'s selling price and margin go to the JualanLab counter with one tap. Recipes and ingredient costs stay in UntungLab.',
+    p2: 'Plan a Batch: enter how many pieces to make, and UntungLab works out the batches and the shopping list.',
+    p3: 'In JualanLab: sell at the counter or a bazaar, see today\'s profit, and Close Day with capital and profit kept apart.',
+    mana: 'Find both under Menu and under More. UntungLab users get a special price for JualanLab.',
+    cuba: 'Try Send to JualanLab',
+    kenali: 'See JualanLab',
+    nanti: 'Later',
+  },
   placeholder: {
     title: 'Under construction',
     body: 'This section will be ready in the next development phase.',
