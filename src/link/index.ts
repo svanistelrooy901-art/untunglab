@@ -1,7 +1,7 @@
 /**
- * COPY of the JualanLab repo's `src/link/` (with `spec/` for the format and fixtures). Do not edit here.
- * This folder is the contract between the two apps and must stay identical to JualanLab's copy
- * (JualanLab decision L-12, UntungLab D-96). Change it in JualanLab first, then copy it over and run both test suites.
+ * Shared contract between UntungLab and JualanLab (spec/LINK-FORMAT.md). This folder is identical in both repos
+ * (JualanLab L-12, UntungLab D-96). JualanLab holds the source: change it there first, copy it to UntungLab,
+ * and run both test suites. Do not edit one copy alone.
  */
 export * from './types';
 export { encodePayload, decodePayload, SCHEME_PREFIX, MAX_PAYLOAD_CHARS, MAX_JSON_BYTES } from './envelope';
