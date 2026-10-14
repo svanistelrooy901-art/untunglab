@@ -748,8 +748,7 @@ export const en: Widen<typeof ms> = {
     p2: 'Plan a Batch: enter how many pieces to make, and UntungLab works out the batches and the shopping list.',
     p3: 'In JualanLab: sell at the counter or a bazaar, see today\'s profit, and Close Day with capital and profit kept apart.',
     mana: 'Find both under Menu and under More. UntungLab users get a special price for JualanLab.',
-    cuba: 'Try Send to JualanLab',
-    kenali: 'See JualanLab',
+    cuba: 'Try Plan a Batch',
     nanti: 'Later',
   },
   placeholder: {

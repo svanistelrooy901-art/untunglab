@@ -748,8 +748,7 @@ export const ms = {
     p2: 'Rancang Batch: isi berapa unit hendak dibuat, UntungLab kira bilangan batch dan senarai bahan untuk dibeli.',
     p3: 'Di JualanLab: jual di kaunter atau bazar, lihat untung hari ini, dan Tutup Hari dengan duit modal dan untung diasingkan.',
     mana: 'Kedua-duanya ada di Menu dan di Lagi. Pengguna UntungLab dapat harga istimewa untuk JualanLab.',
-    cuba: 'Cuba Hantar ke JualanLab',
-    kenali: 'Lihat JualanLab',
+    cuba: 'Cuba Rancang Batch',
     nanti: 'Nanti',
   },
   placeholder: {

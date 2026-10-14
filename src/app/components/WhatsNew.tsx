@@ -4,9 +4,7 @@ import { useLangState } from '../../i18n/lang';
 import { t } from '../../i18n/ms';
 import { useLive } from '../data';
 import { markWhatsNewSeen, shouldShowWhatsNew, whatsNewSeen } from '../whatsNew';
-import { btnPrimary, btnQuiet, btnSecondary } from './ui';
-
-const JUALANLAB_URL = 'https://jualan.untunglab.space';
+import { btnPrimary, btnQuiet } from './ui';
 
 /** One-time note after the update that connects UntungLab to JualanLab (D-98). */
 export function WhatsNew() {
@@ -53,12 +51,10 @@ export function WhatsNew() {
         </ul>
         <p className="mt-4 rounded-xl bg-canvas p-3 text-sm text-muted">{t('baharu.mana')}</p>
         <div className="mt-5 flex flex-col gap-2">
-          <button type="button" className={btnPrimary} onClick={() => close(() => navigate('/hantar-jualanlab'))}>
+          {/* Until JualanLab launches, nothing here leads into it; Rancang Batch works fully inside UntungLab. */}
+          <button type="button" className={btnPrimary} onClick={() => close(() => navigate('/rancang-batch'))}>
             {t('baharu.cuba')}
           </button>
-          <a href={JUALANLAB_URL} target="_blank" rel="noopener noreferrer" className={btnSecondary} onClick={() => close()}>
-            {t('baharu.kenali')}
-          </a>
           <button type="button" className={btnQuiet} onClick={() => close()}>
             {t('baharu.nanti')}
           </button>
