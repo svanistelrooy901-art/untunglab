@@ -17,6 +17,8 @@ export interface Env {
   PUBLIC_BASE_URL: string;
   APP_ORIGIN: string;
   APP_URL: string;
+  /** smeLab sales page (D-99). Empty = this Worker's own /beli page. */
+  SALES_URL?: string;
   BREVO_SENDER_EMAIL: string;
   BREVO_SENDER_NAME: string;
   /** Web Analytics (D-93): public beacon token, account id, optional site tag. Empty = off. */
@@ -75,6 +77,7 @@ export default {
         appOrigin: env.APP_ORIGIN,
         appUrl: env.APP_URL,
         publicBaseUrl: env.PUBLIC_BASE_URL.replace(/\/+$/, ''),
+        salesUrl: env.SALES_URL?.trim() || undefined,
         debugErrors: Number(env.PRICE_SEN) <= 100, // test price only: show the provider's error text
         maxDevices: 2,
         failureLimit: 10,
