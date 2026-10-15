@@ -28,6 +28,11 @@ export interface Config {
   failureWindowMinutes: number;
   /** Public site token of the Cloudflare Web Analytics beacon for the sales page (D-93). Empty = no beacon. */
   cfBeaconToken?: string;
+  /**
+   * Where UntungLab is sold now (D-99): the smeLab sales page. When set, `/` and `/beli` count the visit and send the
+   * person there; orders, payments, licences and the admin page stay here.
+   */
+  salesUrl?: string;
 }
 
 export interface Deps {
@@ -85,13 +90,15 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
 
     try {
       const path = url.pathname.replace(/\/+$/, '') || '/';
-      if (req.method === 'GET' && path === '/') return Response.redirect(`${config.publicBaseUrl}/beli`, 302);
+      const salesPage = config.salesUrl ? `${config.salesUrl.replace(/\/+$/, '')}/#harga` : `${config.publicBaseUrl}/beli`;
+      if (req.method === 'GET' && path === '/') return Response.redirect(salesPage, 302);
       if (req.method === 'GET' && path === '/mula') {
         await countVisit(req, 'start');
-        return Response.redirect(config.appUrl || `${config.publicBaseUrl}/beli`, 302);
+        return Response.redirect(config.appUrl || salesPage, 302);
       }
       if (req.method === 'GET' && path === '/beli') {
         await countVisit(req, 'view');
+        if (config.salesUrl) return Response.redirect(salesPage, 302);
         return html(renderBuyPage(...(await currentPrice()), config.appUrl, config.cfBeaconToken));
       }
       if (req.method === 'GET' && path === '/terima') return html(renderReturnPage(config.appUrl));

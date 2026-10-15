@@ -395,6 +395,19 @@ describe('usage counting (no cookies, no personal data)', () => {
     expect(res.status).toBe(302);
     expect(res.headers.get('location')).toBe('https://api.example.com/beli');
   });
+  it('with the smeLab sales page set, / and /beli send people there and still count the visit (D-99)', async () => {
+    const w = await makeWorld({ salesUrl: 'https://smelab.example.com/' });
+    for (const path of ['/', '/beli', '/beli?src=fb']) {
+      const res = await w.call('GET', path);
+      expect(res.status).toBe(302);
+      expect(res.headers.get('location')).toBe('https://smelab.example.com/#harga');
+    }
+    const u = await w.json(await w.admin('/api/admin/usage', {}));
+    expect(u.totals.view).toBe(2);
+    // Payments, licences and the return page stay on this server.
+    expect((await w.call('GET', '/terima')).status).toBe(200);
+    expect((await w.call('POST', '/api/activate', {})).status).toBe(400);
+  });
   it('crawlers and link previews are not counted as visits', async () => {
     const w = await makeWorld();
     await w.call('GET', '/beli', undefined, { 'user-agent': 'WhatsApp/2.23 A' });

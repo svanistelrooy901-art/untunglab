@@ -48,7 +48,7 @@ Prasyarat: Node 20+, `npm i -g wrangler`, `wrangler login`.
 
 **Cara paling mudah: papan pemuka admin.** Buka `https://beli.untunglab.space/admin`, masukkan `ADMIN_TOKEN` sekali. Ada ringkasan (pesanan, pengguna yang dah bayar, jumlah RM, lesen aktif/dibatalkan, peranti), carian emel/kod, dan butang Batalkan, Pulihkan, Hantar semula emel, Reset peranti. Token hanya dalam memori halaman (tutup tab = hilang). Halaman tak disenaraikan (noindex) dan tak mengandungi rahsia; data hanya keluar bila token betul.
 
-Pautan iklan boleh ditanda `https://beli.untunglab.space/beli?src=fb` (huruf kecil/nombor/-/_, maks 20); jadual "Dari mana pembeli datang" mengira klik beli dan bayaran ikut sumber.
+Sejak D-99, `/` dan `/beli` menghantar pelawat ke halaman jualan smeLab (`SALES_URL` dalam `wrangler.toml`; kosongkan untuk guna semula halaman `/beli` lama). Pautan iklan boleh ditanda `https://beli.untunglab.space/beli?src=fb` (huruf kecil/nombor/-/_, maks 20); jadual "Dari mana pembeli datang" mengira klik beli dan bayaran ikut sumber (hanya pada halaman `/beli` lama; smeLab belum merekod sumber).
 
 Sebelum deploy versi dengan jadual baharu (`order_meta`, `admin_log`), jalankan `schema.sql` pada D1 (selamat diulang; hanya menambah): `wrangler d1 execute untunglab-license --remote --file=schema.sql`.
 
