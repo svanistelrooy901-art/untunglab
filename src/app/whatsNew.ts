@@ -4,7 +4,7 @@
  */
 
 /** Bump the id for the next announcement; each id is shown once. */
-export const WHATS_NEW_ID = 'jualanlab-1';
+export const WHATS_NEW_ID = 'jualanlab-launch';
 const KEY = 'untunglab.whatsNewSeen';
 
 let seenThisVisit: string | null = null;

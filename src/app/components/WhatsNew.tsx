@@ -4,9 +4,10 @@ import { useLangState } from '../../i18n/lang';
 import { t } from '../../i18n/ms';
 import { useLive } from '../data';
 import { markWhatsNewSeen, shouldShowWhatsNew, whatsNewSeen } from '../whatsNew';
+import { JUALANLAB_ORIGIN } from '../../link/links';
 import { btnPrimary, btnQuiet } from './ui';
 
-/** One-time note after the update that connects UntungLab to JualanLab (D-98). */
+/** One-time note: JualanLab has launched (25 Oct 2026); replaces the D-98 note, so everyone sees it once more. */
 export function WhatsNew() {
   const { chosen } = useLangState();
   const location = useLocation();
@@ -38,9 +39,6 @@ export function WhatsNew() {
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t('baharu.label')}</p>
         <h2 id="whats-new-title" className="mt-1 text-lg font-bold">{t('baharu.tajuk')}</h2>
         <p className="mt-2 text-sm text-muted">{t('baharu.isi')}</p>
-        <p className="mt-3 rounded-xl border border-watch-line bg-watch-soft p-3 text-sm font-semibold text-watch" data-testid="jualanlab-belum-lancar">
-          {t('jualanlab.belumLancar')}
-        </p>
         <ul className="mt-4 space-y-3">
           {points.map((p, i) => (
             <li key={i} className="flex gap-3 text-sm">
@@ -51,8 +49,10 @@ export function WhatsNew() {
         </ul>
         <p className="mt-4 rounded-xl bg-canvas p-3 text-sm text-muted">{t('baharu.mana')}</p>
         <div className="mt-5 flex flex-col gap-2">
-          {/* Until JualanLab launches, nothing here leads into it; Rancang Batch works fully inside UntungLab. */}
-          <button type="button" className={btnPrimary} onClick={() => close(() => navigate('/rancang-batch'))}>
+          <a href={JUALANLAB_ORIGIN} target="_blank" rel="noopener" className={btnPrimary} onClick={() => close()}>
+            {t('baharu.buka')}
+          </a>
+          <button type="button" className={btnQuiet} onClick={() => close(() => navigate('/rancang-batch'))}>
             {t('baharu.cuba')}
           </button>
           <button type="button" className={btnQuiet} onClick={() => close()}>
