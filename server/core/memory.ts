@@ -72,11 +72,13 @@ export class MemoryStore implements Store {
     const orders = [...this.orders.values()];
     const paid = orders.filter((o) => o.status === 'paid' && o.amountSen > 0);
     const free = orders.filter((o) => o.status === 'paid' && o.amountSen === 0);
+    const viaSmelab = free.filter((o) => (this.meta.get(o.id)?.note ?? '').startsWith('smeLab')).length;
     const lic = [...this.licenses.values()];
     return {
       orders: orders.length,
       paid: paid.length,
-      complimentary: free.length,
+      complimentary: free.length - viaSmelab,
+      smelab: viaSmelab,
       pending: orders.length - paid.length - free.length,
       revenueSen: paid.reduce((n, o) => n + o.amountSen, 0),
       activeLicenses: lic.filter((l) => l.status === 'active').length,

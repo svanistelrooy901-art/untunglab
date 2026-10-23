@@ -124,6 +124,16 @@ export function describeStore(name: string, make: () => Promise<Store>) {
       expect(await s.stats(10)).toMatchObject({ orders: 2, paid: 1, complimentary: 1, pending: 0, revenueSen: 5900, activeLicenses: 2 });
     });
 
+    it('counts free codes issued for a smeLab purchase apart from the admin\'s own test codes', async () => {
+      const s = await make();
+      await s.createOrder(order({ id: 't1', email: 'me@x.com', amountSen: 0, billCode: 'FREE' }));
+      await s.createOrder(order({ id: 's1', email: 'buyer@x.com', amountSen: 0, billCode: 'FREE' }));
+      await s.markOrderPaid('t1', 'UL-AAAA-AAAA-AAAA', '2026-09-30T01:00:00.000Z');
+      await s.markOrderPaid('s1', 'UL-BBBB-BBBB-BBBB', '2026-09-30T02:00:00.000Z');
+      await s.setMeta('s1', { note: 'smeLab 9a71d60f RM75.00' });
+      expect(await s.stats(10)).toMatchObject({ orders: 2, paid: 0, complimentary: 1, smelab: 1, pending: 0, revenueSen: 0 });
+    });
+
     it('keeps a source and a note per order, and an admin action log (newest first)', async () => {
       const s = await make();
       await s.createOrder(order({ id: 'o1' }));
@@ -211,7 +221,7 @@ export function describeStore(name: string, make: () => Promise<Store>) {
 
     it('stats on an empty store are all zero', async () => {
       const s = await make();
-      expect(await s.stats(10)).toEqual({ orders: 0, paid: 0, complimentary: 0, pending: 0, revenueSen: 0, activeLicenses: 0, revokedLicenses: 0, devices: 0, recent: [] });
+      expect(await s.stats(10)).toEqual({ orders: 0, paid: 0, complimentary: 0, smelab: 0, pending: 0, revenueSen: 0, activeLicenses: 0, revokedLicenses: 0, devices: 0, recent: [] });
     });
   });
 }

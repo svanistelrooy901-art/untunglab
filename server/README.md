@@ -46,7 +46,7 @@ Prasyarat: Node 20+, `npm i -g wrangler`, `wrangler login`.
 
 ## Operasi harian (admin)
 
-**Cara paling mudah: papan pemuka admin.** Buka `https://beli.untunglab.space/admin`, masukkan `ADMIN_TOKEN` sekali. Ada ringkasan (pesanan, pengguna yang dah bayar, jumlah RM, lesen aktif/dibatalkan, peranti), carian emel/kod, dan butang Batalkan, Pulihkan, Hantar semula emel, Reset peranti. Token hanya dalam memori halaman (tutup tab = hilang). Halaman tak disenaraikan (noindex) dan tak mengandungi rahsia; data hanya keluar bila token betul.
+**Cara paling mudah: papan pemuka admin.** Buka `https://beli.untunglab.space/admin`, masukkan `ADMIN_TOKEN` sekali. Ada ringkasan (pesanan, pengguna yang dah bayar, jumlah RM, lesen aktif/dibatalkan, peranti), carian emel/kod, dan butang Batalkan, Pulihkan, Hantar semula emel, Reset peranti. Ada tab untuk setiap produk (UL, smeLab, JL, KL, PL; D-100): tab smeLab dan JL sambung terus ke Worker masing-masing dengan token masing-masing (rahsia `ADMIN_TOKEN` pada Worker itu; CORS hanya benarkan halaman ini). Token hanya dalam memori halaman (tutup tab = hilang). Halaman tak disenaraikan (noindex) dan tak mengandungi rahsia; data hanya keluar bila token betul.
 
 Sejak D-99, `/` dan `/beli` menghantar pelawat ke halaman jualan smeLab (`SALES_URL` dalam `wrangler.toml`; kosongkan untuk guna semula halaman `/beli` lama). Pautan iklan boleh ditanda `https://beli.untunglab.space/beli?src=fb` (huruf kecil/nombor/-/_, maks 20); jadual "Dari mana pembeli datang" mengira klik beli dan bayaran ikut sumber (hanya pada halaman `/beli` lama; smeLab belum merekod sumber).
 

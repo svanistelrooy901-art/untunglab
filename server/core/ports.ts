@@ -31,8 +31,10 @@ export interface Stats {
   orders: number;
   /** Paid orders with a price above RM0. */
   paid: number;
-  /** Free (RM0) licences issued by the admin. */
+  /** Free (RM0) licences the admin issued for testing or as gifts. */
   complimentary: number;
+  /** Free (RM0) licences issued for a smeLab purchase (the order note starts with "smeLab"); the money was paid at smeLab. */
+  smelab: number;
   pending: number;
   revenueSen: number;
   activeLicenses: number;

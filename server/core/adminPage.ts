@@ -3,8 +3,14 @@
  * JavaScript variable only (never localStorage, cookies or the URL), so closing or reloading the tab forgets it.
  * All text from the database is written with textContent, never innerHTML.
  */
+/**
+ * The other products keep their own data and their own admin token (D-100): this page calls their Workers directly from
+ * the browser (CORS allows only this page's address), so UntungLab's Worker never holds another product's secret.
+ */
+export const PRODUCT_APIS = { sme: 'https://smelab.untunglab.space', jl: 'https://jualan.untunglab.space' } as const;
+
 export const ADMIN_CSP =
-  "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; object-src 'none'";
+  `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self' ${PRODUCT_APIS.sme} ${PRODUCT_APIS.jl}; img-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; object-src 'none'`;
 
 export function renderAdminPage(): string {
   return `<!doctype html>
@@ -54,6 +60,11 @@ th{color:var(--mut);font-weight:600;font-size:.72rem;letter-spacing:.08em;text-t
 .axis{display:flex;justify-content:space-between;font-size:.72rem;color:var(--mut);margin-top:4px}
 ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem;word-break:break-word}
 .hide{display:none}
+.tabs{display:flex;gap:4px;margin-top:14px;overflow-x:auto;padding-bottom:2px}
+.tab{flex:0 0 auto;min-height:40px;padding:0 12px;background:transparent;color:var(--mut);border:1px solid var(--line);box-shadow:none;border-radius:999px}
+.tab:hover{background:rgba(117,248,234,.08);transform:none;box-shadow:none}
+.tab[aria-selected=true]{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 6px 22px rgba(47,123,255,.3)}
+.kv{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0}
 #trOn{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}#trOn summary{cursor:pointer;color:var(--mint);font-weight:700;font-size:.85rem;letter-spacing:.04em;padding:6px 0}#trOn[open] summary{margin-bottom:8px}
 @media (prefers-reduced-motion:reduce){.bar{animation:none}button{transition:none}}
 </style></head><body><main>
@@ -66,7 +77,16 @@ ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bot
   <div class="msg err" id="loginErr"></div>
 </div>
 <div id="app" class="hide">
-  <div class="card"><h2>Ringkasan</h2><div class="stats" id="stats"></div><div class="row"><button class="alt" id="refresh">Muat semula data</button><button class="alt" id="lock">Kunci (log keluar)</button></div></div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Produk">
+    <button class="tab" role="tab" data-tab="ul" aria-selected="true">UL</button>
+    <button class="tab" role="tab" data-tab="sme" aria-selected="false">smeLab</button>
+    <button class="tab" role="tab" data-tab="jl" aria-selected="false">JL</button>
+    <button class="tab" role="tab" data-tab="kl" aria-selected="false">KL</button>
+    <button class="tab" role="tab" data-tab="pl" aria-selected="false">PL</button>
+    <button class="tab" id="lock" style="margin-left:auto">Kunci</button>
+  </div>
+  <div id="p-ul">
+  <div class="card"><h2>Ringkasan</h2><div class="stats" id="stats"></div><div class="row"><button class="alt" id="refresh">Muat semula data</button></div></div>
   <div class="card"><h2>Cari pembeli</h2>
     <input id="q" placeholder="Emel atau kod UL-XXXX-XXXX-XXXX" aria-label="Emel atau kod">
     <div class="row"><button id="find">Cari</button></div>
@@ -100,6 +120,11 @@ ul.plain{list-style:none;margin:0;padding:0}ul.plain li{padding:9px 0;border-bot
   <div class="card"><h2>Pesanan terkini</h2><div style="overflow-x:auto"><table><thead><tr><th>Tarikh</th><th>Pembeli</th><th style="white-space:nowrap">RM</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table></div></div>
   <div class="card"><h2>Eksport dan log</h2><div class="row"><button class="alt" id="export">Muat turun CSV (semua pembeli)</button></div><div class="msg" id="expMsg"></div>
     <h2 style="margin-top:14px">Tindakan admin terkini</h2><ul class="plain" id="log"></ul></div>
+  </div>
+  <div id="p-sme" class="hide"></div>
+  <div id="p-jl" class="hide"></div>
+  <div id="p-kl" class="hide"></div>
+  <div id="p-pl" class="hide"></div>
 </div>
 <script>
 (function(){
@@ -115,7 +140,7 @@ function msg(id,text,bad){var m=$(id);m.textContent=text;m.className='msg '+(bad
 function pill(s){return el('span','pill '+s,s)}
 function renderStats(s){
   var box=$('stats');box.textContent='';
-  var items=[['Pesanan',s.orders],['Dah bayar (pengguna)',s.paid],['Kod percuma',s.complimentary],['Belum bayar',s.pending],['Jumlah RM',rm(s.revenueSen)],['Lesen aktif',s.activeLicenses],['Dibatalkan',s.revokedLicenses],['Peranti aktif',s.devices]];
+  var items=[['Pesanan',s.orders],['Dah bayar (pengguna)',s.paid],['Kod percuma (ujian)',s.complimentary],['Kod dari smeLab',s.smelab],['Belum bayar',s.pending],['Jumlah RM',rm(s.revenueSen)],['Lesen aktif',s.activeLicenses],['Dibatalkan',s.revokedLicenses],['Peranti aktif',s.devices]];
   if(s.earlyBirdLeft!==null&&s.earlyBirdLeft!==undefined)items.push(['Early bird tinggal',s.earlyBirdLeft]);
   items.forEach(function(i){var d=el('div','stat');d.appendChild(el('b','',String(i[1])));d.appendChild(el('span','',i[0]));box.appendChild(d)});
   var t=$('recent');t.textContent='';
@@ -223,6 +248,127 @@ function find(quiet){
     return load();
   }).catch(function(e){msg('findMsg',e.message,true)});
 }
+/* ---- other products: own data, own token (D-100) ---- */
+var APIS=${JSON.stringify(PRODUCT_APIS)};
+var P={sme:{name:'smeLab',base:APIS.sme,token:''},jl:{name:'JualanLab',base:APIS.jl,token:''}};
+function tiles(box,items){box.textContent='';items.forEach(function(i){var d=el('div','stat');d.appendChild(el('b','',String(i[1])));d.appendChild(el('span','',i[0]));box.appendChild(d)})}
+function when(t){return t?t.slice(0,16).replace('T',' '):'-'}
+function say(node,text,bad){node.textContent=text;node.className='msg '+(bad?'err':'ok')}
+function remote(p,action,body){
+  return fetch(p.base+'/api/admin/'+action,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+p.token},body:JSON.stringify(body||{})}).then(function(r){
+    return r.json().catch(function(){return {}}).then(function(j){
+      if(!r.ok){var m=r.status===401?'Token salah.':r.status===429?'Terlalu banyak cubaan. Tunggu sebentar.':r.status===404?'Tak dijumpai (atau API admin belum dihidupkan di '+p.name+').':r.status===409?'Tak boleh: '+(j.error||'konflik')+'.':r.status===400?'Input tak sah: '+(j.error||'')+'.':'Gagal ('+r.status+').';var e=new Error(m);e.status=r.status;throw e}
+      return j})},function(){throw new Error('Tak dapat sambung ke '+p.name+'. Semak token dan sambungan.')});
+}
+function simpleTable(head,rows){
+  var wrap=el('div');wrap.style.overflowX='auto';var t=el('table');var h=el('tr');head.forEach(function(x){h.appendChild(el('th','',x))});var th=el('thead');th.appendChild(h);t.appendChild(th);
+  var tb=el('tbody');rows.forEach(function(r){var tr=el('tr');r.forEach(function(c){var td=el('td');if(c&&c.nodeType)td.appendChild(c);else td.textContent=String(c);tr.appendChild(td)});tb.appendChild(tr)});
+  if(!rows.length){var er=el('tr'),ec=el('td','muted','Tiada data lagi.');ec.colSpan=head.length;er.appendChild(ec);tb.appendChild(er)}
+  t.appendChild(tb);wrap.appendChild(t);return wrap}
+function who(name,email){var d=el('div');d.appendChild(el('div','',name));d.appendChild(el('div','muted',email));return d}
+function connectUi(p,box,build){
+  box.textContent='';
+  var cc=el('div','card');cc.appendChild(el('h2','','Sambung ke '+p.name));
+  cc.appendChild(el('p','muted','Token admin '+p.name+' berasingan daripada UntungLab. Ia hanya disimpan dalam halaman ini; tutup atau muat semula tab, ia hilang.'));
+  var inp=el('input');inp.type='password';inp.autocomplete='off';inp.setAttribute('aria-label','Token admin '+p.name);cc.appendChild(inp);
+  var row=el('div','row');var go=el('button','','Sambung');row.appendChild(go);cc.appendChild(row);
+  var m=el('div','msg err');cc.appendChild(m);box.appendChild(cc);
+  var dash=el('div','hide');box.appendChild(dash);
+  var built=build(dash);
+  function enter(){p.token=inp.value.trim();inp.value='';m.textContent='';go.disabled=true;
+    built.load().then(function(){cc.className='card hide';dash.className=''}).catch(function(e){p.token='';m.textContent=e.message}).then(function(){go.disabled=false})}
+  go.onclick=enter;inp.addEventListener('keydown',function(e){if(e.key==='Enter')enter()});
+}
+function lookupCard(title,placeholder,label){
+  var c=el('div','card');c.appendChild(el('h2','',title));
+  var q=el('input');q.placeholder=placeholder;q.setAttribute('aria-label',label);c.appendChild(q);
+  var r=el('div','row');var b=el('button','','Cari');r.appendChild(b);c.appendChild(r);
+  var m=el('div','msg');c.appendChild(m);var res=el('div');c.appendChild(res);
+  return {card:c,q:q,btn:b,msg:m,res:res}}
+function buildSme(dash){
+  var p=P.sme;
+  var c1=el('div','card');c1.appendChild(el('h2','','Ringkasan smeLab'));var st=el('div','stats');c1.appendChild(st);
+  c1.appendChild(el('p','muted','Bayaran balik dibuat manual (bank atau DuitNow); selepas itu batalkan akses di bawah.'));
+  var rr=el('div','row');var rf=el('button','alt','Muat semula data');rr.appendChild(rf);c1.appendChild(rr);dash.appendChild(c1);
+  var L=lookupCard('Cari pembeli (smeLab)','Emel atau ID pesanan','Emel atau ID pesanan smeLab');dash.appendChild(L.card);
+  var c3=el('div','card');c3.appendChild(el('h2','','Pesanan terkini'));var rec=el('div');c3.appendChild(rec);dash.appendChild(c3);
+  var items={untunglab:'UntungLab',jualanlab:'JualanLab',combo:'Combo'};
+  function load(){return remote(p,'stats').then(function(s){
+    tiles(st,[['Akaun',s.accounts],['Pesanan',s.orders.total],['Dah bayar',s.orders.paid],['Belum bayar',s.orders.pending],['Jumlah RM',rm(s.revenueSen)],['UL sahaja',s.byItem.untunglab],['JL sahaja',s.byItem.jualanlab],['Combo',s.byItem.combo],['Akses UL aktif',s.active.untunglab],['Akses JL aktif',s.active.jualanlab],['Akses dibatalkan',s.revoked],['Early bird UL tinggal',s.earlyLeft.untunglab],['Early bird JL tinggal',s.earlyLeft.jualanlab]]);
+    rec.textContent='';rec.appendChild(simpleTable(['Tarikh','Pembeli','Item','Status'],s.recent.map(function(o){return [when(o.createdAt),who(o.name,o.email),items[o.item]+' RM'+rm(o.amountSen),pill(o.status)]})))})}
+  function show(j){
+    L.res.textContent='';var a=j.account;var card=el('div','card');
+    card.appendChild(el('div','',(a.name||'-')+' · '+a.email));
+    card.appendChild(el('div','muted','Akaun dibuat '+when(a.createdAt)+(a.complimentary?' · akaun percuma (COMP_EMAILS)':'')));
+    card.appendChild(el('h2','','Akses')).style.marginTop='10px';
+    j.entitlements.forEach(function(e){
+      var li=el('div','kv');li.appendChild(el('b','',e.product==='untunglab'?'UntungLab':'JualanLab'));li.appendChild(pill(e.revokedAt?'revoked':'active'));li.appendChild(el('span','muted',e.source==='purchase'?'beli':'lesen UL sedia ada'));
+      if(e.ulCode)li.appendChild(el('span','mono',e.ulCode));card.appendChild(li);
+      var b=e.revokedAt?el('button','alt','Pulihkan akses'):el('button','bad','Batalkan akses');
+      b.onclick=function(){
+        if(!e.revokedAt&&!window.confirm('Batalkan akses '+(e.product==='untunglab'?'UntungLab':'JualanLab')+' untuk '+a.email+'? Kod lesen UntungLab tak dibatalkan di sini; guna tab UL untuk itu.'))return;
+        b.disabled=true;remote(p,e.revokedAt?'restore':'revoke',{entitlementId:e.id}).then(function(){say(L.msg,e.revokedAt?'Akses dipulihkan.':'Akses dibatalkan.',false);return find(true).then(load)}).catch(function(x){say(L.msg,x.message,true)}).then(function(){b.disabled=false})};
+      card.appendChild(b)});
+    if(!j.entitlements.length)card.appendChild(el('div','muted','Tiada akses.'));
+    card.appendChild(el('h2','','Pesanan')).style.marginTop='10px';
+    j.orders.forEach(function(o){
+      var li=el('div','kv');li.appendChild(el('b','',items[o.item]+' RM'+rm(o.amountSen)));li.appendChild(pill(o.status));li.appendChild(el('span','muted',when(o.createdAt)));if(o.ulCode)li.appendChild(el('span','mono',o.ulCode));card.appendChild(li);
+      if(o.status==='paid'){var b=el('button','alt','Hantar semula resit');b.onclick=function(){b.disabled=true;remote(p,'resend',{orderId:o.id}).then(function(){say(L.msg,'Resit dihantar.',false)}).catch(function(x){say(L.msg,x.message,true)}).then(function(){b.disabled=false})};card.appendChild(b)}});
+    if(!j.orders.length)card.appendChild(el('div','muted','Tiada pesanan.'));
+    L.res.appendChild(card)}
+  function find(quiet){var v=L.q.value.trim();if(!v)return Promise.resolve();
+    return remote(p,'lookup',v.indexOf('@')>=0?{email:v}:{orderId:v}).then(function(j){if(!quiet)say(L.msg,'',false);show(j)}).catch(function(x){L.res.textContent='';say(L.msg,x.status===404?'Tiada rekod.':x.message,true)})}
+  L.btn.onclick=function(){find(false)};L.q.addEventListener('keydown',function(e){if(e.key==='Enter')find(false)});
+  rf.onclick=function(){load().catch(function(x){say(L.msg,x.message,true)})};
+  return {load:load}}
+function buildJl(dash){
+  var p=P.jl;
+  var c1=el('div','card');c1.appendChild(el('h2','','Ringkasan JualanLab'));var st=el('div','stats');c1.appendChild(st);
+  c1.appendChild(el('p','muted','Bilangan sahaja. Jumlah jualan dan pelanggan penjual tak dipaparkan. Pelan penuh ikut pembelian di smeLab; beri atau tarik akses di tab smeLab.'));
+  var rr=el('div','row');var rf=el('button','alt','Muat semula data');rr.appendChild(rf);c1.appendChild(rr);dash.appendChild(c1);
+  var L=lookupCard('Cari penjual (JualanLab)','Emel penjual','Emel penjual JualanLab');dash.appendChild(L.card);
+  var c3=el('div','card');c3.appendChild(el('h2','','Kedai terkini'));var rec=el('div');c3.appendChild(rec);dash.appendChild(c3);
+  function plan(plan,onTrial){return plan==='pos'?'dibeli':onTrial?'bulan percuma':'percuma'}
+  function load(){return remote(p,'stats').then(function(s){
+    tiles(st,[['Pengguna',s.users],['Kedai',s.shops],['POS penuh dibeli',s.bought],['Bulan percuma berjalan',s.onTrial],['Tamat dalam 7 hari',s.trialEndingSoon],['Pelan percuma (tamat)',s.free],['Jualan 7 hari',s.soldLast7],['Jualan 30 hari',s.soldLast30],['Kedai aktif 7 hari',s.activeShops7],['Senarai tunggu',s.waitlist]]);
+    rec.textContent='';rec.appendChild(simpleTable(['Tarikh','Kedai','Pelan'],s.recent.map(function(r){var d=el('div');d.appendChild(pill(plan(r.plan,r.onTrial)));if(r.plan!=='pos'&&r.trialEndsAt)d.appendChild(el('div','muted','sampai '+r.trialEndsAt.slice(0,10)));return [when(r.createdAt),who(r.name,r.email),d]})))})}
+  function show(j,email){
+    L.res.textContent='';var card=el('div','card');
+    card.appendChild(el('div','',(j.user.name||'-')+' · '+j.user.email));
+    card.appendChild(el('div','muted','Akaun dibuat '+when(j.user.createdAt)+(j.user.smeLab?' · sudah ada akaun smeLab':'')));
+    var s=j.shop;
+    if(!s){card.appendChild(el('div','muted','Belum buka kedai.'));L.res.appendChild(card);return}
+    card.appendChild(el('h2','',s.name)).style.marginTop='10px';
+    var k=el('div','kv');k.appendChild(pill(plan(s.plan,s.onTrial)));if(s.plan!=='pos'&&s.trialEndsAt)k.appendChild(el('span','muted','bulan percuma sampai '+s.trialEndsAt.slice(0,10)));if(s.ulOwner)k.appendChild(el('span','muted','ada UntungLab'));card.appendChild(k);
+    card.appendChild(el('div','muted','Item aktif '+s.activeItems+' · jualan '+s.sales+' · jualan terakhir '+when(s.lastSaleAt)));
+    if(s.plan==='pos'){card.appendChild(el('div','muted','Sudah beli POS penuh; tiada bulan percuma untuk dipanjangkan.'))}
+    else{var row=el('div','row');[7,14,30].forEach(function(n){var b=el('button','alt','+'+n+' hari percuma');b.onclick=function(){b.disabled=true;
+      remote(p,'extend-trial',{email:email,days:n}).then(function(r){say(L.msg,'Bulan percuma sampai '+r.trialEndsAt.slice(0,10)+'.',false);return find(true).then(load)}).catch(function(x){say(L.msg,x.message,true)}).then(function(){b.disabled=false})};row.appendChild(b)});card.appendChild(row)}
+    L.res.appendChild(card)}
+  function find(quiet){var v=L.q.value.trim().toLowerCase();if(!v)return Promise.resolve();
+    return remote(p,'lookup',{email:v}).then(function(j){if(!quiet)say(L.msg,'',false);show(j,v)}).catch(function(x){L.res.textContent='';say(L.msg,x.status===404?'Tiada rekod.':x.message,true)})}
+  L.btn.onclick=function(){find(false)};L.q.addEventListener('keydown',function(e){if(e.key==='Enter')find(false)});
+  rf.onclick=function(){load().catch(function(x){say(L.msg,x.message,true)})};
+  return {load:load}}
+/* KiraLab and PromoLab: not launched; the waiting list lives on smeLab */
+var soon={};
+function buildSoon(box,key,app,name,note){
+  box.textContent='';var c=el('div','card');c.appendChild(el('h2','',name));c.appendChild(el('p','muted',note));
+  var info=el('p','muted');c.appendChild(info);var ul=el('ul','plain');c.appendChild(ul);box.appendChild(c);
+  soon[key]=function(){ul.textContent='';
+    if(!P.sme.token){info.textContent='Sambung tab smeLab dahulu untuk lihat senarai tunggu.';return}
+    info.textContent='Memuatkan...';
+    remote(P.sme,'waitlist',{app:app}).then(function(j){info.textContent='Senarai tunggu: '+j.entries.length+(j.entries.length>=200?' (200 terkini)':'')+'.';
+      j.entries.forEach(function(e){ul.appendChild(el('li','',e.email+' · '+e.createdAt.slice(0,10)))})}).catch(function(x){info.textContent=x.message})}}
+function showTab(name){
+  var bs=document.querySelectorAll('#tabs [data-tab]');for(var i=0;i<bs.length;i++){bs[i].setAttribute('aria-selected',bs[i].getAttribute('data-tab')===name?'true':'false')}
+  ['ul','sme','jl','kl','pl'].forEach(function(k){$('p-'+k).className=k===name?'':'hide'});
+  if(soon[name])soon[name]()}
+$('tabs').addEventListener('click',function(e){var t=e.target.closest?e.target.closest('[data-tab]'):null;if(t)showTab(t.getAttribute('data-tab'))});
+function resetOthers(){P.sme.token='';P.jl.token='';connectUi(P.sme,$('p-sme'),buildSme);connectUi(P.jl,$('p-jl'),buildJl);
+  buildSoon($('p-kl'),'kl','kiralab','KiraLab (KL)','Belum dilancarkan. Orang mendaftar emel di halaman smeLab.');
+  buildSoon($('p-pl'),'pl','promolab','PromoLab (PL)','Belum dilancarkan. Orang mendaftar emel di halaman smeLab.')}
+resetOthers();
 $('enter').onclick=function(){
   token=$('token').value.trim();$('token').value='';
   load().then(function(){$('login').className='card hide';$('app').className=''}).catch(function(e){token='';$('loginErr').textContent=e.message});
@@ -247,7 +393,7 @@ $('export').onclick=function(){
   }).catch(function(e){msg('expMsg',e.message,true)}).then(function(){b.disabled=false});
 };
 $('refresh').onclick=function(){load().catch(function(e){msg('findMsg',e.message,true)})};
-$('lock').onclick=function(){token='';$('app').className='hide';$('login').className='card';$('results').textContent='';$('loginErr').textContent=''};
+$('lock').onclick=function(){token='';resetOthers();showTab('ul');$('app').className='hide';$('login').className='card';$('results').textContent='';$('loginErr').textContent=''};
 })();
 </script></main></body></html>`;
 }

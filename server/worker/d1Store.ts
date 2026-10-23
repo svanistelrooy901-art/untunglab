@@ -95,8 +95,8 @@ export class D1Store implements Store {
 
   async stats(recent: number): Promise<Stats> {
     const o = await this.db
-      .prepare("SELECT COUNT(*) AS n, COALESCE(SUM(CASE WHEN status = 'paid' AND amount_sen > 0 THEN 1 ELSE 0 END), 0) AS paid, COALESCE(SUM(CASE WHEN status = 'paid' AND amount_sen = 0 THEN 1 ELSE 0 END), 0) AS free, COALESCE(SUM(CASE WHEN status = 'paid' THEN amount_sen ELSE 0 END), 0) AS revenue FROM orders")
-      .first<{ n: number; paid: number; free: number; revenue: number }>();
+      .prepare("SELECT COUNT(*) AS n, COALESCE(SUM(CASE WHEN status = 'paid' AND amount_sen > 0 THEN 1 ELSE 0 END), 0) AS paid, COALESCE(SUM(CASE WHEN status = 'paid' AND amount_sen = 0 THEN 1 ELSE 0 END), 0) AS free, COALESCE(SUM(CASE WHEN status = 'paid' AND amount_sen = 0 AND m.note LIKE 'smeLab%' THEN 1 ELSE 0 END), 0) AS sme, COALESCE(SUM(CASE WHEN status = 'paid' THEN amount_sen ELSE 0 END), 0) AS revenue FROM orders LEFT JOIN order_meta m ON m.order_id = orders.id")
+      .first<{ n: number; paid: number; free: number; sme: number; revenue: number }>();
     const l = await this.db
       .prepare("SELECT COALESCE(SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END), 0) AS active, COALESCE(SUM(CASE WHEN status = 'revoked' THEN 1 ELSE 0 END), 0) AS revoked FROM licenses")
       .first<{ active: number; revoked: number }>();
@@ -108,7 +108,7 @@ export class D1Store implements Store {
     const total = o?.n ?? 0;
     const paid = o?.paid ?? 0;
     return {
-      orders: total, paid, complimentary: o?.free ?? 0, pending: total - paid - (o?.free ?? 0), revenueSen: o?.revenue ?? 0,
+      orders: total, paid, complimentary: (o?.free ?? 0) - (o?.sme ?? 0), smelab: o?.sme ?? 0, pending: total - paid - (o?.free ?? 0), revenueSen: o?.revenue ?? 0,
       activeLicenses: l?.active ?? 0, revokedLicenses: l?.revoked ?? 0, devices: d?.n ?? 0,
       recent: (r.results ?? []).map((x) => ({ id: x.id, name: x.name, email: x.email, amountSen: x.amount_sen, status: x.status, createdAt: x.created_at, paidAt: x.paid_at, licenseStatus: x.license_status })),
     };
