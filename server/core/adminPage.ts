@@ -291,11 +291,13 @@ function buildSme(dash){
   c1.appendChild(el('p','muted','Bayaran balik dibuat manual (bank atau DuitNow); selepas itu batalkan akses di bawah.'));
   var rr=el('div','row');var rf=el('button','alt','Muat semula data');rr.appendChild(rf);c1.appendChild(rr);dash.appendChild(c1);
   var L=lookupCard('Cari pembeli (smeLab)','Emel atau ID pesanan','Emel atau ID pesanan smeLab');dash.appendChild(L.card);
+  var c2=el('div','card');c2.appendChild(el('h2','','Dari mana pembeli datang'));c2.appendChild(el('p','muted','Letak ?src=fb pada pautan smeLab atau pautan beli UntungLab (fb, tr, trbio, wa). Pembeli ingat sumber 30 hari.'));var srcBox=el('div');c2.appendChild(srcBox);dash.appendChild(c2);
   var c3=el('div','card');c3.appendChild(el('h2','','Pesanan terkini'));var rec=el('div');c3.appendChild(rec);dash.appendChild(c3);
   var items={untunglab:'UntungLab',jualanlab:'JualanLab',combo:'Combo'};
   function load(){return remote(p,'stats').then(function(s){
     tiles(st,[['Akaun',s.accounts],['Pesanan',s.orders.total],['Dah bayar',s.orders.paid],['Belum bayar',s.orders.pending],['Jumlah RM',rm(s.revenueSen)],['UL sahaja',s.byItem.untunglab],['JL sahaja',s.byItem.jualanlab],['Combo',s.byItem.combo],['Akses UL aktif',s.active.untunglab],['Akses JL aktif',s.active.jualanlab],['Akses dibatalkan',s.revoked],['Early bird UL tinggal',s.earlyLeft.untunglab],['Early bird JL tinggal',s.earlyLeft.jualanlab]]);
-    rec.textContent='';rec.appendChild(simpleTable(['Tarikh','Pembeli','Item','Status'],s.recent.map(function(o){return [when(o.createdAt),who(o.name,o.email),items[o.item]+' RM'+rm(o.amountSen),pill(o.status)]})))})}
+    srcBox.textContent='';srcBox.appendChild(simpleTable(['Sumber','Pesanan','Bayar'],(s.bySource||[]).map(function(x){return [x.source||'(tiada sumber)',x.orders,x.paid]})));
+    rec.textContent='';rec.appendChild(simpleTable(['Tarikh','Pembeli','Item','Status'],s.recent.map(function(o){return [when(o.createdAt),who(o.name,o.email+(o.source?' · '+o.source:'')),items[o.item]+' RM'+rm(o.amountSen),pill(o.status)]})))})}
   function show(j){
     L.res.textContent='';var a=j.account;var card=el('div','card');
     card.appendChild(el('div','',(a.name||'-')+' · '+a.email));
@@ -312,7 +314,7 @@ function buildSme(dash){
     if(!j.entitlements.length)card.appendChild(el('div','muted','Tiada akses.'));
     card.appendChild(el('h2','','Pesanan')).style.marginTop='10px';
     j.orders.forEach(function(o){
-      var li=el('div','kv');li.appendChild(el('b','',items[o.item]+' RM'+rm(o.amountSen)));li.appendChild(pill(o.status));li.appendChild(el('span','muted',when(o.createdAt)));if(o.ulCode)li.appendChild(el('span','mono',o.ulCode));card.appendChild(li);
+      var li=el('div','kv');li.appendChild(el('b','',items[o.item]+' RM'+rm(o.amountSen)));li.appendChild(pill(o.status));li.appendChild(el('span','muted',when(o.createdAt)));if(o.source)li.appendChild(el('span','muted','sumber '+o.source));if(o.ulCode)li.appendChild(el('span','mono',o.ulCode));card.appendChild(li);
       if(o.status==='paid'){var b=el('button','alt','Hantar semula resit');b.onclick=function(){b.disabled=true;remote(p,'resend',{orderId:o.id}).then(function(){say(L.msg,'Resit dihantar.',false)}).catch(function(x){say(L.msg,x.message,true)}).then(function(){b.disabled=false})};card.appendChild(b)}});
     if(!j.orders.length)card.appendChild(el('div','muted','Tiada pesanan.'));
     L.res.appendChild(card)}

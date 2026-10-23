@@ -90,7 +90,10 @@ export function createHandler(deps: Deps): (req: Request) => Promise<Response> {
 
     try {
       const path = url.pathname.replace(/\/+$/, '') || '/';
-      const salesPage = config.salesUrl ? `${config.salesUrl.replace(/\/+$/, '')}/#harga` : `${config.publicBaseUrl}/beli`;
+      // With the smeLab sales page, a plain ?src= tag travels with the visitor so smeLab can record it on the order (D-102).
+      const tag = (url.searchParams.get('src') ?? '').trim().toLowerCase();
+      const carried = /^[a-z0-9_-]{1,20}$/.test(tag) ? `?src=${tag}` : '';
+      const salesPage = config.salesUrl ? `${config.salesUrl.replace(/\/+$/, '')}/${carried}#harga` : `${config.publicBaseUrl}/beli`;
       if (req.method === 'GET' && path === '/') return Response.redirect(salesPage, 302);
       if (req.method === 'GET' && path === '/mula') {
         await countVisit(req, 'start');

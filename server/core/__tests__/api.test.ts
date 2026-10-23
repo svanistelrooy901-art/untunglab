@@ -397,13 +397,21 @@ describe('usage counting (no cookies, no personal data)', () => {
   });
   it('with the smeLab sales page set, / and /beli send people there and still count the visit (D-99)', async () => {
     const w = await makeWorld({ salesUrl: 'https://smelab.example.com/' });
-    for (const path of ['/', '/beli', '/beli?src=fb']) {
+    for (const path of ['/', '/beli']) {
       const res = await w.call('GET', path);
       expect(res.status).toBe(302);
       expect(res.headers.get('location')).toBe('https://smelab.example.com/#harga');
     }
+    // The ?src= tag travels with the visitor, so smeLab can record where the buyer came from (D-102).
+    for (const [path, to] of [['/beli?src=fb', 'https://smelab.example.com/?src=fb#harga'], ['/?src=TRBIO', 'https://smelab.example.com/?src=trbio#harga'], ['/beli?src=wa&x=1', 'https://smelab.example.com/?src=wa#harga']] as const) {
+      expect((await w.call('GET', path)).headers.get('location')).toBe(to);
+    }
+    // Anything that is not a plain tag is dropped.
+    for (const bad of ['a%20b', '%3Cscript%3E', 'x'.repeat(21), '']) {
+      expect((await w.call('GET', `/beli?src=${bad}`)).headers.get('location')).toBe('https://smelab.example.com/#harga');
+    }
     const u = await w.json(await w.admin('/api/admin/usage', {}));
-    expect(u.totals.view).toBe(2);
+    expect(u.totals.view).toBe(1 + 2 + 4); // only /beli counts a visit; / never did
     // Payments, licences and the return page stay on this server.
     expect((await w.call('GET', '/terima')).status).toBe(200);
     expect((await w.call('POST', '/api/activate', {})).status).toBe(400);
