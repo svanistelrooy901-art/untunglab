@@ -4,6 +4,7 @@ import { useLangState } from '../i18n/lang';
 import { t } from '../i18n/ms';
 import { LanguagePrompt } from './components/LanguagePrompt';
 import { WhatsNew } from './components/WhatsNew';
+import { JualanLabPromo } from './components/JualanLabPromo';
 import { TetapanPage } from './pages/Tetapan';
 import { Layout } from './components/Layout';
 import { DataProvider } from './data';
@@ -62,6 +63,7 @@ export function App() {
       <LanguagePrompt />
       <HashRouter>
         <WhatsNew />
+        <JualanLabPromo />
         <Routes>
           <Route element={<Layout />}>
             {ROUTES.map((r) => {
