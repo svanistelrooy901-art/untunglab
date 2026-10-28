@@ -753,8 +753,8 @@ export const ms = {
   },
   promo: {
     label: 'Promosi JualanLab',
-    alt: 'JualanLab, adik UntungLab: percuma 30 hari, semua fungsi, tanpa kad. POS lain tunjuk jualan RM112.20; JualanLab tunjuk untung hari ini RM31.55. Kaunter POS, kedai online, duit ikut sampul, waktu sibuk. Lancar awal November. Pengguna UntungLab RM29 bila beli penuh.',
-    daftar: 'Daftar sekarang',
+    alt: 'JualanLab, adik UntungLab: percuma 30 hari, semua fungsi, tanpa kad. POS lain tunjuk jualan RM112.20; JualanLab tunjuk untung hari ini RM31.55. Kaunter POS, kedai online, duit ikut sampul, waktu sibuk. Dah lancar: mula percuma 30 hari, hari ini. Pengguna UntungLab RM29 bila beli penuh.',
+    daftar: 'Mula percuma 30 hari',
     nanti: 'Nanti',
     tutup: 'Tutup',
   },

@@ -4,9 +4,9 @@
  */
 
 /** Bump the id (and the picture) for the next promotion; each id is shown once. */
-export const PROMO_ID = 'jualanlab-trial-1';
+export const PROMO_ID = 'jualanlab-launch-1';
 export const PROMO_IMAGE = './promo/jualanlab-promo.jpg';
-/** smeLab shows the waiting list before launch and "start free" after it; the tag is counted there (D-102). */
+/** smeLab's sales page opens on "start free for 30 days"; the tag is counted there (D-102). */
 export const PROMO_URL = 'https://smelab.untunglab.space/?src=ulpopup';
 const KEY = 'untunglab.promoSeen';
 

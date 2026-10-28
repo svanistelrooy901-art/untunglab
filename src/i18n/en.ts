@@ -753,8 +753,8 @@ export const en: Widen<typeof ms> = {
   },
   promo: {
     label: 'JualanLab promotion',
-    alt: 'JualanLab, UntungLab\'s sister app: free for 30 days, every feature, no card. Other POS apps show sales of RM112.20; JualanLab shows today\'s profit of RM31.55. Counter POS, online store, money envelopes, busy hours. Launching early November. UntungLab users pay RM29 for the full version.',
-    daftar: 'Sign up now',
+    alt: 'JualanLab, UntungLab\'s sister app: free for 30 days, every feature, no card. Other POS apps show sales of RM112.20; JualanLab shows today\'s profit of RM31.55. Counter POS, online store, money envelopes, busy hours. Out now: start free for 30 days today. UntungLab users pay RM29 for the full version.',
+    daftar: 'Start free for 30 days',
     nanti: 'Later',
     tutup: 'Close',
   },
