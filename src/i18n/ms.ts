@@ -751,6 +751,13 @@ export const ms = {
     cuba: 'Cuba Rancang Batch',
     nanti: 'Nanti',
   },
+  promo: {
+    label: 'Promosi JualanLab',
+    alt: 'JualanLab, adik UntungLab: percuma 30 hari, semua fungsi, tanpa kad. POS lain tunjuk jualan RM112.20; JualanLab tunjuk untung hari ini RM31.55. Kaunter POS, kedai online, duit ikut sampul, waktu sibuk. Lancar awal November. Pengguna UntungLab RM29 bila beli penuh.',
+    daftar: 'Daftar sekarang',
+    nanti: 'Nanti',
+    tutup: 'Tutup',
+  },
   placeholder: {
     title: 'Sedang dibina',
     body: 'Bahagian ini akan siap dalam fasa pembangunan seterusnya.',
