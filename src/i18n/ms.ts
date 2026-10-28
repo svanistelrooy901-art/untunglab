@@ -738,7 +738,7 @@ export const ms = {
     ralatNota: 'Anda masih boleh isi kuantiti sendiri di bawah.',
   },
   jualanlab: {
-    belumLancar: 'JualanLab belum dilancarkan. Dijangka dilancarkan awal November 2026.',
+    belumLancar: 'JualanLab belum dilancarkan. Dilancarkan Ahad, 25 Oktober 2026.',
   },
   baharu: {
     label: 'Baharu dalam UntungLab',

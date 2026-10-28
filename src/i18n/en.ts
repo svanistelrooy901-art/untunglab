@@ -738,7 +738,7 @@ export const en: Widen<typeof ms> = {
     ralatNota: 'You can still enter the quantities yourself below.',
   },
   jualanlab: {
-    belumLancar: 'JualanLab has not launched yet. Expected launch: early November 2026.',
+    belumLancar: 'JualanLab has not launched yet. Launching Sunday 25 October 2026.',
   },
   baharu: {
     label: 'New in UntungLab',
